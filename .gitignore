@@ -1,0 +1,8 @@
+dist
+node_modules
+.DS_Store
+.env
+.vscode
+.vscode/
+yarn-error.log
+.node_history
