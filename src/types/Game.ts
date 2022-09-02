@@ -1,9 +1,9 @@
-import { Round } from './Round';
+import { RoundType } from './Round';
 
-export interface Game {
+export interface GameType {
   gameID: string;
   gamePreferences: GameConfig;
-  players: Player[];
+  players: PlayerType[];
   teams: {
     team0: 0;
     team1: 1;
@@ -11,7 +11,7 @@ export interface Game {
   };
   teamScores: number[];
   playerScores?: number[];
-  curRound: Round;
+  curRound: RoundType;
   gameHistory: {
     roundNumber: number;
     tricksTaken: number[];
@@ -31,7 +31,7 @@ export type GameConfig = {
   //noAceFace53: boolean;
 };
 
-export type Player = {
+export type PlayerType = {
   userId: string;
   seat: Seat;
   team?: Seat[];

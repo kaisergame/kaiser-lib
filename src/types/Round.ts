@@ -1,20 +1,20 @@
-import { Card, Suit } from './Card';
+import { CardType, Suit } from './Card';
 import { Seat } from './Game';
 import { UserId } from './User';
 
-export interface Round {
+export interface RoundType {
   roundNumber: number;
-  hands: Card[];
+  hands: CardType[];
   bids: number[];
   bid: number | undefined;
   dealer: Seat;
   playOrder: number;
   trump: Suit;
-  cardsPlayed: Card[];
+  cardsPlayed: CardType[];
   tricks: number;
 }
 
-export type Hand = Card[];
+export type Hand = CardType[];
 
 export type PlayerRoundData = {
   userID: UserId;

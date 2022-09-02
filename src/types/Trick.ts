@@ -1,20 +1,20 @@
-import { Card } from './Card';
-import { Player, Seat } from './Game';
+import { CardType } from './Card';
+import { PlayerType, Seat } from './Game';
 import { Hand } from './Round';
 
-export type Trick = {
-  players: Player[];
+export type TrickType = {
+  players: PlayerType[];
   turnOrder: Seat[];
   hands: Hand[];
-  activePlayer: Player;
+  activePlayer: PlayerType;
   playerTurn: PlayerTurn;
-  cardsPlayed: Card[];
-  trickWinner: Player | null;
-  validateCardPlayed(card: Card): boolean;
+  cardsPlayed: CardType[];
+  trickWinner: PlayerType | null;
+  validateCardPlayed(card: CardType): boolean;
 };
 
 export type PlayerTurn = {
   turnNum: number;
-  playableCards: Card[];
-  cardPlayed?: Card;
+  playableCards: CardType[];
+  cardPlayed?: CardType;
 };

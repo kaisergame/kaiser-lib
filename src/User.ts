@@ -1,4 +1,4 @@
-import { Game } from './GameCl';
+import { Game } from './Game';
 
 export class User implements UserType {
   constructor(

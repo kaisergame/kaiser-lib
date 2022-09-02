@@ -1,4 +1,4 @@
-import { Suit } from 'src/types';
+import { Suit } from '../types/index';
 
 // export const PLAYER_NUM = 4;
 

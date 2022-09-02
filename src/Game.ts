@@ -1,8 +1,8 @@
-import { RoundCl } from './RoundCl';
-import { Game, GameConfig, Player, Round, Seat, User } from './types/index';
+import { Round } from './Round';
+import { GameConfig, GameType, PlayerType, RoundType, Seat, User } from './types/index';
 
 export class GameCl {
-  players: Player[];
+  players: PlayerType[];
   dealer: Seat | undefined;
 
   constructor(public host: User, readonly config: GameConfig) {
@@ -19,7 +19,7 @@ export class GameCl {
   }
 
   createPlayer(user: User) {
-    const player: Player = {
+    const player: PlayerType = {
       userId: user.userId,
       seat: (this.players.length - 1) as Seat,
     };
@@ -42,7 +42,7 @@ export class GameCl {
 
   createRound() {
     const dealer = this.setDealer();
-    const round = new RoundCl(this.players, dealer, this.endRound);
+    const round = new Round(this.players, dealer, this.endRound);
     return round;
   }
 
@@ -61,7 +61,7 @@ export class GameCl {
     return false;
   }
 
-  endGame(winner?: Player | Player[]) {
+  endGame(winner?: PlayerType | PlayerType[]) {
     //
   }
 }

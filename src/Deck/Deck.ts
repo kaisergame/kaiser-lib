@@ -1,22 +1,23 @@
-import { CARDS_IN_DECK, HAND_SIZE, SUITS_NUM } from './constants/index';
-import { Card, CardName, Suit } from './types/index';
+import { CARDS_IN_DECK, HAND_SIZE, SUITS_NUM } from '../constants/index';
+import { CardName, CardType, Suit } from '../types/index';
 
-export class DeckCl {
-  cards: Card[];
+export class Deck {
+  cards: CardType[];
 
   constructor(public playerNum: number) {
     this.playerNum = playerNum;
     this.cards = [];
   }
 
-  public createCards(players: number): Card[] {
-    const newCards: Card[] = [];
+  public createCards(players: number): CardType[] {
+    const newCards: CardType[] = [];
     let faceValue = 1;
-    const playValue = faceValue === 1 ? 14 : faceValue;
     const cardsPerSuit = (players * HAND_SIZE) / SUITS_NUM;
     const suits: Suit[] = [Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds];
-    for (let i = 1; i <= CARDS_IN_DECK; i++) {
-      if (!(i % 13)) {
+    for (let i = 0; i < CARDS_IN_DECK; i++) {
+      const playValue = faceValue === 1 ? 14 : faceValue;
+
+      if (i !== 0 && !(i % 13)) {
         suits.shift();
         faceValue = 1;
       }
@@ -25,7 +26,7 @@ export class DeckCl {
         faceValue++;
         continue;
       }
-      const name: string = Object.keys(CardName)[i];
+      const name: string = Object.keys(CardName)[faceValue - 1];
 
       const card = {
         suit: suits[0],
@@ -34,13 +35,13 @@ export class DeckCl {
         playValue: playValue,
         trump: false,
       };
-      newCards.push(card as Card);
+      newCards.push(card as CardType);
       faceValue++;
     }
     return newCards;
   }
 
-  public setTrumpCardValue(deck: Card[], trump: Suit | null) {
+  public setTrumpCardValue(deck: CardType[], trump: Suit | null) {
     if (!trump) return deck;
 
     const trumpDeck = deck.map((card) => {
@@ -52,7 +53,7 @@ export class DeckCl {
     return trumpDeck;
   }
 
-  public shuffleDeck(deck: Card[]) {
+  public shuffleDeck(deck: CardType[]) {
     // Fisher–Yates Shuffle
     let unshuffled = deck.length;
     let t, cardIndex;

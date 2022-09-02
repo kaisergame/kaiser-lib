@@ -1,8 +1,8 @@
-import { DeckCl } from './DeckCl';
-import { TrickCl } from './TrickCl';
+import { DeckCl } from './Deck/Deck';
+import { TrickCl } from './Trick';
 import { Hand, Player, PlayerRoundData, Seat, UserId } from './types/index';
 
-export class RoundCl {
+export class Round {
   playerRoundData: PlayerRoundData;
   hands: Hand[];
 

@@ -21,7 +21,7 @@ export enum CardName {
   King = 'KING',
 }
 
-export type Card = {
+export type CardType = {
   suit: Suit;
   name: CardName;
   value: number;
@@ -34,4 +34,4 @@ export type Card = {
 //   trump: boolean;
 // };
 
-export type Deck = Card[];
+export type Deck = CardType[];
