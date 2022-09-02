@@ -26,7 +26,10 @@ export class Deck {
         faceValue++;
         continue;
       }
-      const name: string = Object.keys(CardName)[faceValue - 1];
+      const name: CardName = Object.values(CardName)[faceValue - 1];
+      // const index = faceValue - 1;
+
+      // const name: CardName = CardName[index as keyof typeof CardName];
 
       const card = {
         suit: suits[0],
