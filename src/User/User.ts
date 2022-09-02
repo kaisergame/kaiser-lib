@@ -1,4 +1,4 @@
-import { Game } from './Game';
+import { Game } from '../Game/Game';
 
 export class User implements UserType {
   constructor(

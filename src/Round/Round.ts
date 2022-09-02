@@ -1,16 +1,22 @@
-import { Bid, Hand, PlayerRoundData, PlayerType, Seat, UserId } from '../@types/index';
+import { Bid, CardType, Hand, PlayerRoundData, PlayerType, Seat, UserId } from '../@types/index';
 import { Deck } from '../Deck/Deck';
-import { Trick } from '../Trick';
+import { Trick } from '../Trick/Trick';
 
 export class Round {
   playerRoundData: PlayerRoundData;
   hands: Hand[];
   bids: Bid[];
+  tricks: {
+    trickPoints: number;
+    cardsPlayed: CardType[];
+    trickWonBy: PlayerType;
+  }[];
 
   constructor(public players: PlayerType[], dealer: Seat, public endRound: (roundPoints: number[]) => number[]) {
     this.players = players;
     this.hands = [];
     this.bids = [];
+    this.tricks = [];
     this.playerRoundData = players.map((player, i) => {
       return {
         userID: player.userId,

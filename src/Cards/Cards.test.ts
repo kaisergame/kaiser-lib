@@ -1,4 +1,4 @@
-import { Deck } from './Deck';
+import { Deck } from './Cards';
 
 describe('Deck', () => {
   describe('createDeck for a 4 player game', () => {

@@ -1,5 +1,5 @@
-import { CardType, Hand, PlayerTurn, PlayerType, Seat, Suit } from './@types/index';
-import { TURN_LENGTH } from './constants/game';
+import { CardType, Hand, PlayerTurn, PlayerType, Seat, Suit } from '../@types/index';
+import { TURN_LENGTH } from '../constants/game';
 
 export class Trick {
   cardsPlayed: CardType[];

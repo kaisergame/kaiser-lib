@@ -9,7 +9,7 @@ export type TrickType = {
   activePlayer: PlayerType;
   playerTurn: PlayerTurn;
   cardsPlayed: CardType[];
-  trickWinner: PlayerType | null;
+  trickWonBy: PlayerType;
   validateCardPlayed(card: CardType): boolean;
 };
 

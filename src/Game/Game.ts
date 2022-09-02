@@ -1,5 +1,5 @@
-import { GameConfig, GameType, PlayerType, RoundType, Seat, User } from './@types/index';
-import { Round } from './Round/Round';
+import { GameConfig, GameType, PlayerType, RoundType, Seat, User } from '../@types/index';
+import { Round } from '../Round/Round';
 
 export class Game {
   players: PlayerType[];

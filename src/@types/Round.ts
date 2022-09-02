@@ -1,5 +1,5 @@
 import { CardType, Suit } from './Card';
-import { Seat } from './Game';
+import { PlayerType, Seat } from './Game';
 import { UserId } from './User';
 
 export interface RoundType {
@@ -11,7 +11,11 @@ export interface RoundType {
   playOrder: number;
   trump: Suit;
   cardsPlayed: CardType[];
-  tricks: number;
+  tricks: {
+    trickPoints: number;
+    cardsPlayed: CardType[];
+    trickWonBy: PlayerType;
+  };
 }
 
 export type Hand = CardType[];
@@ -20,7 +24,7 @@ export type PlayerRoundData = {
   userID: UserId;
   seat: Seat;
   bid: number | undefined;
-  dealer: Seat;
+  isDealer: boolean;
   tricksTaken: number;
 }[];
 
