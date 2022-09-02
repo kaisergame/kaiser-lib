@@ -1,13 +1,13 @@
+import { CardType, Hand, PlayerTurn, PlayerType, Seat, Suit } from './@types/index';
 import { TURN_LENGTH } from './constants/game';
-import { Card, Hand, Player, PlayerTurn, Seat, Suit } from './types/index';
 
-export class TrickCl {
-  cardsPlayed: Card[];
-  activePlayer: Player;
+export class Trick {
+  cardsPlayed: CardType[];
+  activePlayer: PlayerType;
   playerTurn: PlayerTurn;
-  trickWinner: Player | null;
+  trickWinner: PlayerType | null;
 
-  constructor(public players: Player[], public hands: Hand[], public turnOrder: Seat[]) {
+  constructor(public players: PlayerType[], public hands: Hand[], public turnOrder: Seat[]) {
     this.players = players;
     this.hands = hands;
     this.turnOrder = turnOrder;
@@ -27,7 +27,7 @@ export class TrickCl {
     return nextPlayer;
   }
 
-  startPlayerTurn(activePlayer: Player, cardsPlayed: Card[]) {
+  startPlayerTurn(activePlayer: PlayerType, cardsPlayed: CardType[]) {
     const hand = [...this.hands[activePlayer.seat]];
     const ledSuit = cardsPlayed[0]?.suit;
 
@@ -35,20 +35,20 @@ export class TrickCl {
     // this.startTurnTimer();
   }
 
-  private setPlayableCards(hand: Card[], ledSuit?: Suit) {
+  private setPlayableCards(hand: CardType[], ledSuit?: Suit) {
     const playable = ledSuit ? hand.filter((card) => card.suit === ledSuit) : hand;
 
     this.playerTurn.playableCards = playable;
     return playable;
   }
 
-  playCard(activePlayer: Player, cardPlayed: Card) {
+  playCard(activePlayer: PlayerType, cardPlayed: CardType) {
     this.removeCardFromHand(activePlayer, cardPlayed);
     this.updateCardsPlayed(cardPlayed);
     this.endPlayerTurn();
   }
 
-  private removeCardFromHand(activePlayer: Player, cardPlayed: Card) {
+  private removeCardFromHand(activePlayer: PlayerType, cardPlayed: CardType) {
     const hand = [...this.hands[activePlayer.seat]];
     const cardIndex = hand.indexOf(cardPlayed);
 
@@ -57,7 +57,7 @@ export class TrickCl {
     return hand;
   }
 
-  private updateCardsPlayed(cardPlayed: Card) {
+  private updateCardsPlayed(cardPlayed: CardType) {
     const played = [...this.cardsPlayed];
     played.push(cardPlayed);
 

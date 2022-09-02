@@ -1,12 +1,12 @@
-import { DeckCl } from './Deck/Deck';
-import { TrickCl } from './Trick';
-import { Hand, Player, PlayerRoundData, Seat, UserId } from './types/index';
+import { Hand, PlayerRoundData, PlayerType, Seat, UserId } from '../@types/index';
+import { Deck } from '../Deck/Deck';
+import { Trick } from '../Trick';
 
 export class Round {
   playerRoundData: PlayerRoundData;
   hands: Hand[];
 
-  constructor(public players: Player[], dealer: Seat, public endRound: (roundPoints: number[]) => number[]) {
+  constructor(public players: PlayerType[], dealer: Seat, public endRound: (roundPoints: number[]) => number[]) {
     this.players = players;
     this.hands = [];
     this.playerRoundData = players.map((player, i) => {
@@ -22,8 +22,15 @@ export class Round {
   }
   dealHands() {
     const playerNum = this.players.length;
-    const deck = new DeckCl(playerNum);
+    const deck = new Deck(playerNum);
+    const cards = deck.createCards(playerNum);
+    const shuffled = deck.shuffleDeck(cards);
   }
+
+  turnOrder(bids: number[]) {
+    // turn order needs to be based off of winning bidder (who plays first)
+  }
+
   playerBid(dealer: number) {
     //
   }
@@ -31,7 +38,7 @@ export class Round {
     //
   }
   createTrick() {
-    const trick = new TrickCl(this.players);
+    const trick = new Trick(this.players, hands);
   }
 
   updatePoints() {
@@ -39,7 +46,7 @@ export class Round {
   }
 
   evaluateRound() {
-    endRound();
+    // endRound();
   }
 
   isBidMade() {

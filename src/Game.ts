@@ -1,7 +1,7 @@
-import { Round } from './Round';
-import { GameConfig, GameType, PlayerType, RoundType, Seat, User } from './types/index';
+import { GameConfig, GameType, PlayerType, RoundType, Seat, User } from './@types/index';
+import { Round } from './Round/Round';
 
-export class GameCl {
+export class Game {
   players: PlayerType[];
   dealer: Seat | undefined;
 

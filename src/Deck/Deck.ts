@@ -1,5 +1,5 @@
+import { CardName, CardType, Suit } from '../@types/index';
 import { CARDS_IN_DECK, HAND_SIZE, SUITS_NUM } from '../constants/index';
-import { CardName, CardType, Suit } from '../types/index';
 
 export class Deck {
   cards: CardType[];
