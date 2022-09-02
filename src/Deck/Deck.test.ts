@@ -13,13 +13,39 @@ describe('Deck', () => {
       expect(cardsLength).toBe(32);
     });
 
-    // test('deck should have A-7S', () => {
-    //   const playerNum = 4;
-    //   const deck = new Deck(playerNum);
-    //   const cards = deck.createCards(playerNum);
-    //   const spades;
-    //   expect(cardsLength).toBe(32);
-    // });
+    test('deck should have one 5 (of Hearts)', () => {
+      const playerNum = 4;
+      const deck = new Deck(playerNum);
+      const cards = deck.createCards(playerNum);
+      const five = cards.filter((card) => card.name === 'FIVE');
+
+      expect(five).toStrictEqual([
+        {
+          suit: 'HEARTS',
+          name: 'FIVE',
+          value: 5,
+          playValue: 5,
+          trump: false,
+        },
+      ]);
+    });
+
+    test('deck should have one 3 (of Spades)', () => {
+      const playerNum = 4;
+      const deck = new Deck(playerNum);
+      const cards = deck.createCards(playerNum);
+      const three = cards.filter((card) => card.name === 'THREE');
+
+      expect(three).toStrictEqual([
+        {
+          suit: 'SPADES',
+          name: 'THREE',
+          value: 3,
+          playValue: 3,
+          trump: false,
+        },
+      ]);
+    });
 
     test('deck should have four kings', () => {
       const playerNum = 4;
