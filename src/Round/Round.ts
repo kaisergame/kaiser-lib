@@ -1,5 +1,5 @@
 import { Bid, CardType, Hand, PlayerRoundData, PlayerType, Seat, UserId } from '../@types/index';
-import { Deck } from '../Deck/Deck';
+import { Cards } from '../Cards/Cards';
 import { Trick } from '../Trick/Trick';
 
 export class Round {
@@ -28,11 +28,25 @@ export class Round {
     });
     this.endRound = endRound;
   }
-  dealHands() {
+  createHands() {
     const playerNum = this.players.length;
-    const deck = new Deck(playerNum);
-    const cards = deck.createCards(playerNum);
-    const shuffled = deck.shuffleDeck(cards);
+    const cards = new Cards(playerNum);
+    const deck = cards.createCards(playerNum);
+    const shuffledDeck = cards.shuffleDeck(deck);
+
+    this.dealHands(playerNum, shuffledDeck);
+  }
+
+  dealHands(playerNum: number, deck: CardType[]) {
+    let dealToSeat = 0;
+    // create empty hands
+    for (let i = 0; i < playerNum; i++) {
+      this.hands.push([]);
+    }
+    deck.map((card) => {
+      this.hands[dealToSeat].push(card);
+      dealToSeat !== playerNum - 1 ? dealToSeat++ : (dealToSeat = 0);
+    });
   }
 
   turnOrder(bids: number[]) {

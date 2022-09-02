@@ -1,7 +1,7 @@
 import { CardName, CardType, Suit } from '../@types/index';
 import { CARDS_IN_DECK, CARDS_PER_SUIT, HAND_SIZE, SUITS_NUM } from '../constants/index';
 
-export class Deck {
+export class Cards {
   cards: CardType[];
 
   constructor(public playerNum: number) {
