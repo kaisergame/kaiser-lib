@@ -17,7 +17,8 @@
     "type": "git",
     "url": "git+https://github.com/kaisergame/kaiser-lib.git"
   },
-  "author": "Chris Allen <cda891@gmail.com>",
+  "author": "ChrisCoastal <contactchriscoastal@gmail.com>",
+  "contributors": ["Paul Goertzen"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kaisergame/kaiser-lib/issues"
