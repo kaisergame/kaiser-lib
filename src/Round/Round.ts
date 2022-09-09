@@ -13,6 +13,7 @@ export class Round {
     turnNum: 0,
     playableCards: [],
   };
+  // ledSuit: Suit | null = null;
   cardsPlayed: CardType[] = [];
   tricks: {
     trickPoints: number;
@@ -40,9 +41,9 @@ export class Round {
     this.endRound = endRound;
   }
 
-  createHands(shuffledDeck: CardType[]) {
+  createHands(deck: CardType[]) {
     const playerNum = this.players.length;
-    this.dealHands(playerNum, shuffledDeck);
+    this.dealHands(playerNum, deck);
   }
 
   dealHands(playerNum: number, deck: CardType[]) {
@@ -51,10 +52,15 @@ export class Round {
     for (let i = 0; i < playerNum; i++) {
       this.hands.push([]);
     }
-    deck.map((card) => {
+    for (const card of deck) {
       this.hands[dealToSeat].push(card);
+      // deck.shift();
       dealToSeat !== playerNum - 1 ? dealToSeat++ : (dealToSeat = 0);
-    });
+    }
+    // deck.map((card) => {
+    //   this.hands[dealToSeat].push(card);
+    //   dealToSeat !== playerNum - 1 ? dealToSeat++ : (dealToSeat = 0);
+    // });
   }
 
   updateTurnOrder(bids: number[]) {
