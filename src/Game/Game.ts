@@ -11,7 +11,7 @@ export class Game {
     this.dealer = undefined;
   }
 
-  joinPlayer(user: User) {
+  addPlayer(user: User) {
     const players = [...this.players];
 
     const newPlayer = this.createPlayer(user);
@@ -21,7 +21,7 @@ export class Game {
   createPlayer(user: User) {
     const player: PlayerType = {
       userId: user.userId,
-      seat: (this.players.length - 1) as Seat,
+      seat: (this.players.length - 1) as Sea,
     };
     return player;
   }
@@ -36,8 +36,8 @@ export class Game {
     if (dealer === this.players.length - 1) dealer = 0;
     else dealer++;
 
-    this.dealer = dealer as Seat;
-    return dealer as Seat;
+    this.dealer = dealer;
+    return dealer;
   }
 
   createRound() {

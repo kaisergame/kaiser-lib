@@ -21,14 +21,15 @@ export interface GameType {
 
 export type GameConfig = {
   numOfPlayers: PlayerNum;
-  //inviteOnly: boolean;
   minBid: number;
+  scoreToWin: number;
   //bidOut: boolean;
   //kitty: boolean;
   //passCards: PassCards;
   //lowNo: boolean;
   //noBid62: boolean;
   //noAceFace53: boolean;
+  //inviteOnly: boolean;
 };
 
 export type PlayerType = {
@@ -37,6 +38,6 @@ export type PlayerType = {
   team?: Seat[];
 };
 
-export type PlayerNum = 2 | 4 | 5 | 6;
+export type PlayerNum = number;
 
-export type Seat = 0 | 1 | 2 | 3;
+export type Seat = number;

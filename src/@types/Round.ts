@@ -4,11 +4,11 @@ import { UserId } from './User';
 
 export interface RoundType {
   roundNumber: number;
-  hands: CardType[];
+  hands: Hand;
   bids: number[];
   bid: number | undefined;
   dealer: Seat;
-  playOrder: number;
+  turnOrder: number;
   trump: Suit;
   cardsPlayed: CardType[];
   tricks: {
@@ -17,6 +17,11 @@ export interface RoundType {
     trickWonBy: PlayerType;
   };
 }
+
+export type PlayerTurn = {
+  turnNum: number;
+  playableCards: CardType[];
+};
 
 export type Hand = CardType[];
 

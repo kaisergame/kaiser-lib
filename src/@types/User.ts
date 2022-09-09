@@ -1,10 +1,8 @@
 export interface User {
   readonly userId: UserId;
   name: string;
-  email: string;
-  password: string;
   stats: UserStats;
-  gameID: string | null;
+  inGame: string;
 }
 
 export type UserId = string;
