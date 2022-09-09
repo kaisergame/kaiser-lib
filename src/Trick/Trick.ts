@@ -5,7 +5,7 @@ export class Trick {
   cardsPlayed: CardType[];
   activePlayer: PlayerType;
   playerTurn: PlayerTurn;
-  trickWinner: PlayerType | null;
+  trickWinner: PlayerType | null = null;
 
   constructor(public players: PlayerType[], public hands: Hand[], public turnOrder: Seat[]) {
     this.players = players;
@@ -17,7 +17,6 @@ export class Trick {
     };
     this.cardsPlayed = [];
     this.activePlayer = players[turnOrder[0]];
-    this.trickWinner = null;
   }
 
   updateActivePlayer() {

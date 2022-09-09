@@ -35,32 +35,16 @@ export class Cards {
         suit: suits[0],
         name: name,
         value: faceValue,
-        playValue: playValue,
-        trump: false,
       };
 
-      // add 5H and 3S to the deck
-      if (card.suit === Suit.Hearts && card.value === 7)
-        card = { ...card, name: CardName.Five, value: 5, playValue: 5 };
-      if (card.suit === Suit.Spades && card.value === 7)
-        card = { ...card, name: CardName.Three, value: 3, playValue: 3 };
+      // substitute 7H and 7S for 5H and 3S
+      if (card.suit === Suit.Hearts && card.value === 7) card = { ...card, name: CardName.Five, value: 5 };
+      if (card.suit === Suit.Spades && card.value === 7) card = { ...card, name: CardName.Three, value: 3 };
 
       newCards.push(card as CardType);
       faceValue++;
     }
     return newCards;
-  }
-
-  public setTrumpCardValue(deck: CardType[], trump: Suit | null) {
-    if (!trump) return deck;
-
-    const trumpDeck = deck.map((card) => {
-      if (card.suit === trump) card.trump = true;
-      card.playValue = card.playValue + 14;
-      return card;
-    });
-
-    return trumpDeck;
   }
 
   public shuffleDeck(deck: CardType[]) {
