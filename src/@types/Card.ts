@@ -26,12 +26,6 @@ export type CardType = {
   name: CardName;
   value: number;
   playValue: number;
-  trump: boolean;
 };
 
-export type CardPlayType = CardType & {
-  playValue: number;
-  trump: boolean;
-};
-
-export type Deck = CardType[] | CardPlayType[];
+export type Deck = CardType[];

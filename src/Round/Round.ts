@@ -7,7 +7,7 @@ export class Round {
   hands: Hand[] = [];
   bids: Bid[] = [];
   trump: Suit | null = null;
-  turnOrder: number[] = [];
+  turnOrder: Seat[] = [];
   activePlayer: PlayerType = this.players[this.turnOrder[0]];
   playerTurn: PlayerTurn = {
     turnNum: 0,
@@ -20,9 +20,14 @@ export class Round {
     trickWonBy: PlayerType;
   }[] = [];
 
-  constructor(public players: PlayerType[], dealer: Seat, public endRound: (roundPoints: number[]) => number[]) {
+  constructor(
+    public players: PlayerType[],
+    public dealer: Seat,
+    public shuffledDeck: CardType[],
+    public endRound: (roundPoints: number[]) => void
+  ) {
     this.players = players;
-
+    this.shuffledDeck = shuffledDeck;
     this.playerRoundData = players.map((player, i) => {
       return {
         userID: player.userId,
@@ -35,12 +40,8 @@ export class Round {
     this.endRound = endRound;
   }
 
-  createHands() {
+  createHands(shuffledDeck: CardType[]) {
     const playerNum = this.players.length;
-    const cards = new Cards(playerNum);
-    const deck = cards.createCards(playerNum);
-    const shuffledDeck = cards.shuffleDeck(deck);
-
     this.dealHands(playerNum, shuffledDeck);
   }
 
@@ -86,57 +87,6 @@ export class Round {
 
   isBidMade() {
     //
-  }
-
-  // CARD PLAY VALUE
-  public createCards(players: number): CardType[] {
-    const newCards: CardType[] = [];
-
-    const cardsInPlay = (players * HAND_SIZE) / SUITS_NUM;
-    const suits: Suit[] = [Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds];
-    let faceValue = 1;
-
-    for (let i = 0; i < CARDS_IN_DECK; i++) {
-      // make Aces high
-      const playValue = faceValue === 1 ? 14 : faceValue;
-      // check if i has reached a multiple of 13 and change suit
-      if (i !== 0 && !(i % CARDS_PER_SUIT)) {
-        suits.shift();
-        faceValue = 1;
-      }
-      // skip over cards that are not used
-      if (faceValue > 1 && faceValue <= CARDS_PER_SUIT - cardsInPlay + 1) {
-        faceValue++;
-        continue;
-      }
-      const name: CardName = Object.values(CardName)[faceValue - 1];
-
-      let card = {
-        suit: suits[0],
-        name: name,
-        value: faceValue,
-      };
-
-      // substitute 7H and 7S for 5H and 3S
-      if (card.suit === Suit.Hearts && card.value === 7) card = { ...card, name: CardName.Five, value: 5 };
-      if (card.suit === Suit.Spades && card.value === 7) card = { ...card, name: CardName.Three, value: 3 };
-
-      newCards.push(card as CardType);
-      faceValue++;
-    }
-    return newCards;
-  }
-
-  public setTrumpCardValue(deck: CardType[], trump: Suit | null) {
-    if (!trump) return deck;
-
-    const trumpDeck = deck.map((card) => {
-      if (card.suit === trump) card.trump = true;
-      card.playValue = card.playValue + 14;
-      return card;
-    });
-
-    return trumpDeck;
   }
 
   // TRICK RELATED

@@ -2,7 +2,7 @@ export interface User {
   readonly userId: UserId;
   name: string;
   stats: UserStats;
-  inGame: string;
+  // inGame: string;
 }
 
 export type UserId = string;

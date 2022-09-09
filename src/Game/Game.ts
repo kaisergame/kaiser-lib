@@ -1,14 +1,16 @@
-import { GameConfig, GameType, PlayerType, RoundType, Seat, User } from '../@types/index';
+import { CardType, GameConfig, GameType, PlayerType, RoundType, Seat, User } from '../@types/index';
+import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
 export class Game {
-  players: PlayerType[];
-  dealer: Seat | undefined;
+  players: PlayerType[] = [];
+  dealer: Seat | null = null;
+  cards: any | null = null; //FIXME:
+  deck: CardType[] = [];
 
   constructor(public host: User, readonly config: GameConfig) {
     this.host = host;
-    this.players = [];
-    this.dealer = undefined;
+    this.config = config;
   }
 
   addPlayer(user: User) {
@@ -21,9 +23,18 @@ export class Game {
   createPlayer(user: User) {
     const player: PlayerType = {
       userId: user.userId,
-      seat: (this.players.length - 1) as Sea,
+      seat: this.players.length - 1,
     };
     return player;
+  }
+
+  createDeck() {
+    const playerNum = this.players.length;
+    const cards = new Cards(playerNum);
+    const deck = cards.createCards(playerNum);
+    this.cards = cards;
+    this.deck = deck;
+    return deck;
   }
 
   startGame() {
@@ -32,7 +43,9 @@ export class Game {
 
   setDealer() {
     let dealer = this.dealer;
-    if (dealer === undefined) dealer = 0;
+    // if there is no dealer set
+    if (dealer === null) dealer = 0;
+    // if returns to initial dealer
     if (dealer === this.players.length - 1) dealer = 0;
     else dealer++;
 
@@ -42,7 +55,8 @@ export class Game {
 
   createRound() {
     const dealer = this.setDealer();
-    const round = new Round(this.players, dealer, this.endRound);
+    const shuffledDeck = this.cards.shuffleDeck(this.deck);
+    const round = new Round(this.players, dealer, shuffledDeck, this.endRound);
     return round;
   }
 

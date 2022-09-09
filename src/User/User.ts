@@ -5,7 +5,6 @@ export class User implements UserType {
     readonly userID: UserId,
     public name: string,
     public email: string,
-    public password: string,
     public stats: UserStatsType,
     public gameID: string
   ) {
