@@ -24,7 +24,7 @@ export enum CardName {
 export type CardType = {
   suit: Suit;
   name: CardName;
-  value: number;
+  faceValue: number;
   playValue: number;
 };
 

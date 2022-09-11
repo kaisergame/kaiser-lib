@@ -1,21 +1,18 @@
 import { RoundType } from './Round';
+import { UserId } from './User';
 
 export interface GameType {
   gameID: string;
-  gamePreferences: GameConfig;
+  owner: UserId;
+  config: GameConfig;
   players: PlayerType[];
-  teams: {
-    team0: 0;
-    team1: 1;
-    [key: string]: number;
-  };
-  teamScores: number[];
-  playerScores?: number[];
+  teams: { team: Seat[]; score: number }[];
   curRound: RoundType;
   gameHistory: {
-    roundNumber: number;
+    roundNum: number;
     tricksTaken: number[];
     bid: number;
+    score: { team: Seat[]; score: number }[];
   }[];
 }
 
@@ -35,7 +32,8 @@ export type GameConfig = {
 export type PlayerType = {
   userId: string;
   seat: Seat;
-  team?: Seat[];
+  team: number;
+  score: number;
 };
 
 export type PlayerNum = number;

@@ -23,9 +23,8 @@ describe('Deck', () => {
         {
           suit: 'HEARTS',
           name: 'FIVE',
-          value: 5,
+          faceValue: 5,
           playValue: 5,
-          trump: false,
         },
       ]);
     });
@@ -40,9 +39,8 @@ describe('Deck', () => {
         {
           suit: 'SPADES',
           name: 'THREE',
-          value: 3,
+          faceValue: 3,
           playValue: 3,
-          trump: false,
         },
       ]);
     });

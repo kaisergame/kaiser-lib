@@ -34,17 +34,17 @@ export class Cards {
       let card = {
         suit: suits[0],
         name: name,
-        value: faceValue,
+        faceValue: faceValue,
         playValue: playValue,
       };
 
       // substitute 5H and 3S into deck for 7H and 7S
-      if (card.suit === Suit.Hearts && card.value === 7)
-        card = { ...card, name: CardName.Five, value: 5, playValue: 5 };
-      if (card.suit === Suit.Spades && card.value === 7)
-        card = { ...card, name: CardName.Three, value: 3, playValue: 3 };
+      if (card.suit === Suit.Hearts && card.faceValue === 7)
+        card = { ...card, name: CardName.Five, faceValue: 5, playValue: 5 };
+      if (card.suit === Suit.Spades && card.faceValue === 7)
+        card = { ...card, name: CardName.Three, faceValue: 3, playValue: 3 };
 
-      newCards.push(card as CardType);
+      newCards.push(card);
       faceValue++;
     }
     return newCards;

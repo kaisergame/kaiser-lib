@@ -2,9 +2,19 @@ import { CardType, Suit } from './Card';
 import { PlayerType, Seat } from './Game';
 import { UserId } from './User';
 
+export type TrickType = {
+  players: PlayerType[];
+  turnOrder: Seat[];
+  hands: Hand[];
+  activePlayer: PlayerType;
+  playerTurn: PlayerTurn;
+  cardsPlayed: CardType[];
+  trickWonBy: PlayerType;
+  validateCardPlayed(card: CardType): boolean;
+};
+
 export interface RoundType {
-  roundNumber: number;
-  hands: Hand;
+  hands: Hand[];
   bids: number[];
   bid: number | undefined;
   dealer: Seat;
@@ -18,22 +28,25 @@ export interface RoundType {
   };
 }
 
-export type PlayerTurn = {
+export type TurnData = {
   turnNum: number;
   playableCards: CardType[];
+  cardPlayed?: CardType;
+  validBids?: CardType;
 };
 
 export type Hand = CardType[];
 
-export type PlayerRoundData = {
+export type RoundData = {
   userID: UserId;
   seat: Seat;
-  bid: number | undefined;
+  bid: number | null;
   isDealer: boolean;
   tricksTaken: number;
 }[];
 
 export enum Bid {
+  Pass = 0,
   Five = 5,
   FiveNo = 5.5,
   Six = 6,

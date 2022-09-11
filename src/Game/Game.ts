@@ -1,4 +1,4 @@
-import { CardType, GameConfig, GameType, PlayerType, RoundType, Seat, User } from '../@types/index';
+import { CardType, GameConfig, GameType, PlayerType, RoundType, Seat, User, UserId } from '../@types/index';
 import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
@@ -7,9 +7,11 @@ export class Game {
   dealer: Seat | null = null;
   cards: any | null = null; //FIXME:
   deck: CardType[] = [];
+  scores: number[] = [];
+  curRound: RoundType | null = null;
 
-  constructor(public host: User, readonly config: GameConfig) {
-    this.host = host;
+  constructor(public owner: UserId, readonly config: GameConfig) {
+    this.owner = owner;
     this.config = config;
   }
 
@@ -18,14 +20,36 @@ export class Game {
 
     const newPlayer = this.createPlayer(user);
     players.push(newPlayer);
+
+    this.players = players;
   }
 
-  createPlayer(user: User) {
+  private createPlayer(user: User) {
+    const seat = this.players.length - 1;
+
     const player: PlayerType = {
       userId: user.userId,
-      seat: this.players.length - 1,
+      seat: seat,
+      team: this.setTeam(seat),
+      score: 0,
     };
+
     return player;
+  }
+
+  setTeam(seat: number) {
+    let team = -1;
+    if (this.config.numOfPlayers === 4) {
+      team = seat % 2;
+    }
+    if (this.config.numOfPlayers === 5) {
+      team = seat;
+    }
+    // if (this.config.numOfPlayers === 6) {
+    //   team = seat % 3;
+    // }
+
+    return team;
   }
 
   createDeck() {
@@ -57,25 +81,43 @@ export class Game {
     const dealer = this.setDealer();
     const shuffledDeck = this.cards.shuffleDeck(this.deck);
     const round = new Round(this.players, dealer, shuffledDeck, this.endRound);
+
+    // this.curRound = round;
     return round;
   }
 
   endRound(roundPoints: number[]) {
     this.updateScores(roundPoints);
     const winner = this.checkIsWinner();
-    if (winner) this.endGame();
+    if (winner) this.endGame(winner);
+
     if (!winner) this.createRound();
   }
 
   updateScores(roundPoints: number[]) {
-    // how
+    const curScores = this.scores;
+    const updatedScores = [];
+    for (let i = 0; i < roundPoints.length; i++) {
+      const updated = curScores[i] + roundPoints[i];
+      updatedScores.push(updated);
+    }
+    this.scores = updatedScores;
   }
 
-  checkIsWinner(): boolean {
-    return false;
+  checkIsWinner() {
+    const winScore = this.config.scoreToWin;
+
+    const isWinner = this.scores.reduce(
+      (highScore, score, i) => (score >= winScore && score > highScore.score ? { team: i, score: score } : highScore),
+      { team: null, score: 0 } as { team: null | number; score: number }
+    );
+
+    return isWinner.team;
   }
 
-  endGame(winner?: PlayerType | PlayerType[]) {
-    //
+  endGame(winner: number) {
+    // record win
+    // record stats
+    // play again
   }
 }
