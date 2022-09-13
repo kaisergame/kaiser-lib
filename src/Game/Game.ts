@@ -1,14 +1,14 @@
-import { CardType, GameConfig, PlayerType, RoundTotals, RoundType, Seat, User, UserId } from '../@types/index';
+import { CardType, GameConfig, PlayerType, RoundTotals, Seat, User, UserId } from '../@types/index';
 import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
 export class Game {
   players: PlayerType[] = [];
   dealer: Seat | null = null;
-  cards: any | null = null; //FIXME:
+  cards: InstanceType<typeof Cards> | null = null;
   deck: CardType[] = [];
   scores: number[] = [];
-  curRound: RoundType | null = null;
+  curRound: InstanceType<typeof Round> | null = null;
 
   constructor(public owner: UserId, readonly config: GameConfig) {
     this.owner = owner;
@@ -64,6 +64,7 @@ export class Game {
   }
 
   startGame() {
+    this.createDeck();
     this.createRound();
   }
 
@@ -81,6 +82,7 @@ export class Game {
 
   createRound() {
     const dealer = this.setDealer();
+    if (!this.cards) return;
     const shuffledDeck = this.cards.shuffleDeck(this.deck);
     const round = new Round(
       this.config.numOfPlayers,
@@ -91,7 +93,7 @@ export class Game {
       this.endRound
     );
 
-    // this.curRound = round; // TODO:
+    this.curRound = round;
     return round;
   }
 
@@ -117,8 +119,9 @@ export class Game {
     const winScore = this.config.scoreToWin;
 
     const isWinner = this.scores.reduce(
-      (highScore, score, i) => (score >= winScore && score > highScore.score ? { team: i, score: score } : highScore),
-      { team: null, score: 0 } as { team: null | number; score: number }
+      (highScore, score, i): { team: number; score: number } =>
+        score >= winScore && score > highScore.score ? { team: i, score: score } : highScore,
+      { team: -1, score: 0 }
     );
 
     return isWinner.team;
