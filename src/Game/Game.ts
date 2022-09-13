@@ -82,7 +82,14 @@ export class Game {
   createRound() {
     const dealer = this.setDealer();
     const shuffledDeck = this.cards.shuffleDeck(this.deck);
-    const round = new Round(this.config, this.players, dealer, shuffledDeck, this.endRound);
+    const round = new Round(
+      this.config.numOfPlayers,
+      this.config.minBid,
+      this.players,
+      dealer,
+      shuffledDeck,
+      this.endRound
+    );
 
     // this.curRound = round; // TODO:
     return round;

@@ -35,8 +35,8 @@ export type RoundData = {
 }[];
 
 export type BidType = {
-  amount: Bid | null;
-  bidder: Seat | null;
+  amount: Bid;
+  bidder: Seat;
   trump: Suit | boolean;
 };
 
