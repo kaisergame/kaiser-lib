@@ -43,7 +43,7 @@ export type RoundTotals = {
 export type BidType = {
   amount: Bid;
   bidder: Seat;
-  trump: Suit | boolean;
+  isTrump: boolean;
 };
 
 export enum Bid {

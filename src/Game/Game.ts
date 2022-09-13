@@ -1,4 +1,4 @@
-import { CardType, GameConfig, GameType, PlayerType, RoundType, Seat, User, UserId } from '../@types/index';
+import { CardType, GameConfig, PlayerType, RoundTotals, RoundType, Seat, User, UserId } from '../@types/index';
 import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
@@ -95,8 +95,8 @@ export class Game {
     return round;
   }
 
-  endRound(roundPoints: number[]) {
-    this.updateScores(roundPoints);
+  endRound(roundTotals: RoundTotals) {
+    this.updateScores(roundTotals.points);
     const winner = this.checkIsWinner();
     if (winner) this.endGame(winner);
 
