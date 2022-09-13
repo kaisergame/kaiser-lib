@@ -34,6 +34,12 @@ export type RoundData = {
   tricksTaken: number;
 }[];
 
+export type RoundTotals = {
+  bidMade: boolean;
+  points: number[];
+  playerTricks: number[];
+};
+
 export type BidType = {
   amount: Bid;
   bidder: Seat;

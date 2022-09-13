@@ -6,6 +6,7 @@ import {
   Hand,
   PlayerType,
   RoundData,
+  RoundTotals,
   Seat,
   Suit,
   TrickType,
@@ -22,7 +23,7 @@ export class Round {
   bid: BidType = { amount: -1, bidder: -1, trump: false };
   trump: Suit | null = null;
   turnOrder: Seat[] = [];
-  teams: PlayerType[] = [];
+  // teams: PlayerType[] = [];
   activePlayer: Seat = -1;
   // ledSuit: Suit | null = null;
   playableCards: CardType[] = [];
@@ -36,7 +37,7 @@ export class Round {
     public players: PlayerType[],
     public dealer: Seat,
     public deck: CardType[],
-    public endRound: (roundPoints: number[]) => void
+    public endRound: (roundTotals: RoundTotals) => void
   ) {
     this.playerNum = playerNum;
     this.minBid = minBid;
@@ -87,6 +88,7 @@ export class Round {
   }
 
   newTurnOrder() {
+    this.turnOrder = [];
     // bidding (push player left of dealer to turnOrder)
     if (this.bids.length === 0) {
       this.turnOrder.push(this.dealer + 1 < this.playerNum ? this.dealer + 1 : 0);
@@ -191,6 +193,7 @@ export class Round {
 
     hand.slice(cardIndex, cardIndex + 1);
 
+    this.hands[activePlayer.seat] = hand;
     return hand;
   }
 
@@ -208,12 +211,9 @@ export class Round {
       this.endTrick();
     }
     this.resetTurnData();
-    this.startPlayerTurn();
   }
 
   private resetTurnData() {
-    // this.turnData = {
-    // turnNum: this.turnData.turnNum++,
     this.playableCards = [];
   }
 
@@ -280,7 +280,12 @@ export class Round {
   }
 
   evaluateRound() {
+    const bidTotals = this.isBidMade();
+    const playerTricks = this.playerTrickTotals();
+    const totals = { ...bidTotals, playerTricks };
 
+    this.endRound(totals);
+    return totals;
   }
 
   isBidMade() {
@@ -290,23 +295,26 @@ export class Round {
     const defendingTeamPoints = TOTAL_TRICK_POINTS - this.trickPoints[biddingTeam];
     const totals = {
       bidMade: biddingTeamPoints > 0,
-      points: [biddingTeamPoints, defendingTeamPoints],
-    }
-    return totals
+      points: [biddingTeamPoints, defendingTeamPoints], //FIXME:
+    };
+    return totals;
   }
 
-  playerTrickTotals() {
-    return this.tricksTaken.reduce((playerTricks, trick): number[] => {
-      playerTricks[trick.trickWonBy]++
-      return playerTricks
-    }, new Array(this.players.length).fill(0) )
+  playerTrickTotals(): number[] {
+    const totals = this.tricksTaken.reduce((playerTricks, trick): number[] => {
+      playerTricks[trick.trickWonBy]++;
+      return playerTricks;
+    }, new Array(this.players.length).fill(0));
+
+    return totals;
   }
 
-  wasFiveStolen() {//}
+  wasFiveStolen() {
+    //}
+  }
+  // TODO: 5 player feature
+  // setFivePlayerTeams() {
+  // call after bid winning player calls trump / partner card
+  // hands.map((hand) => hand.includes(partnerCard))
+  // }
 }
-
-// TODO: 5 player feature
-// setFivePlayerTeams() {
-// call after bid winning player calls trump / partner card
-// hands.map((hand) => hand.includes(partnerCard))
-// }
