@@ -1,43 +1,50 @@
-import { Bid, CardType, Hand, PlayerTurn, PlayerType, RoundData, Seat, Suit, UserId } from '../@types/index';
+import {
+  Bid,
+  BidType,
+  CardType,
+  GameConfig,
+  Hand,
+  PlayerType,
+  RoundData,
+  Seat,
+  Suit,
+  TrickType,
+  UserId,
+} from '../@types/index';
 import { Cards } from '../Cards/Cards';
 import { TRUMP_VALUE } from '../constants/game';
-
-const MOCK_BIDS = [5, 7.5];
-const MOCK_PLAYER_BID = [8];
+import { HAND_SIZE } from '../constants/game';
 
 export class Round {
-  RoundData: RoundData;
+  playerRoundData: RoundData;
+  playerNum: number;
+  minBid: Bid;
   hands: Hand[] = [];
   bids: Bid[] = [];
-  bid: {
-    bidNum: Bid | null = null;
-    bidder: Seat = null;
-  };
+  bid: BidType = { amount: null, bidder: null, trump: false };
   trump: Suit | null = null;
   turnOrder: Seat[] = [];
-  activePlayer: PlayerType = this.players[this.turnOrder[0]];
-  turnData: PlayerTurn = {
-    turnNum: 0,
-    playableCards: [],
-  };
+  activePlayer: Seat = -1;
   // ledSuit: Suit | null = null;
+  playableCards: CardType[] = [];
   cardsPlayed: CardType[] = [];
-  tricks: {
-    trickPoints: number;
-    cardsPlayed: CardType[];
-    trickWonBy: PlayerType;
-  }[] = [];
+  points: number[] = [];
+  tricks: TrickType[] = [];
 
   constructor(
+    public config: GameConfig,
     public players: PlayerType[],
     public dealer: Seat,
-    public shuffledDeck: CardType[],
+    public deck: CardType[],
     public endRound: (roundPoints: number[]) => void
   ) {
+    this.playerNum = config.numOfPlayers;
+    this.minBid = config.minBid;
     this.players = players;
     this.dealer = dealer;
-    this.shuffledDeck = shuffledDeck;
-    this.RoundData = players.map((player, i) => {
+    // this.activePlayer = players[dealer + 1];
+    this.deck = deck;
+    this.playerRoundData = players.map((player) => {
       return {
         userID: player.userId,
         seat: player.seat,
@@ -49,80 +56,112 @@ export class Round {
     this.endRound = endRound;
   }
 
-  createHands(deck: CardType[]) {
-    const playerNum = this.players.length;
-    this.dealHands(playerNum, deck);
+  startRound() {
+    this.dealHands(this.deck);
+    this.startTurn();
+    // bidding
   }
 
-  dealHands(playerNum: number, deck: CardType[]) {
+  dealHands(deck: CardType[]) {
     let dealToSeat = 0;
     // create empty hands
-    for (let i = 0; i < playerNum; i++) {
+    for (let i = 0; i < this.playerNum; i++) {
       this.hands.push([]);
     }
     for (const card of deck) {
       this.hands[dealToSeat].push(card);
-      dealToSeat !== playerNum - 1 ? dealToSeat++ : (dealToSeat = 0);
+      dealToSeat !== this.playerNum - 1 ? dealToSeat++ : (dealToSeat = 0);
     }
   }
 
-  updateTurnOrder(bids: number[]) {
-    // this.tricks.length === 0 ?
-    // turn order needs to be based off of winning bidder (who plays first)
-    // after first trick it is the winner of the last trick
+  sortHands(reverse?: boolean) {
+    for (const hand of this.hands) {
+      hand.sort(cardCompare);
+    }
+
+    function cardCompare(a: CardType, b: CardType) {
+      return !reverse
+        ? a.suit.localeCompare(b.suit) || a.playValue - b.playValue
+        : b.suit.localeCompare(a.suit) || b.playValue - a.playValue;
+    }
   }
 
+  startTurn() {
+    // bidding
+    if (this.bids.length === 0) {
+      this.turnOrder.push(this.dealer + 1 < this.playerNum ? this.dealer + 1 : 0);
+    }
+    // first turn
+    if (this.bid.bidder && this.tricks.length === 0) {
+      this.turnOrder.push(this.bid.bidder);
+    }
+    // turns after first turn
+    if (this.bid && this.tricks.length !== 0) {
+      this.turnOrder.push(this.tricks[this.tricks.length - 1].trickWonBy);
+    }
+    // done in updateActivePlayer
+    // for (let i = 1; i < this.playerNum; i++) {
+    //   const nextPlayer = playOrder[playOrder.length - 1] + 1 < this.playerNum ? playOrder[playOrder.length - 1] + 1 : 0;
+    //   playOrder.push(nextPlayer);
+    // }
+    this.updateActivePlayer(this.turnOrder[0]);
+  }
+
+  // TODO: 5 player feature
+  // setFivePlayerTeams() {
+  // call after bid winning player calls trump / partner card
+  // hands.map((hand) => hand.includes(partnerCard))
+  // }
+
   validBids() {
-    const curBids = Object.values(this.bids);
+    // const curBids = Object.values(this.bids);
+    const curBids = this.bids;
     const curHighBid = Math.max(...curBids);
+    const noDealerPass = curBids.length === this.playerNum - 1 && this.bids.filter((bid) => bid !== 0).length === 0;
     const validBids = [
       Bid.Pass,
       ...Object.values(Bid).filter((bid) =>
-        this.RoundData[this.activePlayer.seat].isDealer ? bid > curHighBid : bid <= curHighBid
+        this.playerRoundData[this.activePlayer].isDealer
+          ? bid > this.minBid && bid >= curHighBid
+          : bid > this.minBid && bid > curHighBid
       ),
     ];
+    noDealerPass && validBids.shift();
 
     return validBids;
   }
 
   setPlayerBid(bid: Bid) {
     this.bids.push(bid);
-    this.bids.length === this.players.length && this.setWinningBid();
-  }
-
-  updateBids(bid: number) {
-    //
+    // this.bids.length === this.players.length && this.setWinningBid();
   }
 
   setWinningBid() {
-    //
+    // const bidAmount = Math.max(...this.bids) as Bid;
+    const winner = this.bids.reduce(
+      (highBid, bid, i): { bidder: number; bid: Bid; trump: boolean } => {
+        return bid > highBid.bid ? { bidder: this.turnOrder[i], bid: bid, trump: !(bid % 1 > 0) } : highBid;
+      },
+      { bidder: -1, bid: -1, trump: false }
+    );
+
+    const winningBid = winner;
   }
 
-  setTrump(trump: Suit) {
+  setTrump(trump?: Suit) {
     this.trump = trump;
-  }
-
-  updatePoints() {
-    //
-  }
-
-  evaluateRound() {
-    // endRound();
-  }
-
-  isBidMade() {
-    //
   }
 
   // TRICK RELATED
   updateActivePlayer(makeActivePlayer?: number) {
-    let nextPlayerSeat = 0;
+    let nextActivePlayer = -1;
     if (makeActivePlayer) {
-      nextPlayerSeat = makeActivePlayer;
+      nextActivePlayer = makeActivePlayer;
     } else {
-      nextPlayerSeat = this.activePlayer.seat <= this.players.length ? this.activePlayer.seat + 1 : 0;
+      nextActivePlayer = this.activePlayer <= this.players.length ? this.activePlayer + 1 : 0;
     }
-    this.activePlayer = this.players[nextPlayerSeat];
+    this.turnOrder.push(nextActivePlayer);
+    this.activePlayer = nextActivePlayer;
     return this.activePlayer;
   }
 
@@ -142,7 +181,7 @@ export class Round {
   private setPlayableCards(hand: CardType[], ledSuit?: Suit) {
     const playable = ledSuit ? hand.filter((card) => card.suit === ledSuit) : hand;
 
-    this.turnData.playableCards = playable;
+    this.playableCards = playable;
     return playable;
   }
 
@@ -171,17 +210,17 @@ export class Round {
 
   endPlayerTurn() {
     this.updateActivePlayer();
-    this.resetTurnData();
     if (this.cardsPlayed.length === this.players.length) {
       this.endTrick();
     }
+    this.resetTurnData();
+    this.startPlayerTurn();
   }
 
   private resetTurnData() {
-    this.turnData = {
-      turnNum: this.turnData.turnNum++,
-      playableCards: [],
-    };
+    // this.turnData = {
+    // turnNum: this.turnData.turnNum++,
+    this.playableCards = [];
   }
 
   // async startTurnTimer() {
@@ -200,18 +239,19 @@ export class Round {
 
   endTrick() {
     const trickWinner = this.getTrickWinner();
-    const trickPoints = this.getTrickPoints();
+    const trickValue = this.getTrickValue();
     const trickData = {
-      trickPoints: trickPoints,
+      trickValue: trickValue,
       cardsPlayed: this.cardsPlayed,
       trickWonBy: trickWinner,
     };
+    this.tricks.push(trickData);
 
-    // TODO: reset trick variables
+    this.tricks.length === HAND_SIZE ? this.evaluateRound() : this.updateActivePlayer();
     return trickData;
   }
 
-  getTrickPoints() {
+  getTrickValue() {
     let points = 1;
 
     for (const card of this.cardsPlayed) {
@@ -235,7 +275,19 @@ export class Round {
       { turn: -1, playValue: -1 }
     );
 
-    const trickWinner = this.players[this.turnOrder[winner.turn]];
+    const trickWinner = this.turnOrder[winner.turn];
     return trickWinner;
+  }
+
+  updatePoints() {
+    //
+  }
+
+  evaluateRound() {
+    // endRound();
+  }
+
+  isBidMade() {
+    //
   }
 }

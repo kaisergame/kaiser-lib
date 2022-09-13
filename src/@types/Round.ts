@@ -3,14 +3,9 @@ import { PlayerType, Seat } from './Game';
 import { UserId } from './User';
 
 export type TrickType = {
-  players: PlayerType[];
-  turnOrder: Seat[];
-  hands: Hand[];
-  activePlayer: PlayerType;
-  playerTurn: PlayerTurn;
+  trickValue: number;
   cardsPlayed: CardType[];
-  trickWonBy: PlayerType;
-  validateCardPlayed(card: CardType): boolean;
+  trickWonBy: Seat;
 };
 
 export interface RoundType {
@@ -21,18 +16,12 @@ export interface RoundType {
   turnOrder: number;
   trump: Suit;
   cardsPlayed: CardType[];
-  tricks: {
-    trickPoints: number;
-    cardsPlayed: CardType[];
-    trickWonBy: PlayerType;
-  };
+  tricks: TrickType[];
 }
 
 export type TurnData = {
-  turnNum: number;
   playableCards: CardType[];
   cardPlayed?: CardType;
-  validBids?: CardType;
 };
 
 export type Hand = CardType[];
@@ -44,6 +33,12 @@ export type RoundData = {
   isDealer: boolean;
   tricksTaken: number;
 }[];
+
+export type BidType = {
+  amount: Bid | null;
+  bidder: Seat | null;
+  trump: Suit | boolean;
+};
 
 export enum Bid {
   Pass = 0,

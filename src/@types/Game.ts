@@ -1,4 +1,4 @@
-import { RoundType } from './Round';
+import { Bid, RoundType } from './Round';
 import { UserId } from './User';
 
 export interface GameType {
@@ -18,7 +18,7 @@ export interface GameType {
 
 export type GameConfig = {
   numOfPlayers: PlayerNum;
-  minBid: number;
+  minBid: Bid;
   scoreToWin: number;
   //bidOut: boolean;
   //kitty: boolean;

@@ -42,9 +42,11 @@ export class Game {
     if (this.config.numOfPlayers === 4) {
       team = seat % 2;
     }
-    if (this.config.numOfPlayers === 5) {
-      team = seat;
-    }
+
+    // use w/ 5 or 6 player config options
+    // if (this.config.numOfPlayers === 5) {
+    //   team = seat;
+    // }
     // if (this.config.numOfPlayers === 6) {
     //   team = seat % 3;
     // }
@@ -80,9 +82,9 @@ export class Game {
   createRound() {
     const dealer = this.setDealer();
     const shuffledDeck = this.cards.shuffleDeck(this.deck);
-    const round = new Round(this.players, dealer, shuffledDeck, this.endRound);
+    const round = new Round(this.config, this.players, dealer, shuffledDeck, this.endRound);
 
-    // this.curRound = round;
+    // this.curRound = round; // TODO:
     return round;
   }
 
