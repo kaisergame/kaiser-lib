@@ -271,6 +271,7 @@ export class Round {
 
   isBidMade() {
     const biddingTeam = this.players[this.bid.bidder].team;
+    //FIXME: evaluate no trump
     const biddingTeamPoints =
       this.trickPoints[biddingTeam] - this.bid.amount >= 0 ? this.trickPoints[biddingTeam] : this.bid.amount * -1;
     const defendingTeamPoints = TOTAL_TRICK_POINTS - this.trickPoints[biddingTeam];

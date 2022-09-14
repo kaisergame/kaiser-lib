@@ -1,4 +1,4 @@
-import { CardType, GameConfig, PlayerType, RoundTotals, Seat, User, UserId } from '../@types/index';
+import { CardType, GameConfig, PlayerType, RoundTotals, Seat, User } from '../@types/index';
 import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
@@ -10,14 +10,16 @@ export class Game {
   scores: number[] = [];
   curRound: InstanceType<typeof Round> | null = null;
 
-  constructor(public owner: UserId, readonly config: GameConfig) {
+  constructor(public owner: User, readonly config: GameConfig) {
     this.owner = owner;
     this.config = config;
+    this.players = [{ ...this.createPlayer(owner) }];
   }
 
   addPlayer(user: User) {
-    const players = [...this.players];
+    if (this.players.length === this.config.numOfPlayers) return;
 
+    const players = [...this.players];
     const newPlayer = this.createPlayer(user);
     players.push(newPlayer);
 
@@ -25,10 +27,11 @@ export class Game {
   }
 
   private createPlayer(user: User) {
-    const seat = this.players.length - 1;
+    const seat = this.players.length;
 
     const player: PlayerType = {
       userId: user.userId,
+      userName: user.name,
       seat: seat,
       team: this.setTeam(seat),
       score: 0,
@@ -43,7 +46,7 @@ export class Game {
       team = seat % 2;
     }
 
-    // use w/ 5 or 6 player config options
+    // use w/ 5/6 player config options
     // if (this.config.numOfPlayers === 5) {
     //   team = seat;
     // }
@@ -64,17 +67,15 @@ export class Game {
   }
 
   startGame() {
+    if (this.players.length !== this.config.numOfPlayers) return;
     this.createDeck();
     this.createRound();
   }
 
   setDealer() {
     let dealer = this.dealer;
-    // if there is no dealer set
     if (dealer === null) dealer = 0;
-    // if returns to initial dealer
-    if (dealer === this.players.length - 1) dealer = 0;
-    else dealer++;
+    else dealer !== this.players.length - 1 ? dealer++ : (dealer = 0);
 
     this.dealer = dealer;
     return dealer;
@@ -100,9 +101,9 @@ export class Game {
   endRound(roundTotals: RoundTotals) {
     this.updateScores(roundTotals.points);
     const winner = this.checkIsWinner();
-    if (winner) this.endGame(winner);
 
-    if (!winner) this.createRound();
+    if (winner >= 0) this.endGame(winner);
+    if (winner < 0) this.createRound();
   }
 
   updateScores(roundPoints: number[]) {

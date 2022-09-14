@@ -31,6 +31,7 @@ export type GameConfig = {
 
 export type PlayerType = {
   userId: string;
+  userName: string;
   seat: Seat;
   team: number;
   score: number;
