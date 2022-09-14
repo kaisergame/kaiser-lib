@@ -52,13 +52,13 @@ export class Round {
   }
 
   // CARDS
-  dealHands(deck: CardType[]) {
+  dealHands(shuffledDeck: CardType[]) {
     let dealToSeat = 0;
 
     for (let i = 0; i < this.playerNum; i++) {
       this.hands.push([]);
     }
-    for (const card of deck) {
+    for (const card of shuffledDeck) {
       this.hands[dealToSeat].push(card);
       dealToSeat !== this.playerNum - 1 ? dealToSeat++ : (dealToSeat = 0);
     }
@@ -129,15 +129,15 @@ export class Round {
   // CARD PLAY
   orderOfPlay() {
     let nextPlayer = -1;
-    // bidding (push player left of dealer to turnOrder)
+    // bidding (left of dealer to play)
     if (this.bids.length === 0) {
       nextPlayer = this.dealer + 1 < this.playerNum ? this.dealer + 1 : 0;
     }
-    // first turn (push bid winner to turnOrder)
+    // first turn (bid winner to play)
     if (this.bid.bidder && this.tricksTaken.length === 0) {
       nextPlayer = this.bid.bidder;
     }
-    // turns after first turn (push last trick winner to turnOrder)
+    // turns after first turn (previous trick winner to play)
     if (this.bid && this.tricksTaken.length !== 0) {
       nextPlayer = this.tricksTaken[this.tricksTaken.length - 1].trickWonBy;
     }

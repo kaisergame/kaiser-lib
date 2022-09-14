@@ -1,50 +1,52 @@
-import { CardName, Suit } from '../@types/index';
-import { Game } from '../Game/Game';
-import { Round } from './Round';
+import { CardName, PlayerType, Suit, User } from '../@types';
 
-const mockUser: User = {
+export const MOCK_USER_1: User = {
   userId: 'mockUser1234',
   name: 'Ryan',
 };
 
-const mockUser2: User = {
+export const MOCK_USER_2: User = {
   userId: 'mockUser5678',
   name: 'Cody',
 };
 
-const mockUser3: User = {
+export const MOCK_USER_3: User = {
   userId: 'mockUser9999',
   name: 'Stacey',
 };
 
-const players = [
+export const MOCK_PLAYERS: PlayerType[] = [
   {
     userId: 'player1',
+    userName: 'Ryan',
     seat: 0,
     team: 0,
     score: 24,
   },
   {
     userId: 'player2',
+    userName: 'Cody',
     seat: 1,
     team: 1,
     score: -10,
   },
   {
     userId: 'player3',
+    userName: 'Stacey',
     seat: 2,
     team: 0,
     score: 24,
   },
   {
     userId: 'player4',
+    userName: 'Paul',
     seat: 3,
     team: 1,
     score: -10,
   },
 ];
 
-const shuffledDeck = [
+export const MOCK_SHUFFLED_DECK = [
   { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
   { suit: Suit.Spades, name: CardName.Queen, faceValue: 12, playValue: 12 },
   { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 },
@@ -79,34 +81,14 @@ const shuffledDeck = [
   { suit: Suit.Spades, name: CardName.Ten, faceValue: 10, playValue: 10 },
 ];
 
-const game = new Game();
+export const MOCK_ROUND_TOTALS = {
+  bidMade: true,
+  points: [9, 1],
+  playerTricks: [6, 0, 3, 1],
+};
 
-describe('Round', () => {
-  beforeEach(() => {
-    const game = new Game();
-  });
-  describe('create a new Round within a game', () => {
-    // beforeEach(() => {});
-
-    test('4 player round should have 4 players', () => {
-      const round = new Round(4, 5, players, 0, shuffledDeck, endRound);
-      const playerNum = round.players.length;
-
-      expect(playerNum).toBe(4);
-    });
-
-    //   describe('shuffle 4 player deck', () => {
-    //     test('shuffled deck differs from unshuffled deck', () => {
-    //       const playerNum = 4;
-    //       const cards = new Cards(playerNum);
-    //       const deck = cards.createCards(playerNum);
-    //       const deckCopy = [...deck];
-
-    //       expect(deck).toEqual(deckCopy);
-
-    //       cards.shuffleDeck(deckCopy);
-    //       console.log(deckCopy);
-    //       expect(deck).not.toEqual(deckCopy);
-    //     });
-  });
-});
+export const MOCK_GAME_CONFIG = {
+  numOfPlayers: 4,
+  minBid: 7,
+  scoreToWin: 52,
+};
