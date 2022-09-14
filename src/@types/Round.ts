@@ -29,6 +29,8 @@ export type Hand = CardType[];
 export type RoundData = {
   userID: UserId;
   seat: Seat;
+  team: number;
+  roundTeam?: number; // for 5 player
   bid: number | null;
   isDealer: boolean;
   tricksTaken: number;
