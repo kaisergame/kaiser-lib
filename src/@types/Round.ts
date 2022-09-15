@@ -27,14 +27,15 @@ export type TurnData = {
 export type Hand = CardType[];
 
 export type RoundData = {
-  userID: UserId;
+  userId: UserId;
   seat: Seat;
   team: number;
   roundTeam?: number; // for 5 player
   bid: number | null;
+  winningBid: BidType | null;
   isDealer: boolean;
   tricksTaken: number;
-}[];
+};
 
 export type RoundTotals = {
   bidMade: boolean;
@@ -66,6 +67,6 @@ export enum Bid {
   ElevenNo = 11.5,
   Twelve = 12,
   TwelveNo = 12.5,
-  Troika = 12.6,
+  Troika = 12.7,
   Kaiser = 12.9,
 }

@@ -14,7 +14,7 @@ import { TOTAL_TRICK_POINTS, TRUMP_VALUE, TURN_LENGTH } from '../constants/game'
 import { HAND_SIZE } from '../constants/game';
 
 export class Round {
-  playersRoundData: RoundData;
+  playersRoundData: RoundData[];
   hands: Hand[] = [];
   bids: BidType[] = [];
   bid: BidType = { amount: -1, bidder: -1, isTrump: false };
@@ -39,11 +39,12 @@ export class Round {
     this.deck = deck;
     this.playersRoundData = players.map((player) => {
       return {
-        userID: player.userId,
+        userId: player.userId,
         userName: player.userName,
         seat: player.seat,
         team: player.team,
         bid: null,
+        winningBid: null,
         isDealer: dealer === player.seat,
         tricksTaken: 0,
       };
@@ -52,27 +53,27 @@ export class Round {
   }
 
   // CARDS
-  dealHands(shuffledDeck: CardType[]) {
+  dealHands() {
     let dealToSeat = 0;
 
     for (let i = 0; i < this.playerNum; i++) {
       this.hands.push([]);
     }
-    for (const card of shuffledDeck) {
+    for (const card of this.deck) {
       this.hands[dealToSeat].push(card);
       dealToSeat !== this.playerNum - 1 ? dealToSeat++ : (dealToSeat = 0);
     }
   }
 
-  sortHands(reverse?: boolean) {
+  sortHands(lowToHigh?: 'lowToHigh') {
     for (const hand of this.hands) {
       hand.sort(cardSort);
     }
 
     function cardSort(a: CardType, b: CardType) {
-      return !reverse
-        ? a.suit.localeCompare(b.suit) || a.playValue - b.playValue
-        : b.suit.localeCompare(a.suit) || b.playValue - a.playValue;
+      return !lowToHigh
+        ? a.suit.localeCompare(b.suit) || b.playValue - a.playValue
+        : a.suit.localeCompare(b.suit) || a.playValue - b.playValue;
     }
   }
 
@@ -103,7 +104,8 @@ export class Round {
       isTrump: bid % 1 === 0,
     };
     this.bids.push(playerBid);
-    this.bids.length === this.playerNum && this.setWinningBid();
+    this.playersRoundData[this.activePlayer].bid = playerBid.amount;
+    if (this.bids.length === this.playerNum) this.setWinningBid();
   }
 
   setWinningBid() {
@@ -118,7 +120,8 @@ export class Round {
     );
 
     this.bid = winningBid;
-    this.playersRoundData[winningBid.bidder].bid = winningBid.amount;
+    this.playersRoundData[winningBid.bidder].winningBid = winningBid;
+    return winningBid;
   }
 
   setTrump(trump: Suit) {

@@ -1,6 +1,6 @@
 import { CardName, Suit } from '../@types';
 import { Cards } from '../Cards/Cards';
-import * as mock from '../constants/index';
+import * as mock from '../constants/mocks';
 import { Round } from '../Round/Round';
 import { Game } from './Game';
 

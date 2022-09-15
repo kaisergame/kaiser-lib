@@ -17,28 +17,28 @@ export const MOCK_USER_3: User = {
 
 export const MOCK_PLAYERS: PlayerType[] = [
   {
-    userId: 'player1',
+    userId: 'mockUser1234',
     userName: 'Ryan',
     seat: 0,
     team: 0,
     score: 24,
   },
   {
-    userId: 'player2',
+    userId: 'mockUser5678',
     userName: 'Cody',
     seat: 1,
     team: 1,
     score: -10,
   },
   {
-    userId: 'player3',
+    userId: 'mockUser9999',
     userName: 'Stacey',
     seat: 2,
     team: 0,
     score: 24,
   },
   {
-    userId: 'player4',
+    userId: 'mockUser7777',
     userName: 'Paul',
     seat: 3,
     team: 1,
@@ -79,6 +79,40 @@ export const MOCK_SHUFFLED_DECK = [
   { suit: Suit.Hearts, name: CardName.Jack, faceValue: 11, playValue: 11 },
   { suit: Suit.Clubs, name: CardName.Queen, faceValue: 12, playValue: 12 },
   { suit: Suit.Spades, name: CardName.Ten, faceValue: 10, playValue: 10 },
+];
+
+export const MOCK_SORTED_HAND = [
+  { suit: Suit.Clubs, name: CardName.Eight, faceValue: 8, playValue: 8 },
+  { suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 },
+  { suit: Suit.Diamonds, name: CardName.King, faceValue: 13, playValue: 13 },
+  { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 },
+  { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 },
+  { suit: Suit.Hearts, name: CardName.Ten, faceValue: 10, playValue: 10 },
+  { suit: Suit.Hearts, name: CardName.Eight, faceValue: 8, playValue: 8 },
+  { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
+];
+
+export const MOCK_REVERSE_SORTED_HAND = [
+  { suit: Suit.Clubs, name: CardName.Eight, faceValue: 8, playValue: 8 },
+  { suit: Suit.Diamonds, name: CardName.King, faceValue: 13, playValue: 13 },
+  { suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 },
+  { suit: Suit.Hearts, name: CardName.Eight, faceValue: 8, playValue: 8 },
+  { suit: Suit.Hearts, name: CardName.Ten, faceValue: 10, playValue: 10 },
+  { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 },
+  { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 },
+  { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
+];
+
+export const MOCK_BIDS = [
+  { amount: 7, bidder: 1, isTrump: true },
+  { amount: 7.5, bidder: 2, isTrump: false },
+  { amount: 10, bidder: 3, isTrump: true },
+];
+
+export const MOCK_PASS_BIDS = [
+  { amount: 0, bidder: 1, isTrump: true },
+  { amount: 0, bidder: 2, isTrump: true },
+  { amount: 0, bidder: 3, isTrump: true },
 ];
 
 export const MOCK_ROUND_TOTALS = {
