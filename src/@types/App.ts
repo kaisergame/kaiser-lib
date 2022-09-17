@@ -1,7 +1,7 @@
 import { GameType } from './Game';
-import { User } from './User';
+import { UserType } from './User';
 
 export type AppState = {
-  users: User[];
+  users: UserType[];
   activeGames: GameType[];
 };

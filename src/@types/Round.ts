@@ -1,5 +1,5 @@
 import { CardType, Suit } from './Card';
-import { PlayerType, Seat } from './Game';
+import { Seat } from './Game';
 import { UserId } from './User';
 
 export type TakenTrickType = {
