@@ -1,4 +1,4 @@
-import { CardType, GameConfig, PlayerType, RoundTotals, Seat, User } from '../@types/index';
+import { CardType, GameConfig, PlayerType, RoundTotals, Seat, UserType } from '../@types/index';
 import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
@@ -10,13 +10,13 @@ export class Game {
   scores: number[] = [];
   curRound: InstanceType<typeof Round> | null = null;
 
-  constructor(public owner: User, readonly config: GameConfig) {
+  constructor(public owner: UserType, readonly config: GameConfig) {
     this.owner = owner;
     this.config = config;
     this.players = [{ ...this.createPlayer(owner) }];
   }
 
-  addPlayer(user: User) {
+  addPlayer(user: UserType) {
     if (this.players.length === this.config.numOfPlayers) return;
 
     const players = [...this.players];
@@ -26,12 +26,12 @@ export class Game {
     this.players = players;
   }
 
-  private createPlayer(user: User) {
+  private createPlayer(user: UserType) {
     const seat = this.players.length;
 
     const player: PlayerType = {
       userId: user.userId,
-      userName: user.name,
+      userName: user.userName,
       seat: seat,
       team: this.setTeam(seat),
       score: 0,

@@ -20,11 +20,6 @@ export interface RoundType {
   tricks: TakenTrickType[];
 }
 
-export type TurnData = {
-  playableCards: CardType[];
-  cardPlayed?: CardType;
-};
-
 export type Hand = CardType[];
 
 export type RoundData = {

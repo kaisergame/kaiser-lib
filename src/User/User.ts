@@ -1,13 +1,13 @@
-import { GameConfig, PassCards, PlayerNum, UserId, UserStatsType, UserType } from '../@types/index ';
+import { GameConfig, PlayerNum, UserId, UserStatsType, UserType } from '../@types/index';
 import { Game } from '../Game/Game';
 
 export class User implements UserType {
   constructor(
-    readonly userID: UserId,
-    public name: string,
+    readonly userId: UserId,
+    public userName: string,
     public email: string,
     public stats: UserStatsType,
-    public gameID: string
+    public gameID?: string
   ) {
     //
   }
@@ -17,18 +17,18 @@ export class User implements UserType {
       numOfPlayers: 4 as PlayerNum,
       inviteOnly: false,
       minBid: 6,
-      passCards: 1 as PassCards,
+      scoreToWin: 52,
+      passCards: 0,
       lowNo: false,
       noAceFace53: false,
     };
     return config;
   }
 
-  createGame(gameConfig: GameConfig): GameType {
-    const newGame = new Game(this.userID, [this], gameConfig);
+  createGame(gameConfig: GameConfig): InstanceType<typeof Game> {
+    const owner = { userId: this.userId, userName: this.userName };
+    const newGame = new Game(owner, gameConfig);
 
     return newGame;
   }
-
-  invitePlayers() {}
 }

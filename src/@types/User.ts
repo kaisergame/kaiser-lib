@@ -1,13 +1,13 @@
-export interface User {
+export interface UserType {
   readonly userId: UserId;
-  name: string;
+  userName: string;
   // stats: UserStats;
   // inGame: string;
 }
 
 export type UserId = string;
 
-export type UserStats = {
+export type UserStatsType = {
   gamesWon: number;
   gamesLost: number;
   bidsWon: number;

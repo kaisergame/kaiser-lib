@@ -1,18 +1,18 @@
-import { CardName, PlayerType, Suit, User } from '../@types/index';
+import { CardName, PlayerType, Suit, UserType } from '../@types/index';
 
-export const MOCK_USER_1: User = {
+export const MOCK_USER_1: UserType = {
   userId: 'mockUser1234',
-  name: 'Ryan',
+  userName: 'Ryan',
 };
 
-export const MOCK_USER_2: User = {
+export const MOCK_USER_2: UserType = {
   userId: 'mockUser5678',
-  name: 'Cody',
+  userName: 'Cody',
 };
 
-export const MOCK_USER_3: User = {
+export const MOCK_USER_3: UserType = {
   userId: 'mockUser9999',
-  name: 'Stacey',
+  userName: 'Stacey',
 };
 
 export const MOCK_PLAYERS: PlayerType[] = [
