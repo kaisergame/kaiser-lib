@@ -1,4 +1,4 @@
-import { GameConfig, PassCards, PlayerNum, UserId, UserStatsType, UserType } from '../@types/index';
+import { GameConfig, PassCards, PlayerNum, UserId, UserStatsType, UserType } from '../@types/index ';
 import { Game } from '../Game/Game';
 
 export class User implements UserType {

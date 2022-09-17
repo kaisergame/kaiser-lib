@@ -8,6 +8,7 @@ import {
   RoundTotals,
   Seat,
   Suit,
+  TakenTrickType,
   TrickType,
 } from '../@types/index';
 import { TOTAL_TRICK_POINTS, TRUMP_VALUE, TURN_LENGTH } from '../constants/game';
@@ -21,9 +22,9 @@ export class Round {
   trump: Suit | null = null;
   activePlayer: Seat = -1;
   playableCards: CardType[] = [];
-  curTrick: { cardPlayed: CardType; playedBy: Seat }[] = [];
+  curTrick: TrickType[] = [];
   roundPoints: number[] = [];
-  tricksTaken: TrickType[] = [];
+  tricksTaken: TakenTrickType[] = [];
 
   constructor(
     public playerNum: number,
@@ -137,11 +138,11 @@ export class Round {
       nextPlayer = this.dealer + 1 < this.playerNum ? this.dealer + 1 : 0;
     }
     // first turn (bid winner to play)
-    if (this.bid.bidder && this.tricksTaken.length === 0) {
+    if (this.bid.bidder !== -1 && this.tricksTaken.length === 0) {
       nextPlayer = this.bid.bidder;
     }
     // turns after first turn (previous trick winner to play)
-    if (this.bid && this.tricksTaken.length !== 0) {
+    if (this.tricksTaken.length !== 0) {
       nextPlayer = this.tricksTaken[this.tricksTaken.length - 1].trickWonBy;
     }
 
@@ -150,12 +151,15 @@ export class Round {
   }
 
   updateActivePlayer(makeActivePlayer?: number) {
+    if (typeof makeActivePlayer === 'undefined' && this.activePlayer === -1)
+      throw new Error('Must initialize orderOfPlay');
+    if (typeof makeActivePlayer === 'number' && makeActivePlayer > this.playerNum - 1)
+      throw new Error(`There is no player in seat ${makeActivePlayer}`);
+
     let nextActivePlayer = -1;
-    if (makeActivePlayer) {
-      nextActivePlayer = makeActivePlayer;
-    } else {
-      nextActivePlayer = this.activePlayer <= this.playerNum ? this.activePlayer + 1 : 0;
-    }
+    if (typeof makeActivePlayer === 'number') nextActivePlayer = makeActivePlayer;
+    if (typeof makeActivePlayer === 'undefined')
+      nextActivePlayer = this.activePlayer < this.playerNum - 1 ? this.activePlayer + 1 : 0;
 
     this.activePlayer = nextActivePlayer;
     return this.activePlayer;
@@ -167,7 +171,7 @@ export class Round {
       if (autoPlay) {
         const cards = this.playableCards;
         const randomCard = cards[Math.floor(Math.random() * cards.length)];
-        this.playCard(active, randomCard);
+        this.playCard(randomCard);
       }
       if (pointPenalty) {
         this.roundPoints[this.playersRoundData[active].team] = this.roundPoints[this.playersRoundData[active].team] - 1;
@@ -178,28 +182,33 @@ export class Round {
   }
 
   setPlayableCards(hand: CardType[]) {
-    const ledSuit = this.curTrick[0].cardPlayed?.suit;
+    const ledSuit = this.curTrick[0]?.cardPlayed.suit;
     const playable = ledSuit ? hand.filter((card) => card.suit === ledSuit) : hand;
 
     this.playableCards = playable;
     return playable;
   }
 
-  playCard(activePlayer: Seat, cardPlayed: CardType) {
-    this.removeCardFromHand(activePlayer, cardPlayed);
+  playCard(cardPlayed: CardType) {
+    const inHand = this.hands[this.activePlayer].includes(cardPlayed);
+    // return !inHand;
+    if (!inHand) throw new Error('Card not in hand');
+    // if (!this.hands[this.activePlayer].includes(cardPlayed)) throw new Error('Card not in hand');
+    this.removeCardFromHand(cardPlayed);
     this.updateCardsPlayed(cardPlayed);
     this.endPlayerTurn();
   }
 
-  private removeCardFromHand(activePlayer: Seat, cardPlayed: CardType) {
-    const hand = [...this.hands[activePlayer]];
-    const cardIndex = hand.indexOf(cardPlayed);
+  private removeCardFromHand(cardPlayed: CardType) {
+    const hand = [...this.hands[this.activePlayer]];
+    const cardIndex = this.hands[this.activePlayer].indexOf(cardPlayed);
 
     if (cardIndex !== -1) {
       hand.splice(cardIndex, 1);
-      this.hands[activePlayer] = hand;
-    } else console.error('card not in hand');
+      this.hands[this.activePlayer] = hand;
+    } else throw new Error('Card not in hand');
 
+    this.hands[this.activePlayer] = hand;
     return hand;
   }
 
@@ -213,10 +222,6 @@ export class Round {
 
     this.curTrick = updatedTrick;
     return updatedTrick;
-  }
-
-  getCardsPlayed() {
-    return this.curTrick.map((play) => play.cardPlayed);
   }
 
   endPlayerTurn() {
@@ -235,11 +240,12 @@ export class Round {
     const trickWinner = this.getTrickWinner();
     const trickData = {
       trickValue: trickValue,
-      cardsPlayed: this.getCardsPlayed(),
+      cardsPlayed: this.curTrick,
       trickWonBy: trickWinner,
     };
     this.tricksTaken.push(trickData);
     this.updateRoundPoints(trickData);
+    this.updatePlayerRoundData(trickData);
 
     this.tricksTaken.length === HAND_SIZE ? this.evaluateRound() : this.orderOfPlay();
     return trickData;
@@ -248,7 +254,8 @@ export class Round {
   private getTrickValue() {
     let value = 1;
 
-    const cardsPlayed = this.getCardsPlayed();
+    const cardsPlayed = this.curTrick.map((play) => play.cardPlayed);
+
     for (const card of cardsPlayed) {
       if (card.faceValue === 5 && card.suit === Suit.Hearts) value = value + card.faceValue;
       if (card.faceValue === 3 && card.suit === Suit.Spades) value = value - card.faceValue;
@@ -275,9 +282,13 @@ export class Round {
     return trickWinner;
   }
 
-  private updateRoundPoints(trickData: TrickType) {
-    const trickWonByTeam = this.playersRoundData[trickData.trickWonBy].team;
+  private updateRoundPoints(trickData: TakenTrickType) {
+    const winner = this.playersRoundData[trickData.trickWonBy];
+    const trickWonByTeam = winner.roundTeam || winner.team;
     this.roundPoints[trickWonByTeam] = this.roundPoints[trickWonByTeam] + trickData.trickValue;
+  }
+
+  private updatePlayerRoundData(trickData: TakenTrickType) {
     this.playersRoundData[trickData.trickWonBy].tricksTaken =
       this.playersRoundData[trickData.trickWonBy].tricksTaken + trickData.trickValue;
   }
@@ -293,9 +304,11 @@ export class Round {
 
   isBidMade() {
     const biddingTeam = this.playersRoundData[this.bid.bidder].team;
-    //FIXME: evaluate no trump
+    const noBid = this.bid.isTrump ? 1 : 2;
     const biddingTeamPoints =
-      this.roundPoints[biddingTeam] - this.bid.amount >= 0 ? this.roundPoints[biddingTeam] : this.bid.amount * -1;
+      this.roundPoints[biddingTeam] - this.bid.amount >= 0
+        ? this.roundPoints[biddingTeam] * noBid
+        : this.bid.amount * noBid * -1;
     const defendingTeamPoints = TOTAL_TRICK_POINTS - this.roundPoints[biddingTeam];
     const totals = {
       bidMade: biddingTeamPoints > 0,

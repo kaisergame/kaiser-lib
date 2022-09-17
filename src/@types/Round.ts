@@ -2,11 +2,12 @@ import { CardType, Suit } from './Card';
 import { PlayerType, Seat } from './Game';
 import { UserId } from './User';
 
-export type TrickType = {
+export type TakenTrickType = {
   trickValue: number;
-  cardsPlayed: CardType[];
+  cardsPlayed: TrickType[];
   trickWonBy: Seat;
 };
+export type TrickType = { cardPlayed: CardType; playedBy: Seat };
 
 export interface RoundType {
   hands: Hand[];
@@ -16,7 +17,7 @@ export interface RoundType {
   turnOrder: number;
   trump: Suit;
   cardsPlayed: CardType[];
-  tricks: TrickType[];
+  tricks: TakenTrickType[];
 }
 
 export type TurnData = {

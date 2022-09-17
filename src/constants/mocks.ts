@@ -1,4 +1,4 @@
-import { CardName, PlayerType, Suit, User } from '../@types';
+import { CardName, PlayerType, Suit, User } from '../@types/index';
 
 export const MOCK_USER_1: User = {
   userId: 'mockUser1234',
@@ -120,6 +120,36 @@ export const MOCK_ROUND_TOTALS = {
   points: [9, 1],
   playerTricks: [6, 0, 3, 1],
 };
+
+export const MOCK_TRICK = [
+  { cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 1 },
+  { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
+  { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 3 },
+  { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 0 },
+];
+
+export const TAKEN_TRICKS = [
+  {
+    trickValue: 1,
+    cardsPlayed: [
+      { cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 1 },
+      { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
+      { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 3 },
+      { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 0 },
+    ],
+    trickWonBy: 2,
+  },
+  {
+    trickValue: 6,
+    cardsPlayed: [
+      { cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 }, playedBy: 2 },
+      { cardPlayed: { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 3 }, playedBy: 3 },
+      { cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 }, playedBy: 0 },
+      { cardPlayed: { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 1 },
+    ],
+    trickWonBy: 0,
+  },
+];
 
 export const MOCK_GAME_CONFIG = {
   numOfPlayers: 4,
