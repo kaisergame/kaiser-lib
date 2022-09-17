@@ -344,18 +344,4 @@ describe('Round', () => {
       expect(round.playersRoundData[0].tricksTaken).toBe(0);
     });
   });
-
-  describe('evaluateRound method', () => {
-    test('endTrick sends trickValue, trickWinner, and cardsPlayed data to tricksTaken', () => {
-      game.players = mock.MOCK_PLAYERS;
-      game.createDeck();
-      game.createRound();
-      expect(game.curRound).toBeInstanceOf(Round);
-      if (game.curRound) {
-        game.curRound.bid = { bidder: 0, amount: 7, isTrump: true };
-        game.curRound.roundPoints = [8, 2];
-        expect(game.curRound.evaluateRound()).toStrictEqual({ bidMade: true, points: [8, 2] });
-      }
-    });
-  });
 });
