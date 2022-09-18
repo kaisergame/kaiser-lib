@@ -1,4 +1,4 @@
-import { Bid, CardName, CardType, RoundData, Suit } from '../@types/index';
+import { BidAmount, CardName, CardType, RoundData, Suit } from '../@types/index';
 import { HAND_SIZE } from '../constants/index';
 import * as mock from '../constants/mocks';
 import { Game } from '../Game/Game';
@@ -72,7 +72,7 @@ describe('Round', () => {
   describe('validBids method', () => {
     test('players must bid higher than the minimum bid', () => {
       round.updateActivePlayer(1);
-      expect(round.validBids().filter((bid) => bid <= round.minBid && bid !== Bid.Pass).length).toBe(0);
+      expect(round.validBids().filter((bid) => bid <= round.minBid && bid !== BidAmount.Pass).length).toBe(0);
     });
 
     test('players (other than dealer) must bid higher than the previous bids', () => {
@@ -85,28 +85,28 @@ describe('Round', () => {
       round.updateActivePlayer(0);
       expect(round.playersRoundData[round.activePlayer].isDealer).toBe(true);
       round.bids = mock.MOCK_BIDS; // high bid is 10
-      expect(round.validBids().includes(Bid.Ten)).toBe(true);
+      expect(round.validBids().includes(BidAmount.Ten)).toBe(true);
     });
 
     test('if any player before the dealer has bid, the dealer may pass', () => {
       round.updateActivePlayer(0);
       round.bids = mock.MOCK_BIDS;
       expect(round.playersRoundData[round.activePlayer].isDealer).toBe(true);
-      expect(round.validBids().includes(Bid.Pass)).toBe(true);
+      expect(round.validBids().includes(BidAmount.Pass)).toBe(true);
     });
 
     test('if all players before the dealer have passed, the dealer cannot pass', () => {
       round.updateActivePlayer(0);
       round.bids = mock.MOCK_PASS_BIDS;
       expect(round.playersRoundData[round.activePlayer].isDealer).toBe(true);
-      expect(round.validBids().includes(Bid.Pass)).toBe(false);
+      expect(round.validBids().includes(BidAmount.Pass)).toBe(false);
     });
   });
 
   describe('setPlayerBid method', () => {
     test('setPlayerBid adds the passed argument (bid) to bids', () => {
       round.updateActivePlayer(1);
-      round.setPlayerBid(Bid.Ten);
+      round.setPlayerBid(BidAmount.Ten);
       expect(round.bids).toStrictEqual([
         {
           amount: 10,
@@ -118,9 +118,9 @@ describe('Round', () => {
 
     test('for a trump bid isTrump is true; a no trump bid isTrump is false', () => {
       round.updateActivePlayer(1);
-      round.setPlayerBid(Bid.Five);
+      round.setPlayerBid(BidAmount.Five);
       round.updateActivePlayer(2);
-      round.setPlayerBid(Bid.SevenNo);
+      round.setPlayerBid(BidAmount.SevenNo);
       expect(round.bids).toStrictEqual([
         {
           amount: 5,
@@ -140,7 +140,7 @@ describe('Round', () => {
       const spy = jest.spyOn(round, 'setWinningBid');
 
       round.updateActivePlayer(0);
-      round.setPlayerBid(Bid.Ten);
+      round.setPlayerBid(BidAmount.Ten);
       expect(round.bids.length === round.playerNum).toBe(true);
       expect(spy).toBeCalledTimes(1);
     });
@@ -335,11 +335,11 @@ describe('Round', () => {
       round.curTrick = mock.MOCK_TRICK;
       round.endTrick();
     });
-    test('endTrick sends trickValue, trickWinner, and cardsPlayed data to tricksTaken', () => {
+    test('endTrick sends trickPoints, trickWinner, and cardsPlayed data to tricksTaken', () => {
       expect(round.tricksTaken).toStrictEqual([mock.TAKEN_TRICKS[0]]);
     });
 
-    test('endTrick calls updatePlayerRoundData, adds trickValue to player tricksTaken', () => {
+    test('endTrick calls updatePlayerRoundData, adds trickPoints to player tricksTaken', () => {
       expect(round.playersRoundData[2].tricksTaken).toBe(1);
       expect(round.playersRoundData[0].tricksTaken).toBe(0);
     });

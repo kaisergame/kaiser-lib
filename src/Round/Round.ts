@@ -1,37 +1,41 @@
 import {
-  Bid,
+  BidAmount,
   BidType,
   CardType,
+  Deck,
+  EvaluatedTrick,
   Hand,
+  PlayerPointTotals,
+  PlayerRoundData,
   PlayerType,
-  RoundData,
+  RoundPointTotals,
   RoundTotals,
+  RoundType,
   Seat,
   Suit,
-  TakenTrickType,
   TrickType,
 } from '../@types/index';
 import { TOTAL_TRICK_POINTS, TRUMP_VALUE, TURN_LENGTH } from '../constants/game';
 import { HAND_SIZE } from '../constants/game';
 
-export class Round {
-  playersRoundData: RoundData[];
+export class Round implements RoundType {
+  playersRoundData: PlayerRoundData[];
   hands: Hand[] = [];
   bids: BidType[] = [];
-  bid: BidType = { amount: -1, bidder: -1, isTrump: false };
+  winningBid: BidType = { amount: -1, bidder: -1, isTrump: false };
   trump: Suit | null = null;
   activePlayer: Seat = -1;
   playableCards: CardType[] = [];
-  curTrick: TrickType[] = [];
-  roundPoints: number[] = [];
-  tricksTaken: TakenTrickType[] = [];
+  curTrick: TrickType = [];
+  roundPoints: RoundPointTotals = [];
+  tricksTaken: EvaluatedTrick[] = [];
 
   constructor(
     public playerNum: number,
-    public minBid: Bid,
+    public minBid: BidAmount,
     public players: PlayerType[],
     public dealer: Seat,
-    public deck: CardType[],
+    public deck: Deck,
     public endRound: (roundTotals: RoundTotals) => void
   ) {
     this.playerNum = playerNum;
@@ -40,7 +44,7 @@ export class Round {
     this.deck = deck;
     this.playersRoundData = players.map((player) => {
       return {
-        userId: player.userId,
+        playerId: player.playerId,
         userName: player.userName,
         seat: player.seat,
         team: player.team,
@@ -86,8 +90,8 @@ export class Round {
       curBids.length === this.playerNum - 1 && this.bids.filter((bid) => bid.amount !== 0).length === 0;
 
     const validBids = [
-      Bid.Pass,
-      ...Object.values(Bid).filter((bid) =>
+      BidAmount.Pass,
+      ...Object.values(BidAmount).filter((bid) =>
         this.playersRoundData[this.activePlayer].isDealer
           ? bid > this.minBid && bid >= curHighBid
           : bid > this.minBid && bid > curHighBid
@@ -98,7 +102,7 @@ export class Round {
     return validBids;
   }
 
-  setPlayerBid(bid: Bid) {
+  setPlayerBid(bid: BidAmount) {
     const playerBid = {
       amount: bid,
       bidder: this.activePlayer,
@@ -110,9 +114,9 @@ export class Round {
   }
 
   setWinningBid() {
-    // const bidAmount = Math.max(...this.bids) as Bid;
+    // const bidAmount = Math.max(...this.bids) as BidAmount;
     const winningBid = this.bids.reduce(
-      (highBid, bid): { bidder: number; amount: Bid; isTrump: boolean } => {
+      (highBid, bid): { bidder: number; amount: BidAmount; isTrump: boolean } => {
         return bid.amount > highBid.amount
           ? { bidder: bid.bidder, amount: bid.amount, isTrump: bid.amount % 1 === 0 }
           : highBid;
@@ -120,13 +124,13 @@ export class Round {
       { bidder: -1, amount: -1, isTrump: false }
     );
 
-    this.bid = winningBid;
-    this.playersRoundData[winningBid.bidder].winningBid = winningBid;
+    this.winningBid = winningBid;
+    this.playersRoundData[winningBid.bidder].winningBid = winningBid.amount;
     return winningBid;
   }
 
   setTrump(trump: Suit) {
-    if (!this.bid.isTrump) return;
+    if (!this.winningBid.isTrump) return;
     this.trump = trump;
   }
 
@@ -138,8 +142,8 @@ export class Round {
       nextPlayer = this.dealer + 1 < this.playerNum ? this.dealer + 1 : 0;
     }
     // first turn (bid winner to play)
-    if (this.bid.bidder !== -1 && this.tricksTaken.length === 0) {
-      nextPlayer = this.bid.bidder;
+    if (this.winningBid.bidder !== -1 && this.tricksTaken.length === 0) {
+      nextPlayer = this.winningBid.bidder;
     }
     // turns after first turn (previous trick winner to play)
     if (this.tricksTaken.length !== 0) {
@@ -167,14 +171,14 @@ export class Round {
 
   turnTimer(autoPlay?: boolean, pointPenalty?: boolean) {
     const timer = setTimeout(() => {
-      const active = this.activePlayer;
       if (autoPlay) {
         const cards = this.playableCards;
         const randomCard = cards[Math.floor(Math.random() * cards.length)];
         this.playCard(randomCard);
       }
       if (pointPenalty) {
-        this.roundPoints[this.playersRoundData[active].team] = this.roundPoints[this.playersRoundData[active].team] - 1;
+        const penaltyTeam = this.playersRoundData[this.activePlayer].team;
+        this.roundPoints[penaltyTeam].points = this.roundPoints[penaltyTeam].points - 1;
       }
     }, TURN_LENGTH);
 
@@ -236,16 +240,15 @@ export class Round {
   }
 
   endTrick() {
-    const trickValue = this.getTrickValue();
+    const trickPoints = this.getTrickValue();
     const trickWinner = this.getTrickWinner();
     const trickData = {
-      trickValue: trickValue,
+      trickPoints: trickPoints,
       cardsPlayed: this.curTrick,
       trickWonBy: trickWinner,
     };
     this.tricksTaken.push(trickData);
     this.updateRoundPoints(trickData);
-    this.updatePlayerRoundData(trickData);
 
     this.tricksTaken.length === HAND_SIZE ? this.evaluateRound() : this.orderOfPlay();
     return trickData;
@@ -282,46 +285,60 @@ export class Round {
     return trickWinner;
   }
 
-  private updateRoundPoints(trickData: TakenTrickType) {
+  private updateRoundPoints(trickData: EvaluatedTrick) {
     const winner = this.playersRoundData[trickData.trickWonBy];
-    const trickWonByTeam = winner.roundTeam || winner.team;
-    this.roundPoints[trickWonByTeam] = this.roundPoints[trickWonByTeam] + trickData.trickValue;
-  }
-
-  private updatePlayerRoundData(trickData: TakenTrickType) {
-    this.playersRoundData[trickData.trickWonBy].tricksTaken =
-      this.playersRoundData[trickData.trickWonBy].tricksTaken + trickData.trickValue;
+    const trickWonByTeam = winner.roundTeam || winner.team; // roundTeam used for 5 player
+    this.roundPoints[trickWonByTeam].points = this.roundPoints[trickWonByTeam].points + trickData.trickPoints;
   }
 
   evaluateRound() {
-    const scoreTotals = this.isBidMade();
-    const playerTricks = this.playerTrickTotals();
-    const totals = { ...scoreTotals, playerTricks };
+    const { bidMade, roundPoints } = this.isBidMade();
+    const playerPoints = this.playerTrickTotals();
+    const totals = { bidMade, roundPoints, playerPoints };
 
     this.endRound(totals);
     return totals;
   }
 
   isBidMade() {
-    const biddingTeam = this.playersRoundData[this.bid.bidder].team;
-    const noBid = this.bid.isTrump ? 1 : 2;
+    const biddingTeam = this.playersRoundData[this.winningBid.bidder].team;
+    const noBidMultiplier = this.winningBid.isTrump ? 1 : 2;
     const biddingTeamPoints =
-      this.roundPoints[biddingTeam] - this.bid.amount >= 0
-        ? this.roundPoints[biddingTeam] * noBid
-        : this.bid.amount * noBid * -1;
-    const defendingTeamPoints = TOTAL_TRICK_POINTS - this.roundPoints[biddingTeam];
+      this.roundPoints[biddingTeam].points - this.winningBid.amount >= 0
+        ? this.roundPoints[biddingTeam].points * noBidMultiplier
+        : this.winningBid.amount * noBidMultiplier * -1;
+    const defendingTeamPoints = TOTAL_TRICK_POINTS - this.roundPoints[biddingTeam].points;
+
+    const points = this.roundPoints.map((pointData) => {
+      const points = pointData.team === biddingTeam ? biddingTeamPoints : defendingTeamPoints;
+      return {
+        team: pointData.team,
+        points: points,
+      };
+    });
     const totals = {
       bidMade: biddingTeamPoints > 0,
-      points: biddingTeam === 0 ? [biddingTeamPoints, defendingTeamPoints] : [defendingTeamPoints, biddingTeamPoints], //FIXME:
+      roundPoints: points,
     };
     return totals;
   }
 
-  playerTrickTotals(): number[] {
-    const totals = this.tricksTaken.reduce((playerTricks, trick): number[] => {
-      playerTricks[trick.trickWonBy]++;
+  playerTrickTotals(): PlayerPointTotals {
+    const points = this.tricksTaken.reduce((playerTricks, trick) => {
+      playerTricks[trick.trickWonBy] = {
+        player: trick.trickWonBy,
+        points: playerTricks[trick.trickWonBy].points + trick.trickPoints,
+      };
       return playerTricks;
     }, new Array(this.playerNum).fill(0));
+
+    const totals = [];
+    for (let i = 0; i < points.length; i++) {
+      totals.push({
+        player: i,
+        points: points[i],
+      });
+    }
 
     return totals;
   }

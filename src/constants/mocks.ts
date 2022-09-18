@@ -1,4 +1,16 @@
-import { CardName, PlayerType, Suit, UserType } from '../@types/index';
+import {
+  BidType,
+  CardName,
+  Deck,
+  EvaluatedTrick,
+  GameConfig,
+  Hand,
+  PlayerType,
+  RoundTotals,
+  Suit,
+  TrickType,
+  UserType,
+} from '../@types/index';
 
 export const MOCK_USER_1: UserType = {
   userId: 'mockUser1234',
@@ -17,36 +29,32 @@ export const MOCK_USER_3: UserType = {
 
 export const MOCK_PLAYERS: PlayerType[] = [
   {
-    userId: 'mockUser1234',
+    playerId: 'mockUser1234',
     userName: 'Ryan',
     seat: 0,
     team: 0,
-    score: 24,
   },
   {
-    userId: 'mockUser5678',
+    playerId: 'mockUser5678',
     userName: 'Cody',
     seat: 1,
     team: 1,
-    score: -10,
   },
   {
-    userId: 'mockUser9999',
+    playerId: 'mockUser9999',
     userName: 'Stacey',
     seat: 2,
     team: 0,
-    score: 24,
   },
   {
-    userId: 'mockUser7777',
+    playerId: 'mockUser7777',
     userName: 'Paul',
     seat: 3,
     team: 1,
-    score: -10,
   },
 ];
 
-export const MOCK_SHUFFLED_DECK = [
+export const MOCK_SHUFFLED_DECK: Deck = [
   { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
   { suit: Suit.Spades, name: CardName.Queen, faceValue: 12, playValue: 12 },
   { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 },
@@ -81,7 +89,7 @@ export const MOCK_SHUFFLED_DECK = [
   { suit: Suit.Spades, name: CardName.Ten, faceValue: 10, playValue: 10 },
 ];
 
-export const MOCK_SORTED_HAND = [
+export const MOCK_SORTED_HAND: Hand = [
   { suit: Suit.Clubs, name: CardName.Eight, faceValue: 8, playValue: 8 },
   { suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 },
   { suit: Suit.Diamonds, name: CardName.King, faceValue: 13, playValue: 13 },
@@ -92,7 +100,7 @@ export const MOCK_SORTED_HAND = [
   { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
 ];
 
-export const MOCK_REVERSE_SORTED_HAND = [
+export const MOCK_REVERSE_SORTED_HAND: Hand = [
   { suit: Suit.Clubs, name: CardName.Eight, faceValue: 8, playValue: 8 },
   { suit: Suit.Diamonds, name: CardName.King, faceValue: 13, playValue: 13 },
   { suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 },
@@ -103,34 +111,42 @@ export const MOCK_REVERSE_SORTED_HAND = [
   { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
 ];
 
-export const MOCK_BIDS = [
+export const MOCK_BIDS: BidType[] = [
   { amount: 7, bidder: 1, isTrump: true },
   { amount: 7.5, bidder: 2, isTrump: false },
   { amount: 10, bidder: 3, isTrump: true },
 ];
 
-export const MOCK_PASS_BIDS = [
+export const MOCK_PASS_BIDS: BidType[] = [
   { amount: 0, bidder: 1, isTrump: true },
   { amount: 0, bidder: 2, isTrump: true },
   { amount: 0, bidder: 3, isTrump: true },
 ];
 
-export const MOCK_ROUND_TOTALS = {
+export const MOCK_ROUND_TOTALS: RoundTotals = {
   bidMade: true,
-  points: [9, 1],
-  playerTricks: [6, 0, 3, 1],
+  roundPoints: [
+    { team: 0, points: 9 },
+    { team: 1, points: 1 },
+  ],
+  playerPoints: [
+    { player: 0, points: 6 },
+    { player: 1, points: 0 },
+    { player: 2, points: 3 },
+    { player: 3, points: 1 },
+  ],
 };
 
-export const MOCK_TRICK = [
+export const MOCK_TRICK: TrickType = [
   { cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 1 },
   { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
   { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 3 },
   { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 0 },
 ];
 
-export const TAKEN_TRICKS = [
+export const TAKEN_TRICKS: EvaluatedTrick[] = [
   {
-    trickValue: 1,
+    trickPoints: 1,
     cardsPlayed: [
       { cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 1 },
       { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
@@ -140,7 +156,7 @@ export const TAKEN_TRICKS = [
     trickWonBy: 2,
   },
   {
-    trickValue: 6,
+    trickPoints: 6,
     cardsPlayed: [
       { cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 }, playedBy: 2 },
       { cardPlayed: { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 3 }, playedBy: 3 },
@@ -151,7 +167,7 @@ export const TAKEN_TRICKS = [
   },
 ];
 
-export const MOCK_GAME_CONFIG = {
+export const MOCK_GAME_CONFIG: GameConfig = {
   numOfPlayers: 4,
   minBid: 7,
   scoreToWin: 52,

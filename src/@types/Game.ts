@@ -1,24 +1,46 @@
-import { Bid, RoundType } from './Round';
-import { UserId } from './User';
+import { Suit } from './Cards';
+import { BidAmount, RoundPointTotals, RoundType } from './Round';
 
 export interface GameType {
-  gameID: string;
-  owner: UserId;
+  gameId: GameId;
+  owner: UserType;
   config: GameConfig;
   players: PlayerType[];
-  teams: { team: Seat[]; score: number }[];
-  curRound: RoundType;
-  gameHistory: {
-    roundNum: number;
-    tricksTaken: number[];
-    bid: number;
-    score: { team: Seat[]; score: number }[];
-  }[];
+  teams: TeamData[];
+  curRound: RoundType | null;
+  prevRounds: PrevRoundData[];
 }
+
+export type GameId = string;
+
+export type PrevRoundData = {
+  roundNum: number;
+  winningBid: number;
+  trump: Suit | null;
+  roundPoints: RoundPointTotals;
+  roundTeams: TeamData[];
+};
+
+// export interface RoundType {
+//   playersRoundData: PlayerRoundData[];
+//   playerNum: number;
+//   dealer: Seat;
+//   deck: CardType[];
+//   hands: Hand[];
+//   minBid: BidAmount;
+//   bids: BidType[];
+//   winningBid: BidType;
+//   trump: Suit | null;
+//   activePlayer: Seat;
+//   playableCards: CardType[];
+//   curTrick: TrickType;
+//   roundPoints: RoundPointTotals;
+//   tricksTaken: EvaluatedTrick[];
+// }
 
 export type GameConfig = {
   numOfPlayers: PlayerNum;
-  minBid: Bid;
+  minBid: BidAmount;
   scoreToWin: number;
   //bidOut: boolean;
   //kitty: boolean;
@@ -29,14 +51,26 @@ export type GameConfig = {
   //inviteOnly: boolean;
 };
 
+export type PlayerNum = number;
+
+export type TeamData = { team: number; teamMembers: Seat[]; score: number };
+
 export type PlayerType = {
-  userId: string;
-  userName: string;
+  playerId: PlayerId;
+  userName: UserName;
   seat: Seat;
   team: number;
-  score: number;
 };
 
-export type PlayerNum = number;
+export type PlayerId = UserId;
+
+export type UserType = {
+  userId: UserId;
+  userName: UserName;
+};
+
+export type UserId = string;
+
+export type UserName = string;
 
 export type Seat = number;

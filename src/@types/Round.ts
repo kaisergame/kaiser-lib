@@ -1,51 +1,43 @@
-import { CardType, Suit } from './Card';
-import { Seat } from './Game';
-import { UserId } from './User';
-
-export type TakenTrickType = {
-  trickValue: number;
-  cardsPlayed: TrickType[];
-  trickWonBy: Seat;
-};
-export type TrickType = { cardPlayed: CardType; playedBy: Seat };
+import { CardType, Suit } from './Cards';
+import { PlayerId, Seat } from './Game';
 
 export interface RoundType {
-  hands: Hand[];
-  bids: number[];
-  bid: number | undefined;
+  playersRoundData: PlayerRoundData[];
+  playerNum: number;
   dealer: Seat;
-  turnOrder: number;
-  trump: Suit;
-  cardsPlayed: CardType[];
-  tricks: TakenTrickType[];
+  deck: CardType[];
+  hands: Hand[];
+  minBid: BidAmount;
+  bids: BidType[];
+  winningBid: BidType;
+  trump: Suit | null;
+  activePlayer: Seat;
+  playableCards: CardType[];
+  curTrick: TrickType;
+  roundPoints: RoundPointTotals;
+  tricksTaken: EvaluatedTrick[];
 }
 
 export type Hand = CardType[];
 
-export type RoundData = {
-  userId: UserId;
+export type PlayerRoundData = {
+  playerId: PlayerId;
   seat: Seat;
   team: number;
   roundTeam?: number; // for 5 player
-  bid: number | null;
-  winningBid: BidType | null;
+  bid: BidAmount | null;
+  winningBid: BidAmount | null;
   isDealer: boolean;
-  tricksTaken: number;
-};
-
-export type RoundTotals = {
-  bidMade: boolean;
-  points: number[];
-  playerTricks: number[];
+  // tricksTaken: number;
 };
 
 export type BidType = {
-  amount: Bid;
+  amount: BidAmount;
   bidder: Seat;
   isTrump: boolean;
 };
 
-export enum Bid {
+export enum BidAmount {
   Pass = 0,
   Five = 5,
   FiveNo = 5.5,
@@ -66,3 +58,20 @@ export enum Bid {
   Troika = 12.7,
   Kaiser = 12.9,
 }
+
+export type EvaluatedTrick = {
+  cardsPlayed: TrickType;
+  trickPoints: number;
+  trickWonBy: Seat;
+};
+export type TrickType = { cardPlayed: CardType; playedBy: Seat }[];
+
+export type RoundTotals = {
+  bidMade: boolean;
+  roundPoints: RoundPointTotals;
+  playerPoints: PlayerPointTotals;
+};
+
+export type RoundPointTotals = { team: number; points: number }[];
+
+export type PlayerPointTotals = { player: Seat; points: number }[];

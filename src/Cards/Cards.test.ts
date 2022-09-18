@@ -10,7 +10,7 @@ describe('Deck', () => {
     deck = cards.createCards(playerNum);
   });
 
-  describe('createDeck for a 4 player game', () => {
+  describe('initializeDeck for a 4 player game', () => {
     test('deck should have 32 cards', () => {
       const cardsLength = deck.length;
       expect(cardsLength).toBe(32);

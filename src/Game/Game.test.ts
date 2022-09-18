@@ -22,7 +22,7 @@ describe('Game with 4 players', () => {
       game.addPlayer(mock.MOCK_USER_2);
       game.addPlayer(mock.MOCK_USER_3);
 
-      expect(game.players[1].userId).toBe(mock.MOCK_USER_2.userId);
+      expect(game.players[1].playerId).toBe(mock.MOCK_USER_2.userId);
       expect(game.players[1].team).toBe(1);
       expect(game.players[2].seat).toBe(2);
       expect(game.players[2].team).toBe(0);
@@ -41,15 +41,15 @@ describe('Game with 4 players', () => {
     });
   });
 
-  describe('createDeck method', () => {
+  describe('initializeDeck method', () => {
     test('cards should be instance of Cards', () => {
-      game.createDeck();
+      game.initializeDeck();
 
       expect(game.cards).toBeInstanceOf(Cards);
     });
 
     test('the deck should have 32 cards', () => {
-      game.createDeck();
+      game.initializeDeck();
 
       expect(game.deck.length).toBe(32);
       expect(game.deck[0]).toStrictEqual({ suit: Suit.Spades, name: CardName.Ace, faceValue: 1, playValue: 14 });
@@ -83,18 +83,19 @@ describe('Game with 4 players', () => {
     });
 
     test('4 player round should have 4 players', () => {
-      expect(game.curRound?.players.length).toBe(4);
+      expect(game.curRound?.playersRoundData.length).toBe(4);
     });
   });
 
   describe('updateScore method', () => {
     beforeEach(() => {
-      game.scores = [23, -10];
+      game.teams[0].score = 23;
+      game.teams[0].score = -10;
     });
 
     test('score of 8 and 2 should be added to respective teams', () => {
       game.updateScores([8, 2]);
-      expect(game.scores).toStrictEqual([31, -8]);
+      expect(game.teams).toStrictEqual([31, -8]);
     });
     test('score of -16 and 5 should be added to respective teams', () => {
       game.updateScores([-16, 5]);

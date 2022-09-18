@@ -1,42 +1,75 @@
-import { CardType, GameConfig, PlayerType, RoundTotals, Seat, UserType } from '../@types/index';
+import {
+  Deck,
+  GameConfig,
+  GameId,
+  GameType,
+  PlayerType,
+  PrevRoundData,
+  RoundPointTotals,
+  RoundTotals,
+  RoundType,
+  Seat,
+  TeamData,
+  UserId,
+  UserType,
+} from '../@types/index';
 import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
-export class Game {
+// interface GameType {
+//   gameId: string;
+//   owner: PlayerId;
+//   config: GameConfig;
+//   players: PlayerType[];
+//   teams: TeamData[];
+//   curRound: RoundType;
+//   prevRounds: {
+//     roundNum: number;
+//     winningBid: number;
+//     trump: Suit | null;
+//     roundPoints: RoundPointTotals;
+//     roundTeams: TeamData[];
+//   }[];
+// }
+
+export class Game implements GameType {
+  gameId: GameId;
   players: PlayerType[] = [];
-  dealer: Seat | null = null;
-  cards: InstanceType<typeof Cards> | null = null;
-  deck: CardType[] = [];
+  teams: TeamData[] = [];
   scores: number[] = [];
-  curRound: InstanceType<typeof Round> | null = null;
+  dealer: Seat | null = null;
+  cards: Cards | null = null;
+  deck: Deck = [];
+  curRound: RoundType | null = null;
+  prevRounds: PrevRoundData[] = [];
 
   constructor(public owner: UserType, readonly config: GameConfig) {
+    this.gameId = this.setGameId();
     this.owner = owner;
     this.config = config;
-    this.players = [{ ...this.createPlayer(owner) }];
+    this.players = [{ ...this.addPlayer(owner) }];
+  }
+
+  setGameId() {
+    const gameId = 'game12345';
+    return gameId;
   }
 
   addPlayer(user: UserType) {
-    if (this.players.length === this.config.numOfPlayers) return;
+    if (this.players.length === this.config.numOfPlayers)
+      throw new Error(`Already ${this.config.numOfPlayers} players in game`);
 
     const players = [...this.players];
-    const newPlayer = this.createPlayer(user);
-    players.push(newPlayer);
+    const playerSeat = this.players.length;
+    const player: PlayerType = {
+      playerId: user.userId,
+      userName: user.userName,
+      seat: playerSeat,
+      team: this.setTeam(playerSeat),
+    };
+    players.push(player);
 
     this.players = players;
-  }
-
-  private createPlayer(user: UserType) {
-    const seat = this.players.length;
-
-    const player: PlayerType = {
-      userId: user.userId,
-      userName: user.userName,
-      seat: seat,
-      team: this.setTeam(seat),
-      score: 0,
-    };
-
     return player;
   }
 
@@ -57,7 +90,7 @@ export class Game {
     return team;
   }
 
-  createDeck() {
+  initializeDeck() {
     const playerNum = this.players.length;
     const cards = new Cards(playerNum);
     const deck = cards.createCards(playerNum);
@@ -68,7 +101,7 @@ export class Game {
 
   startGame() {
     if (this.players.length !== this.config.numOfPlayers) return;
-    this.createDeck();
+    this.initializeDeck();
     this.createRound();
   }
 
@@ -99,18 +132,18 @@ export class Game {
   }
 
   endRound(roundTotals: RoundTotals) {
-    this.updateScores(roundTotals.points);
+    this.updateScores(roundTotals.roundPoints);
     const winner = this.checkIsWinner();
 
     if (winner >= 0) this.endGame(winner);
     if (winner < 0) this.createRound();
   }
 
-  updateScores(roundPoints: number[]) {
+  updateScores(roundPoints: RoundPointTotals) {
     const curScores = this.scores;
     const updatedScores = [];
     for (let i = 0; i < roundPoints.length; i++) {
-      const updated = curScores[i] + roundPoints[i];
+      const updated = curScores[roundPoints[i].team] + roundPoints[i].points;
       updatedScores.push(updated);
     }
     this.scores = updatedScores;
