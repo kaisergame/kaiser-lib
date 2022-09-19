@@ -23,12 +23,12 @@ export type Hand = CardType[];
 export type PlayerRoundData = {
   playerId: string;
   seat: Seat;
-  team: number;
-  roundTeam?: number; // for 5 player
+  teamId: string;
+  // roundTeam?: number; // for 5 player
   bid: BidAmount | null;
-  winningBid: BidAmount | null;
+  // wonBid: boolean;
+  // madeBid: boolean;
   isDealer: boolean;
-  // tricksTaken: number;
 };
 
 export type BidType = {
@@ -72,6 +72,6 @@ export type RoundTotals = {
   playerPoints: PlayerPointTotals;
 };
 
-export type RoundPointTotals = { team: number; points: number }[];
+export type RoundPointTotals = { teamId: string; points: number }[];
 
-export type PlayerPointTotals = { player: Seat; points: number }[];
+export type PlayerPointTotals = { playerId: string; playerSeat: Seat; points: number }[];

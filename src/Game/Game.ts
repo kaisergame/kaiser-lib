@@ -35,7 +35,7 @@ import { Round } from '../Round/Round';
 export class Game implements GameType {
   gameId: GameId;
   players: PlayerId[];
-  teams: TeamType[] = [];
+  teams: TeamType[];
   dealer: Seat = 0;
   cards: Cards;
   deck: Deck;
@@ -46,19 +46,21 @@ export class Game implements GameType {
     this.gameId = this.setGameId();
     this.owner = owner;
     this.config = config;
-    this.players = [owner.userId];
-    this.cards = new Cards(config.numOfPlayers);
+    this.players = [];
+    this.teams = this.initializeTeams(owner);
+    this.cards = new Cards(config.playerNum);
     this.deck = this.cards.createCards();
   }
 
   setGameId() {
+    // TODO:
     const gameId = 'game12345';
     return gameId;
   }
 
   addPlayer(user: UserType) {
-    if (this.players.length === this.config.numOfPlayers)
-      throw new Error(`Already ${this.config.numOfPlayers} players in game`);
+    if (this.players.length === this.config.playerNum)
+      throw new Error(`Already ${this.config.playerNum} players in game`);
 
     const player: PlayerType = {
       playerId: user.userId,
@@ -67,27 +69,49 @@ export class Game implements GameType {
       // team: this.setTeam(playerSeat),
     };
 
-    this.players.push(user.userId);
+    this.players.push(player.playerId);
+    for (const team of this.teams) {
+      if (team.teamSeats.includes(player.seat)) team.teamMembers.push(player);
+    }
+
     return player;
   }
 
   setPlayerSeat() {
-    const seats = Array.from(Array(this.config.numOfPlayers).keys());
+    const seats = Array.from(Array(this.config.playerNum).keys());
     // const seatsTaken = this.players.map((player) => player.seat);
     const seatsTaken = this.teams.flatMap((team) => {
-      const seats = [];
+      const taken = [];
       for (const player of team.teamMembers) {
-        seats.push(player.seat);
+        taken.push(player.seat);
       }
-      return seats;
+      return taken;
     });
     const openSeats = seats.filter((seat) => !seatsTaken.includes(seat));
 
     return Math.min(...openSeats);
   }
 
-  initializeTeams() {
-    //
+  initializeTeams(owner: UserType) {
+    let numOfTeams = -1;
+    const { playerNum } = this.config;
+    const teams = [];
+
+    if (playerNum === 4) numOfTeams = 2;
+
+    for (let i = 0; i < numOfTeams; i++) {
+      const team: TeamType = {
+        teamId: this.createTeamId(),
+        teamSeats: this.getTeamSeats(i),
+        teamMembers: [],
+        teamScore: 0,
+      };
+      teams.push(team);
+    }
+
+    this.addPlayer(owner);
+
+    return teams;
   }
 
   createTeamId() {
@@ -95,17 +119,30 @@ export class Game implements GameType {
     return id;
   }
 
+  getTeamSeats(teamIndex: number) {
+    const seats = [];
+    const { playerNum } = this.config;
+
+    if (playerNum === 4) {
+      for (let i = teamIndex; i < playerNum; i += 2) {
+        seats.push(i);
+      }
+    }
+
+    return seats;
+  }
+
   setTeam(seat: number) {
     let team = -1;
-    if (this.config.numOfPlayers === 4) {
+    if (this.config.playerNum === 4) {
       team = seat % 2;
     }
 
     // use w/ 5/6 player config options
-    // if (this.config.numOfPlayers === 5) {
+    // if (this.config.playerNum === 5) {
     //   team = seat;
     // }
-    // if (this.config.numOfPlayers === 6) {
+    // if (this.config.playerNum === 6) {
     //   team = seat % 3;
     // }
 
@@ -117,7 +154,7 @@ export class Game implements GameType {
   }
 
   startGame() {
-    if (this.players.length !== this.config.numOfPlayers) return;
+    if (this.players.length !== this.config.playerNum) return;
     this.createRound();
   }
 
@@ -135,7 +172,7 @@ export class Game implements GameType {
     if (!this.cards) return;
     const shuffledDeck = this.cards.shuffleDeck(this.deck);
     const round = new Round(
-      this.config.numOfPlayers,
+      this.config.playerNum,
       this.config.minBid,
       this.players,
       dealer,
@@ -151,33 +188,32 @@ export class Game implements GameType {
     this.updateScores(roundTotals.roundPoints);
     const winner = this.checkIsWinner();
 
-    if (winner >= 0) this.endGame(winner);
-    if (winner < 0) this.createRound();
+    if (winner) this.endGame(winner);
+    if (!winner) this.createRound();
   }
 
   updateScores(roundPoints: RoundPointTotals) {
-    const curScores = this.teams.map((team) => team.score);
-    const updatedScores = [];
-    for (let i = 0; i < roundPoints.length; i++) {
-      const updated = curScores[roundPoints[i].team] + roundPoints[i].points;
-      updatedScores.push(updated);
+    for (const pointData of roundPoints) {
+      for (const team of this.teams) {
+        if (pointData.teamId === team.teamId) team.teamScore += pointData.points;
+      }
     }
-    this.scores = updatedScores;
   }
 
   checkIsWinner() {
     const winScore = this.config.scoreToWin;
-
-    const isWinner = this.scores.reduce(
-      (highScore, score, i): { team: number; score: number } =>
-        score >= winScore && score > highScore.score ? { team: i, score: score } : highScore,
-      { team: -1, score: 0 }
+    const isWinner = this.teams.reduce<{ teamId: string | null; teamScore: number }>(
+      (highScore, team) => {
+        const { teamId, teamScore } = team;
+        return teamScore >= winScore && teamScore > highScore.teamScore ? { teamId, teamScore } : highScore;
+      },
+      { teamId: null, teamScore: 0 }
     );
 
-    return isWinner.team;
+    return isWinner.teamId;
   }
 
-  endGame(winner: number) {
-    console.log(`Team ${winner} wins!`);
+  endGame(teamId: string) {
+    console.log(`Team ${teamId} wins!`);
   }
 }

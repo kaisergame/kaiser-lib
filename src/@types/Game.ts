@@ -43,7 +43,7 @@ export type PrevRoundData = {
 // }
 
 export type GameConfig = {
-  numOfPlayers: PlayerNum;
+  playerNum: PlayerNum;
   minBid: BidAmount;
   scoreToWin: number;
   //bidOut: boolean;
@@ -57,7 +57,12 @@ export type GameConfig = {
 
 export type PlayerNum = number;
 
-export type TeamType = { teamId: number; teamMembers: PlayerType[]; score: number };
+export type TeamType = {
+  teamId: string;
+  teamSeats: Seat[];
+  teamMembers: PlayerType[];
+  teamScore: number;
+};
 
 export type PlayerType = {
   playerId: PlayerId;

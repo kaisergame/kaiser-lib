@@ -168,7 +168,7 @@ export const TAKEN_TRICKS: EvaluatedTrick[] = [
 ];
 
 export const MOCK_GAME_CONFIG: GameConfig = {
-  numOfPlayers: 4,
+  playerNum: 4,
   minBid: 7,
   scoreToWin: 52,
 };

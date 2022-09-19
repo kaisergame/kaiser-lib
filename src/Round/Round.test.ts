@@ -8,10 +8,10 @@ describe('Round', () => {
   let game: InstanceType<typeof Game>;
   let round: InstanceType<typeof Round>;
   const dealer = 0;
-  const { numOfPlayers, minBid } = mock.MOCK_GAME_CONFIG;
+  const { playerNum, minBid } = mock.MOCK_GAME_CONFIG;
   beforeEach(() => {
     game = new Game(mock.MOCK_USER_1, mock.MOCK_GAME_CONFIG);
-    round = new Round(numOfPlayers, minBid, mock.MOCK_PLAYERS, dealer, mock.MOCK_SHUFFLED_DECK, game.endRound);
+    round = new Round(playerNum, minBid, mock.MOCK_PLAYERS, dealer, mock.MOCK_SHUFFLED_DECK, game.endRound);
   });
 
   describe('create a new Round', () => {
@@ -212,7 +212,7 @@ describe('Round', () => {
       }).toThrowError();
     });
 
-    test('updateActivePlayer should throw error if no arg is number > numOfPlayers - 1', () => {
+    test('updateActivePlayer should throw error if no arg is number > playerNum - 1', () => {
       expect(() => {
         round.updateActivePlayer(round.playerNum + 1);
       }).toThrowError();
