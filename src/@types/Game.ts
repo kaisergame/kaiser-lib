@@ -1,12 +1,16 @@
-import { Suit } from './Cards';
+import type { Cards } from '../Cards/Cards';
+import { Deck, Suit } from './Cards';
 import { BidAmount, RoundPointTotals, RoundType } from './Round';
 
 export interface GameType {
   gameId: GameId;
   owner: UserType;
   config: GameConfig;
-  players: PlayerType[];
-  teams: TeamData[];
+  players: PlayerId[];
+  teams: TeamType[];
+  dealer: Seat;
+  cards: Cards;
+  deck: Deck;
   curRound: RoundType | null;
   prevRounds: PrevRoundData[];
 }
@@ -18,7 +22,7 @@ export type PrevRoundData = {
   winningBid: number;
   trump: Suit | null;
   roundPoints: RoundPointTotals;
-  roundTeams: TeamData[];
+  roundTeams: TeamType[];
 };
 
 // export interface RoundType {
@@ -53,24 +57,19 @@ export type GameConfig = {
 
 export type PlayerNum = number;
 
-export type TeamData = { team: number; teamMembers: Seat[]; score: number };
+export type TeamType = { teamId: number; teamMembers: PlayerType[]; score: number };
 
 export type PlayerType = {
   playerId: PlayerId;
-  userName: UserName;
+  userName: string;
   seat: Seat;
-  team: number;
 };
 
-export type PlayerId = UserId;
+export type PlayerId = string;
 
 export type UserType = {
-  userId: UserId;
-  userName: UserName;
+  userId: string;
+  userName: string;
 };
-
-export type UserId = string;
-
-export type UserName = string;
 
 export type Seat = number;

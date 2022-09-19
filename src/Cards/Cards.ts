@@ -9,10 +9,10 @@ export class Cards {
     this.cards = [];
   }
 
-  public createCards(players: number): CardType[] {
+  public createCards(): CardType[] {
     const newCards: CardType[] = [];
 
-    const cardsInPlay = (players * HAND_SIZE) / SUITS_NUM;
+    const cardsInPlay = (this.playerNum * HAND_SIZE) / SUITS_NUM;
     const suits: Suit[] = [Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds];
     let faceValue = 1;
 
