@@ -20,6 +20,7 @@ export type GameId = string;
 export type PrevRoundData = {
   roundNum: number;
   winningBid: number;
+  bidMade: boolean;
   trump: Suit | null;
   roundPoints: RoundPointTotals;
   roundTeams: TeamType[];

@@ -13,6 +13,7 @@ import {
   RoundType,
   Seat,
   Suit,
+  TeamType,
   TrickType,
 } from '../@types/index';
 import { TOTAL_TRICK_POINTS, TRUMP_VALUE, TURN_LENGTH } from '../constants/game';
@@ -33,7 +34,7 @@ export class Round implements RoundType {
   constructor(
     public playerNum: number,
     public minBid: BidAmount,
-    public players: PlayerType[],
+    public teams: TeamType[],
     public dealer: Seat,
     public deck: Deck,
     public endRound: (roundTotals: RoundTotals) => void
@@ -42,17 +43,19 @@ export class Round implements RoundType {
     this.minBid = minBid;
     this.dealer = dealer;
     this.deck = deck;
-    this.playersRoundData = players.map((player) => {
-      return {
-        playerId: player.playerId,
-        userName: player.userName,
-        seat: player.seat,
-        team: player.team,
-        bid: null,
-        winningBid: null,
-        isDealer: dealer === player.seat,
-        tricksTaken: 0,
-      };
+    this.playersRoundData = teams.flatMap((team) => {
+      const players = [];
+      for (const player of team.teamMembers) {
+        players.push({
+          playerId: player.playerId,
+          userName: player.userName,
+          seat: player.seat,
+          teamId: team.teamId,
+          bid: null,
+          isDealer: dealer === player.seat,
+        });
+      }
+      return players;
     });
     this.endRound = endRound;
   }
