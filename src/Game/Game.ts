@@ -16,22 +16,6 @@ import {
 import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
-// interface GameType {
-//   gameId: string;
-//   owner: PlayerId;
-//   config: GameConfig;
-//   players: PlayerType[];
-//   teams: TeamType[];
-//   curRound: RoundType;
-//   prevRounds: {
-//     roundNum: number;
-//     winningBid: number;
-//     trump: Suit | null;
-//     roundPoints: RoundPointTotals;
-//     roundTeams: TeamType[];
-//   }[];
-// }
-
 export class Game implements GameType {
   gameId: GameId;
   players: PlayerId[];
@@ -53,8 +37,7 @@ export class Game implements GameType {
   }
 
   setGameId() {
-    // TODO:
-    const gameId = 'game12345';
+    const gameId = 'gameId12345';
     return gameId;
   }
 
@@ -79,7 +62,6 @@ export class Game implements GameType {
 
   setPlayerSeat() {
     const seats = Array.from(Array(this.config.playerNum).keys());
-    // const seatsTaken = this.players.map((player) => player.seat);
     const seatsTaken = this.teams.flatMap((team) => {
       const taken = [];
       for (const player of team.teamMembers) {
@@ -101,7 +83,7 @@ export class Game implements GameType {
 
     for (let i = 0; i < numOfTeams; i++) {
       const team: TeamType = {
-        teamId: this.createTeamId(),
+        teamId: `team${i}`,
         teamSeats: this.getTeamSeats(i),
         teamMembers: [],
         teamScore: 0,
@@ -112,11 +94,6 @@ export class Game implements GameType {
     this.addPlayer(owner);
 
     return teams;
-  }
-
-  createTeamId() {
-    const id = Math.trunc(Math.random() * 1000000).toString();
-    return id;
   }
 
   getTeamSeats(teamIndex: number) {
@@ -137,14 +114,6 @@ export class Game implements GameType {
     if (this.config.playerNum === 4) {
       team = seat % 2;
     }
-
-    // use w/ 5/6 player config options
-    // if (this.config.playerNum === 5) {
-    //   team = seat;
-    // }
-    // if (this.config.playerNum === 6) {
-    //   team = seat % 3;
-    // }
 
     return team;
   }
