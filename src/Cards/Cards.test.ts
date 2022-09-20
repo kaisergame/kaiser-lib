@@ -3,11 +3,11 @@ import { CardType } from 'src/@types';
 import { Cards } from './Cards';
 
 describe('Deck', () => {
-  let playerNum: number, cards: InstanceType<typeof Cards>, deck: CardType[];
+  let numPlayers: number, cards: InstanceType<typeof Cards>, deck: CardType[];
   beforeAll(() => {
-    playerNum = 4;
-    cards = new Cards(playerNum);
-    deck = cards.createCards(playerNum);
+    numPlayers = 4;
+    cards = new Cards(numPlayers);
+    deck = cards.createCards(numPlayers);
   });
 
   describe('initializeDeck for a 4 player game', () => {

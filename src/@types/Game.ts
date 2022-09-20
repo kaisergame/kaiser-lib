@@ -4,20 +4,21 @@ import { BidAmount, RoundPointTotals, RoundType } from './Round';
 
 export interface GameType {
   gameId: GameId;
-  owner: UserType;
+  owner: { id: string; name: string };
   config: GameConfig;
-  players: PlayerId[];
+  players: PlayerType[];
   teams: TeamType[];
+  score: ScoreType[];
   dealer: Seat;
   cards: Cards;
   deck: Deck;
   curRound: RoundType | null;
-  prevRounds: PrevRoundData[];
+  RoundSummaries: RoundSummary[];
 }
 
 export type GameId = string;
 
-export type PrevRoundData = {
+export type RoundSummary = {
   roundNum: number;
   winningBid: number;
   bidMade: boolean;
@@ -28,7 +29,7 @@ export type PrevRoundData = {
 
 // export interface RoundType {
 //   playersRoundData: PlayerRoundData[];
-//   playerNum: number;
+//   numPlayers: number;
 //   dealer: Seat;
 //   deck: CardType[];
 //   hands: Hand[];
@@ -44,7 +45,7 @@ export type PrevRoundData = {
 // }
 
 export type GameConfig = {
-  playerNum: PlayerNum;
+  numPlayers: number;
   minBid: BidAmount;
   scoreToWin: number;
   //bidOut: boolean;
@@ -56,26 +57,26 @@ export type GameConfig = {
   //inviteOnly: boolean;
 };
 
-export type PlayerNum = number;
-
 export type TeamType = {
   teamId: string;
+  teamNum: number;
   teamSeats: Seat[];
-  teamMembers: PlayerType[];
-  teamScore: number;
+  teamMembers: PlayerId[];
+  // teamScore: number;
 };
+
+export type Seat = number;
 
 export type PlayerType = {
   playerId: PlayerId;
-  userName: string;
+  name: string;
+  teamId: string;
   seat: Seat;
 };
 
 export type PlayerId = string;
 
-export type UserType = {
-  userId: string;
-  userName: string;
+export type ScoreType = {
+  teamId: string;
+  teamScore: number;
 };
-
-export type Seat = number;

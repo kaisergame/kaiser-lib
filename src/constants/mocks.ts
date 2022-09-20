@@ -14,41 +14,41 @@ import {
 
 export const MOCK_USER_1: UserType = {
   userId: 'mockUser1234',
-  userName: 'Ryan',
+  name: 'Ryan',
 };
 
 export const MOCK_USER_2: UserType = {
   userId: 'mockUser5678',
-  userName: 'Cody',
+  name: 'Cody',
 };
 
 export const MOCK_USER_3: UserType = {
   userId: 'mockUser9999',
-  userName: 'Stacey',
+  name: 'Stacey',
 };
 
 export const MOCK_PLAYERS: PlayerType[] = [
   {
     playerId: 'mockUser1234',
-    userName: 'Ryan',
+    name: 'Ryan',
     seat: 0,
     team: 0,
   },
   {
     playerId: 'mockUser5678',
-    userName: 'Cody',
+    name: 'Cody',
     seat: 1,
     team: 1,
   },
   {
     playerId: 'mockUser9999',
-    userName: 'Stacey',
+    name: 'Stacey',
     seat: 2,
     team: 0,
   },
   {
     playerId: 'mockUser7777',
-    userName: 'Paul',
+    name: 'Paul',
     seat: 3,
     team: 1,
   },
@@ -168,7 +168,7 @@ export const TAKEN_TRICKS: EvaluatedTrick[] = [
 ];
 
 export const MOCK_GAME_CONFIG: GameConfig = {
-  playerNum: 4,
+  numPlayers: 4,
   minBid: 7,
   scoreToWin: 52,
 };

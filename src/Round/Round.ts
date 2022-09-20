@@ -28,34 +28,32 @@ export class Round implements RoundType {
   activePlayer: Seat = -1;
   playableCards: CardType[] = [];
   curTrick: TrickType = [];
+  tricksTeam0: EvaluatedTrick[] = [];
+  tricksTeam1: EvaluatedTrick[] = [];
   roundPoints: RoundPointTotals = [];
-  tricksTaken: EvaluatedTrick[] = [];
 
   constructor(
-    public playerNum: number,
+    public numPlayers: number,
     public minBid: BidAmount,
+    public players: PlayerType[],
     public teams: TeamType[],
     public dealer: Seat,
     public deck: Deck,
     public endRound: (roundTotals: RoundTotals) => void
   ) {
-    this.playerNum = playerNum;
+    this.numPlayers = numPlayers;
     this.minBid = minBid;
     this.dealer = dealer;
     this.deck = deck;
-    this.playersRoundData = teams.flatMap((team) => {
-      const players = [];
-      for (const player of team.teamMembers) {
-        players.push({
-          playerId: player.playerId,
-          userName: player.userName,
-          seat: player.seat,
-          teamId: team.teamId,
-          bid: null,
-          isDealer: dealer === player.seat,
-        });
-      }
-      return players;
+    this.playersRoundData = players.map((player) => {
+      return {
+        playerId: player.playerId,
+        name: player.name,
+        seat: player.seat,
+        teamId: player.teamId,
+        bid: null,
+        isDealer: dealer === player.seat,
+      };
     });
     this.endRound = endRound;
   }
@@ -64,12 +62,12 @@ export class Round implements RoundType {
   dealHands() {
     let dealToSeat = 0;
 
-    for (let i = 0; i < this.playerNum; i++) {
+    for (let i = 0; i < this.numPlayers; i++) {
       this.hands.push([]);
     }
     for (const card of this.deck) {
       this.hands[dealToSeat].push(card);
-      dealToSeat !== this.playerNum - 1 ? dealToSeat++ : (dealToSeat = 0);
+      dealToSeat !== this.numPlayers - 1 ? dealToSeat++ : (dealToSeat = 0);
     }
   }
 
@@ -90,7 +88,7 @@ export class Round implements RoundType {
     const curBids = this.bids.map((bid) => bid.amount);
     const curHighBid = Math.max(...curBids);
     const noDealerPass =
-      curBids.length === this.playerNum - 1 && this.bids.filter((bid) => bid.amount !== 0).length === 0;
+      curBids.length === this.numPlayers - 1 && this.bids.filter((bid) => bid.amount !== 0).length === 0;
 
     const validBids = [
       BidAmount.Pass,
@@ -113,7 +111,7 @@ export class Round implements RoundType {
     };
     this.bids.push(playerBid);
     this.playersRoundData[this.activePlayer].bid = playerBid.amount;
-    if (this.bids.length === this.playerNum) this.setWinningBid();
+    if (this.bids.length === this.numPlayers) this.setWinningBid();
   }
 
   setWinningBid() {
@@ -142,7 +140,7 @@ export class Round implements RoundType {
     let nextPlayer = -1;
     // bidding (left of dealer to play)
     if (this.bids.length === 0) {
-      nextPlayer = this.dealer + 1 < this.playerNum ? this.dealer + 1 : 0;
+      nextPlayer = this.dealer + 1 < this.numPlayers ? this.dealer + 1 : 0;
     }
     // first turn (bid winner to play)
     if (this.winningBid.bidder !== -1 && this.tricksTaken.length === 0) {
@@ -160,13 +158,13 @@ export class Round implements RoundType {
   updateActivePlayer(makeActivePlayer?: number) {
     if (typeof makeActivePlayer === 'undefined' && this.activePlayer === -1)
       throw new Error('Must initialize orderOfPlay');
-    if (typeof makeActivePlayer === 'number' && makeActivePlayer > this.playerNum - 1)
+    if (typeof makeActivePlayer === 'number' && makeActivePlayer > this.numPlayers - 1)
       throw new Error(`There is no player in seat ${makeActivePlayer}`);
 
     let nextActivePlayer = -1;
     if (typeof makeActivePlayer === 'number') nextActivePlayer = makeActivePlayer;
     if (typeof makeActivePlayer === 'undefined')
-      nextActivePlayer = this.activePlayer < this.playerNum - 1 ? this.activePlayer + 1 : 0;
+      nextActivePlayer = this.activePlayer < this.numPlayers - 1 ? this.activePlayer + 1 : 0;
 
     this.activePlayer = nextActivePlayer;
     return this.activePlayer;
@@ -232,7 +230,7 @@ export class Round implements RoundType {
   }
 
   endPlayerTurn() {
-    if (this.curTrick.length === this.playerNum) {
+    if (this.curTrick.length === this.numPlayers) {
       this.endTrick();
     } else this.updateActivePlayer();
     this.resetPlayableCards();
@@ -333,7 +331,7 @@ export class Round implements RoundType {
         points: playerTricks[trick.trickWonBy].points + trick.trickPoints,
       };
       return playerTricks;
-    }, new Array(this.playerNum).fill(0));
+    }, new Array(this.numPlayers).fill(0));
 
     const totals = [];
     for (let i = 0; i < points.length; i++) {

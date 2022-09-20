@@ -5,54 +5,52 @@ import {
   GameType,
   PlayerId,
   PlayerType,
-  PrevRoundData,
+  RoundSummary,
   RoundPointTotals,
   RoundTotals,
   RoundType,
   Seat,
   TeamType,
-  UserType,
+  ScoreType,
 } from '../@types/index';
 import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
 export class Game implements GameType {
-  gameId: GameId;
-  players: PlayerId[];
+  players: PlayerType[];
   teams: TeamType[];
+  score: ScoreType[];
   dealer: Seat = 0;
   cards: Cards;
   deck: Deck;
   curRound: RoundType | null = null;
-  prevRounds: PrevRoundData[] = [];
+  RoundSummaries: RoundSummary[] = [];
 
-  constructor(public owner: UserType, readonly config: GameConfig) {
-    this.gameId = this.setGameId();
+  constructor(public owner: { id: string; name: string }, readonly gameId: string, readonly config: GameConfig) {
+    this.gameId = gameId;
     this.owner = owner;
     this.config = config;
     this.players = [];
     this.teams = this.initializeTeams(owner);
-    this.cards = new Cards(config.playerNum);
-    this.deck = this.cards.createCards();
+    this.score = this.initializeScore();
+    this.cards = new Cards(config.numPlayers);
+    this.deck = this.cards.createDeck();
   }
 
-  setGameId() {
-    const gameId = 'gameId12345';
-    return gameId;
-  }
+  addPlayer(id: string, name: string) {
+    if (this.players.length === this.config.numPlayers)
+      throw new Error(`Already ${this.config.numPlayers} players in game`);
 
-  addPlayer(user: UserType) {
-    if (this.players.length === this.config.playerNum)
-      throw new Error(`Already ${this.config.playerNum} players in game`);
-
+    const playerSeat = this.setPlayerSeat(),
     const player: PlayerType = {
-      playerId: user.userId,
-      userName: user.userName,
-      seat: this.setPlayerSeat(),
+      playerId: id,
+      teamId:
+      name: name,
+      seat: playerSeat
       // team: this.setTeam(playerSeat),
     };
 
-    this.players.push(player.playerId);
+    this.players.push(player);
     for (const team of this.teams) {
       if (team.teamSeats.includes(player.seat)) team.teamMembers.push(player);
     }
@@ -61,7 +59,7 @@ export class Game implements GameType {
   }
 
   setPlayerSeat() {
-    const seats = Array.from(Array(this.config.playerNum).keys());
+    const seats = Array.from(Array(this.config.numPlayers).keys());
     const seatsTaken = this.teams.flatMap((team) => {
       const taken = [];
       for (const player of team.teamMembers) {
@@ -74,14 +72,14 @@ export class Game implements GameType {
     return Math.min(...openSeats);
   }
 
-  initializeTeams(owner: UserType) {
-    let numOfTeams = -1;
-    const { playerNum } = this.config;
+  initializeTeams(owner: { id: string; name: string }) {
+    let numTeams = -1;
+    const { numPlayers } = this.config;
     const teams = [];
 
-    if (playerNum === 4) numOfTeams = 2;
+    if (numPlayers === 4) numTeams = 2;
 
-    for (let i = 0; i < numOfTeams; i++) {
+    for (let i = 0; i < numTeams; i++) {
       const team: TeamType = {
         teamId: `team${i}`,
         teamSeats: this.getTeamSeats(i),
@@ -91,17 +89,17 @@ export class Game implements GameType {
       teams.push(team);
     }
 
-    this.addPlayer(owner);
+    this.addPlayer(owner.id, owner.name);
 
     return teams;
   }
 
   getTeamSeats(teamIndex: number) {
     const seats = [];
-    const { playerNum } = this.config;
+    const { numPlayers } = this.config;
 
-    if (playerNum === 4) {
-      for (let i = teamIndex; i < playerNum; i += 2) {
+    if (numPlayers === 4) {
+      for (let i = teamIndex; i < numPlayers; i += 2) {
         seats.push(i);
       }
     }
@@ -111,7 +109,7 @@ export class Game implements GameType {
 
   setTeam(seat: number) {
     let team = -1;
-    if (this.config.playerNum === 4) {
+    if (this.config.numPlayers === 4) {
       team = seat % 2;
     }
 
@@ -123,7 +121,7 @@ export class Game implements GameType {
   }
 
   startGame() {
-    if (this.players.length !== this.config.playerNum) return;
+    if (this.players.length !== this.config.numPlayers) throw new Error(`Game requires ${this.config.numPlayers} to start`);
     this.createRound();
   }
 
@@ -141,7 +139,7 @@ export class Game implements GameType {
     if (!this.cards) return;
     const shuffledDeck = this.cards.shuffleDeck(this.deck);
     const round = new Round(
-      this.config.playerNum,
+      this.config.numPlayers,
       this.config.minBid,
       this.players,
       dealer,

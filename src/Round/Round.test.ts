@@ -8,16 +8,16 @@ describe('Round', () => {
   let game: InstanceType<typeof Game>;
   let round: InstanceType<typeof Round>;
   const dealer = 0;
-  const { playerNum, minBid } = mock.MOCK_GAME_CONFIG;
+  const { numPlayers, minBid } = mock.MOCK_GAME_CONFIG;
   beforeEach(() => {
     game = new Game(mock.MOCK_USER_1, mock.MOCK_GAME_CONFIG);
-    round = new Round(playerNum, minBid, mock.MOCK_PLAYERS, dealer, mock.MOCK_SHUFFLED_DECK, game.endRound);
+    round = new Round(numPlayers, minBid, mock.MOCK_PLAYERS, dealer, mock.MOCK_SHUFFLED_DECK, game.endRound);
   });
 
   describe('create a new Round', () => {
     test('4 player round should have 4 players', () => {
-      expect(round.playerNum).toBe(4);
-      expect(round.playerNum).toBe(round.playersRoundData.length);
+      expect(round.numPlayers).toBe(4);
+      expect(round.numPlayers).toBe(round.playersRoundData.length);
     });
 
     test('playersRoundData should be of type RoundData', () => {
@@ -45,7 +45,7 @@ describe('Round', () => {
       round.dealHands();
     });
     test('dealHands should deal cards to each player', () => {
-      expect(round.hands.length).toBe(round.playerNum);
+      expect(round.hands.length).toBe(round.numPlayers);
     });
 
     test('each hand should have length === HAND_SIZE', () => {
@@ -141,7 +141,7 @@ describe('Round', () => {
 
       round.updateActivePlayer(0);
       round.setPlayerBid(BidAmount.Ten);
-      expect(round.bids.length === round.playerNum).toBe(true);
+      expect(round.bids.length === round.numPlayers).toBe(true);
       expect(spy).toBeCalledTimes(1);
     });
   });
@@ -212,9 +212,9 @@ describe('Round', () => {
       }).toThrowError();
     });
 
-    test('updateActivePlayer should throw error if no arg is number > playerNum - 1', () => {
+    test('updateActivePlayer should throw error if no arg is number > numPlayers - 1', () => {
       expect(() => {
-        round.updateActivePlayer(round.playerNum + 1);
+        round.updateActivePlayer(round.numPlayers + 1);
       }).toThrowError();
     });
 
@@ -303,7 +303,7 @@ describe('Round', () => {
     test('if 4 cards have been played endTrick is called', () => {
       round.updateActivePlayer(0);
       round.curTrick = mock.MOCK_TRICK;
-      expect(round.curTrick.length).toEqual(round.playerNum);
+      expect(round.curTrick.length).toEqual(round.numPlayers);
       const spy = jest.spyOn(round, 'endTrick');
 
       round.endPlayerTurn();
@@ -313,7 +313,7 @@ describe('Round', () => {
     test('if less than 4 cards have been played updateActivePlayer is called', () => {
       round.updateActivePlayer(1);
       round.curTrick = [];
-      expect(round.curTrick.length).not.toEqual(round.playerNum);
+      expect(round.curTrick.length).not.toEqual(round.numPlayers);
       const spy = jest.spyOn(round, 'updateActivePlayer');
 
       round.endPlayerTurn();

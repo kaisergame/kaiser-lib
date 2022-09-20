@@ -3,7 +3,7 @@ import { Seat } from './Game';
 
 export interface RoundType {
   playersRoundData: PlayerRoundData[];
-  playerNum: number;
+  numPlayers: number;
   dealer: Seat;
   deck: CardType[];
   hands: Hand[];
@@ -14,15 +14,16 @@ export interface RoundType {
   activePlayer: Seat;
   playableCards: CardType[];
   curTrick: TrickType;
+  tricksTeam0: EvaluatedTrick[];
+  tricksTeam1: EvaluatedTrick[];
   roundPoints: RoundPointTotals;
-  tricksTaken: EvaluatedTrick[];
 }
 
 export type Hand = CardType[];
 
 export type PlayerRoundData = {
   playerId: string;
-  userName: string;
+  name: string;
   seat: Seat;
   teamId: string;
   // roundTeam?: number; // needed for 5 player?

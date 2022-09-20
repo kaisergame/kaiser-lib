@@ -4,15 +4,15 @@ import { CARDS_IN_DECK, CARDS_PER_SUIT, HAND_SIZE, SUITS_NUM } from '../constant
 export class Cards {
   cards: CardType[];
 
-  constructor(public playerNum: number) {
-    this.playerNum = playerNum;
+  constructor(public numPlayers: number) {
+    this.numPlayers = numPlayers;
     this.cards = [];
   }
 
-  public createCards(): CardType[] {
-    const newCards: CardType[] = [];
+  createDeck(): CardType[] {
+    const newDeck: CardType[] = [];
 
-    const cardsInPlay = (this.playerNum * HAND_SIZE) / SUITS_NUM;
+    const cardsInPlay = (this.numPlayers * HAND_SIZE) / SUITS_NUM;
     const suits: Suit[] = [Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds];
     let faceValue = 1;
 
@@ -44,10 +44,10 @@ export class Cards {
       if (card.suit === Suit.Spades && card.faceValue === 7)
         card = { ...card, name: CardName.Three, faceValue: 3, playValue: 3 };
 
-      newCards.push(card);
+      newDeck.push(card);
       faceValue++;
     }
-    return newCards;
+    return newDeck;
   }
 
   public shuffleDeck(deck: CardType[]) {
