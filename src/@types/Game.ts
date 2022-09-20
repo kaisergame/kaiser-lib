@@ -8,7 +8,7 @@ export interface GameType {
   config: GameConfig;
   players: PlayerType[];
   teams: TeamType[];
-  score: ScoreType[];
+  scores: ScoreType[];
   dealer: Seat;
   cards: Cards;
   deck: Deck;
@@ -59,7 +59,6 @@ export type GameConfig = {
 
 export type TeamType = {
   teamId: string;
-  teamNum: number;
   teamSeats: Seat[];
   teamMembers: PlayerId[];
   // teamScore: number;
@@ -68,8 +67,8 @@ export type TeamType = {
 export type Seat = number;
 
 export type PlayerType = {
-  playerId: PlayerId;
-  name: string;
+  playerId: PlayerId | null;
+  name: string | null;
   teamId: string;
   seat: Seat;
 };
