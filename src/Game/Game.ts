@@ -30,8 +30,8 @@ export class Game implements GameType {
     this.gameId = gameId;
     this.owner = owner;
     this.config = config;
-    this.players = this.initializePlayers();
-    this.teams = this.initializeTeams();
+    this.teams = [];
+    this.players = [];
     this.scores = [
       { teamId: 'team0', teamScore: 0 },
       { teamId: 'team1', teamScore: 0 },
@@ -40,45 +40,28 @@ export class Game implements GameType {
     this.deck = this.cards.createDeck();
   }
 
-  // setTeam(seat: number) {
-  //   let team = -1;
-  //   if (this.config.numOfPlayers === 4) {
-  //     team = seat % 2;
-  //   }
-
-  //   // use w/ 5/6 player config options
-  //   // if (this.config.numOfPlayers === 5) {
-  //   //   team = seat;
-  //   // }
-  //   // if (this.config.numOfPlayers === 6) {
-  //   //   team = seat % 3;
-  //   // }
-
-  //   return team;
-  // }
+  initializeGame = (() => {
+    this.initializeTeams();
+    this.initializePlayers();
+    this.addPlayer(this.owner.id, this.owner.name);
+  })();
 
   addPlayer(id: string, name: string): PlayerType {
     if (this.players.length === this.config.numPlayers)
       throw new Error(`Already ${this.config.numPlayers} players in game`);
 
-    const playerSeat = this.setPlayerSeat();
-    const playerTeam = this.teams.findIndex((team) => team.teamSeats.includes(playerSeat));
-    const player: PlayerType = {
-      playerId: id,
-      teamId: this.teams[playerTeam].teamId,
-      name: name,
-      seat: playerSeat,
-    };
+    const openSeat = this.findOpenSeat();
+    const player = { ...this.players[openSeat], playerId: id, name: name };
+    const playerTeam = this.teams.find((team) => team.teamId === player.teamId);
 
-    this.players.push(player);
-    for (const team of this.teams) {
-      if (team.teamSeats.includes(player.seat)) team.teamMembers.push(player.playerId!);
-    }
+    if (!playerTeam) throw new Error('Player not added could not asign player to team');
 
+    this.players[openSeat] = player;
+    playerTeam.teamMembers.push(player.playerId!);
     return player;
   }
 
-  setPlayerSeat(): number {
+  findOpenSeat(): number {
     const openSeat = this.players.findIndex((player) => player.playerId === null);
     return openSeat;
   }
@@ -115,14 +98,12 @@ export class Game implements GameType {
     return players;
   }
 
-  getTeamSeats(teamIndex: number) {
+  getTeamSeats(teamIndex: number): number[] {
     const seats = [];
     const { numPlayers } = this.config;
 
-    if (numPlayers === 4) {
-      for (let i = teamIndex; i < numPlayers; i += 2) {
-        seats.push(i);
-      }
+    for (let i = teamIndex; i < numPlayers; i += numPlayers / 2) {
+      seats.push(i);
     }
 
     return seats;
@@ -137,8 +118,27 @@ export class Game implements GameType {
     return team;
   }
 
-  changePlayerSeat() {
-    //
+  switchPlayerSeat(movePlayer: PlayerType, moveToSeat?: Seat): void {
+    if (this.curRound) throw new Error('Cannot change seats while game is in progress');
+
+    const seatLeft = movePlayer.seat < this.config.numPlayers - 1 ? movePlayer.seat + 1 : 0;
+    const switchSeat = moveToSeat || seatLeft;
+
+    const movePlayerIndex = this.players.findIndex((player) => player.seat === movePlayer.seat);
+    const switchPlayerIndex = this.players.findIndex((player) => player.seat === switchSeat);
+    const { playerId: movePlayerId, name: movePlayerName } = [...this.players][movePlayerIndex];
+    const { playerId: switchPlayerId, name: switchPlayerName } = [...this.players][switchPlayerIndex];
+
+    this.players[movePlayerIndex] = {
+      ...this.players[movePlayerIndex],
+      playerId: switchPlayerId,
+      name: switchPlayerName,
+    };
+    this.players[switchPlayerIndex] = {
+      ...this.players[switchPlayerIndex],
+      playerId: movePlayerId,
+      name: movePlayerName,
+    };
   }
 
   startGame() {
