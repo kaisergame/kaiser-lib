@@ -335,11 +335,11 @@ describe('Round', () => {
       round.curTrick = mock.MOCK_TRICK;
       round.endTrick();
     });
-    test('endTrick sends trickPoints, trickWinner, and cardsPlayed data to tricksTaken', () => {
+    test('endTrick sends pointValue, trickWinner, and cardsPlayed data to tricksTaken', () => {
       expect(round.tricksTaken).toStrictEqual([mock.TAKEN_TRICKS[0]]);
     });
 
-    test('endTrick calls updatePlayerRoundData, adds trickPoints to player tricksTaken', () => {
+    test('endTrick calls updatePlayerRoundData, adds pointValue to player tricksTaken', () => {
       expect(round.playersRoundData[2].tricksTaken).toBe(1);
       expect(round.playersRoundData[0].tricksTaken).toBe(0);
     });

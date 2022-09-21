@@ -1,5 +1,5 @@
 import { CardType, Suit } from './Cards';
-import { Seat } from './Game';
+import { PlayerId, PlayerType, Seat } from './Game';
 
 export interface RoundType {
   playersRoundData: PlayerRoundData[];
@@ -39,6 +39,10 @@ export type BidType = {
   isTrump: boolean;
 };
 
+export type EvaluatedBid = BidType & {
+  bidMade: boolean;
+};
+
 export enum BidAmount {
   Pass = 0,
   Five = 5,
@@ -63,18 +67,18 @@ export enum BidAmount {
 
 export type EvaluatedTrick = {
   cardsPlayed: TrickType;
-  trickPoints: number;
-  trickWonBy: Seat;
+  pointValue: number;
+  trickWonBy: PlayerId;
 };
 
-export type TrickType = { cardPlayed: CardType; playedBy: { teamId: string; playerId: string; playerSeat: Seat } }[];
+export type TrickType = { cardPlayed: CardType; playedBy: PlayerId }[];
 
 export type RoundTotals = {
-  bidMade: boolean;
+  bid: EvaluatedBid;
   roundPoints: RoundPointTotals;
   playerPoints: PlayerPointTotals;
 };
 
 export type RoundPointTotals = { teamId: string; points: number }[];
 
-export type PlayerPointTotals = { teamId: string; playerId: string; playerSeat: Seat; points: number }[];
+export type PlayerPointTotals = { teamId: string; playerId: string; points: number }[];

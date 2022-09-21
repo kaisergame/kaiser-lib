@@ -7,7 +7,7 @@ describe('Deck', () => {
   beforeAll(() => {
     numPlayers = 4;
     cards = new Cards(numPlayers);
-    deck = cards.createCards(numPlayers);
+    deck = cards.createDeck();
   });
 
   describe('initializeDeck for a 4 player game', () => {

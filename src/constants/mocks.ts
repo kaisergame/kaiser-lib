@@ -146,7 +146,7 @@ export const MOCK_TRICK: TrickType = [
 
 export const TAKEN_TRICKS: EvaluatedTrick[] = [
   {
-    trickPoints: 1,
+    pointValue: 1,
     cardsPlayed: [
       { cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 1 },
       { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
@@ -156,7 +156,7 @@ export const TAKEN_TRICKS: EvaluatedTrick[] = [
     trickWonBy: 2,
   },
   {
-    trickPoints: 6,
+    pointValue: 6,
     cardsPlayed: [
       { cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 }, playedBy: 2 },
       { cardPlayed: { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 3 }, playedBy: 3 },

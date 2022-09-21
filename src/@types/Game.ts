@@ -24,7 +24,7 @@ export type RoundSummary = {
   bidMade: boolean;
   trump: Suit | null;
   roundPoints: RoundPointTotals;
-  roundTeams: TeamType[];
+  roundTeams?: TeamType[];
 };
 
 // export interface RoundType {
