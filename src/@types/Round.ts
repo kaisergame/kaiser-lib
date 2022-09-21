@@ -81,4 +81,4 @@ export type RoundTotals = {
 
 export type RoundPointTotals = { teamId: string; points: number }[];
 
-export type PlayerPointTotals = { teamId: string; playerId: string; points: number }[];
+export type PlayerPointTotals = { playerId: string; points: number }[];

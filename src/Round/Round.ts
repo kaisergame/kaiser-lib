@@ -340,12 +340,12 @@ export class Round implements RoundType {
 
   playerTrickTotals(): PlayerPointTotals {
     const tricks = this.tricksTeam0.concat(this.tricksTeam1);
-    const initialPoints = new Array(this.numPlayers).fill({ teamId: '', playerId: '', points: 0 });
+    const initialPoints = new Array(this.numPlayers).fill({ playerId: '', points: 0 });
 
     const totals = tricks.reduce((playerTricks, trick) => {
       const trickWonBy = this.playersRoundData.find((player) => player.playerId === trick.trickWonBy)!;
       playerTricks[trickWonBy.seat] = {
-        player: trickWonBy,
+        playerId: trickWonBy,
         points: playerTricks[trickWonBy.seat].points + trick.pointValue,
       };
       return playerTricks;

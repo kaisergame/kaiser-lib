@@ -9,21 +9,20 @@ import {
   RoundTotals,
   Suit,
   TrickType,
-  UserType,
 } from '../@types/index';
 
-export const MOCK_USER_1: UserType = {
-  userId: 'mockUser1234',
+export const MOCK_USER_1 = {
+  id: 'mockUser1234',
   name: 'Ryan',
 };
 
-export const MOCK_USER_2: UserType = {
-  userId: 'mockUser5678',
+export const MOCK_USER_2 = {
+  id: 'mockUser5678',
   name: 'Cody',
 };
 
-export const MOCK_USER_3: UserType = {
-  userId: 'mockUser9999',
+export const MOCK_USER_3 = {
+  id: 'mockUser9999',
   name: 'Stacey',
 };
 
@@ -32,25 +31,25 @@ export const MOCK_PLAYERS: PlayerType[] = [
     playerId: 'mockUser1234',
     name: 'Ryan',
     seat: 0,
-    team: 0,
+    teamId: 'team0',
   },
   {
     playerId: 'mockUser5678',
     name: 'Cody',
     seat: 1,
-    team: 1,
+    teamId: 'team1',
   },
   {
     playerId: 'mockUser9999',
     name: 'Stacey',
     seat: 2,
-    team: 0,
+    teamId: 'team0',
   },
   {
     playerId: 'mockUser7777',
     name: 'Paul',
     seat: 3,
-    team: 1,
+    teamId: 'team1',
   },
 ];
 
@@ -126,14 +125,14 @@ export const MOCK_PASS_BIDS: BidType[] = [
 export const MOCK_ROUND_TOTALS: RoundTotals = {
   bidMade: true,
   roundPoints: [
-    { team: 0, points: 9 },
-    { team: 1, points: 1 },
+    { teamId: 'team0', points: 9 },
+    { teamId: 'team1', points: 1 },
   ],
   playerPoints: [
-    { player: 0, points: 6 },
-    { player: 1, points: 0 },
-    { player: 2, points: 3 },
-    { player: 3, points: 1 },
+    { playerId: 'player-ryan', points: 6 },
+    { playerId: 'player-cody', points: 0 },
+    { playerId: 'player-stacey', points: 3 },
+    { playerId: 'player-paul', points: 1 },
   ],
 };
 
