@@ -38,7 +38,6 @@ export class Round implements RoundType {
     public numPlayers: number,
     public minBid: BidAmount,
     public players: PlayerType[],
-    public teams: TeamType[],
     public dealer: Seat,
     public deck: Deck,
     public endRound: (roundTotals: RoundTotals) => void
@@ -319,7 +318,8 @@ export class Round implements RoundType {
   }
 
   isBidMade(): EvaluatedBid {
-    const bidTeam = this.teams.find((team) => team.teamSeats.includes(this.winningBid.bidder))!.teamId;
+    // const bidTeam = this.teams.find((team) => team.teamSeats.includes(this.winningBid.bidder))!.teamId;
+    const bidTeam = this.players.find((player) => player.seat === this.winningBid.bidder)!.teamId;
     let pointsMade = this.roundPoints.find((points) => points.teamId === bidTeam)!.points;
 
     const noBidMultiplier = this.winningBid.isTrump ? 1 : 2;
