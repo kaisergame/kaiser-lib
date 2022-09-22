@@ -157,14 +157,14 @@ export const MOCK_TRICK: TrickType = [
   { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 0 },
 ];
 
-export const TAKEN_TRICKS: EvaluatedTrick[] = [
+export const TAKEN_TRICKS_NO_TRUMP: EvaluatedTrick[] = [
   {
     pointValue: 1,
     cardsPlayed: [
       { cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 1 },
       { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
-      { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 3 },
-      { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 0 },
+      { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 0 }, playedBy: 3 },
+      { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 0 }, playedBy: 0 },
     ],
     trickWonBy: 2,
   },
@@ -172,9 +172,9 @@ export const TAKEN_TRICKS: EvaluatedTrick[] = [
     pointValue: 6,
     cardsPlayed: [
       { cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 }, playedBy: 2 },
-      { cardPlayed: { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 3 }, playedBy: 3 },
+      { cardPlayed: { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 0 }, playedBy: 3 },
       { cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 }, playedBy: 0 },
-      { cardPlayed: { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 1 },
+      { cardPlayed: { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 0 }, playedBy: 1 },
     ],
     trickWonBy: 0,
   },

@@ -6,7 +6,6 @@ import {
   EvaluatedBid,
   EvaluatedTrick,
   Hand,
-  PlayerId,
   PlayerPointTotals,
   PlayerRoundData,
   PlayerType,
@@ -15,10 +14,9 @@ import {
   RoundType,
   Seat,
   Suit,
-  TeamType,
   TrickType,
 } from '../@types/index';
-import { TOTAL_TRICK_POINTS, TRUMP_VALUE, TURN_LENGTH } from '../constants/game';
+import { TRUMP_VALUE } from '../constants/game';
 import { HAND_SIZE } from '../constants/game';
 
 export class Round implements RoundType {
@@ -32,7 +30,10 @@ export class Round implements RoundType {
   curTrick: TrickType = [];
   tricksTeam0: EvaluatedTrick[] = [];
   tricksTeam1: EvaluatedTrick[] = [];
-  roundPoints: RoundPointTotals = [];
+  roundPoints: RoundPointTotals = [
+    { teamId: 'team0', points: 0 },
+    { teamId: 'team1', points: 1 },
+  ];
 
   constructor(
     public numPlayers: number,
@@ -139,7 +140,7 @@ export class Round implements RoundType {
   // CARD PLAY
   orderOfPlay(nextToPlay?: Seat): Seat {
     let nextPlayer = -1;
-    if (nextToPlay) return nextToPlay;
+    if (typeof nextToPlay === 'number') return nextToPlay;
 
     // bidding (left of dealer to play)
     if (this.bids.length === 0) {

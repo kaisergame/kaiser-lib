@@ -21,11 +21,7 @@ export interface RoundType {
 
 export type Hand = CardType[];
 
-export type PlayerRoundData = {
-  playerId: string;
-  name: string;
-  seat: Seat;
-  teamId: string;
+export type PlayerRoundData = PlayerType & {
   // roundTeam?: number; // needed for 5 player?
   bid: BidAmount | null;
   // wonBid: boolean;

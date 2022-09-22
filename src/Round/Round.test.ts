@@ -1,4 +1,4 @@
-import { BidAmount, CardName, CardType, RoundData, Suit } from '../@types/index';
+import { BidAmount, CardName, CardType, PlayerRoundData, Suit } from '../@types/index';
 import { HAND_SIZE } from '../constants/index';
 import * as mock from '../constants/mocks';
 import { Game } from '../Game/Game';
@@ -10,7 +10,7 @@ describe('Round', () => {
   const dealer = 0;
   const { numPlayers, minBid } = mock.MOCK_GAME_CONFIG;
   beforeEach(() => {
-    game = new Game(mock.MOCK_USER_1, mock.MOCK_GAME_CONFIG);
+    game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
     round = new Round(numPlayers, minBid, mock.MOCK_PLAYERS, dealer, mock.MOCK_SHUFFLED_DECK, game.endRound);
   });
 
@@ -21,21 +21,15 @@ describe('Round', () => {
     });
 
     test('playersRoundData should be of type RoundData', () => {
-      const { score: _, ...mockPlayer0 } = mock.MOCK_PLAYERS[0];
-      const { score: __, ...mockPlayer2 } = mock.MOCK_PLAYERS[2];
-      expect(round.playersRoundData[0]).toMatchObject<RoundData>({
-        ...mockPlayer0,
+      expect(round.playersRoundData[0]).toMatchObject<PlayerRoundData>({
+        ...mock.MOCK_PLAYERS[0],
         bid: null,
-        winningBid: null,
         isDealer: true,
-        tricksTaken: 0,
       });
-      expect(round.playersRoundData[2]).toMatchObject<RoundData>({
-        ...mockPlayer2,
+      expect(round.playersRoundData[2]).toMatchObject<PlayerRoundData>({
+        ...mock.MOCK_PLAYERS[2],
         bid: null,
-        winningBid: null,
         isDealer: false,
-        tricksTaken: 0,
       });
     });
   });
@@ -147,22 +141,18 @@ describe('Round', () => {
   });
 
   describe('setWinningBid method', () => {
-    test('setWinningBid should reduce bids to the highest bid amount', () => {
+    test('setWinningBid should reduce bids returning the highest bid', () => {
       round.bids = mock.MOCK_BIDS;
       expect(round.setWinningBid()).toStrictEqual({ amount: 10, bidder: 3, isTrump: true });
-    });
-
-    test('setWinningBid updates playerRoundData winningBid for bid winner', () => {
-      round.bids = mock.MOCK_BIDS;
-      round.setWinningBid();
-      expect(round.playersRoundData[3].winningBid).toStrictEqual({ amount: 10, bidder: 3, isTrump: true });
     });
   });
 
   describe('setTrump method', () => {
-    test('setTrump will return if bid.isTrump is false', () => {
-      round.setTrump(Suit.Hearts);
-      expect(round.trump).toBe(null);
+    test('setTrump will throw exception if bid.isTrump is false', () => {
+      round.winningBid = mock.MOCK_BIDS[1];
+      expect(() => {
+        round.setTrump(Suit.Hearts);
+      }).toThrowError();
     });
 
     test('setTrump updates round trump property to passed suit', () => {
@@ -189,18 +179,18 @@ describe('Round', () => {
     });
 
     test('after bidding, activePlayer is set to highest bidder', () => {
-      round.bid = mock.MOCK_BIDS[1];
+      round.winningBid = mock.MOCK_BIDS[1];
       round.orderOfPlay();
       expect(round.activePlayer).toBe(2);
 
-      round.bid = mock.MOCK_BIDS[2];
+      round.winningBid = mock.MOCK_BIDS[2];
       round.orderOfPlay();
       expect(round.activePlayer).toBe(3);
     });
 
     test('after a trick is taken, activePlayer is set to player that took trick', () => {
-      round.tricksTaken = mock.TAKEN_TRICKS;
-      round.orderOfPlay();
+      round.activePlayer = 0;
+      round.orderOfPlay(0);
       expect(round.activePlayer).toBe(0);
     });
   });
@@ -336,12 +326,7 @@ describe('Round', () => {
       round.endTrick();
     });
     test('endTrick sends pointValue, trickWinner, and cardsPlayed data to tricksTaken', () => {
-      expect(round.tricksTaken).toStrictEqual([mock.TAKEN_TRICKS[0]]);
-    });
-
-    test('endTrick calls updatePlayerRoundData, adds pointValue to player tricksTaken', () => {
-      expect(round.playersRoundData[2].tricksTaken).toBe(1);
-      expect(round.playersRoundData[0].tricksTaken).toBe(0);
+      expect(round.tricksTeam0).toStrictEqual([mock.TAKEN_TRICKS_NO_TRUMP[0]]);
     });
   });
 });
