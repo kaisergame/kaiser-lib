@@ -129,10 +129,10 @@ export const MOCK_ROUND_TOTALS: RoundTotals = {
     { teamId: 'team1', points: 1 },
   ],
   playerPoints: [
-    { playerId: 'player-ryan', points: 6 },
-    { playerId: 'player-cody', points: 0 },
-    { playerId: 'player-stacey', points: 3 },
-    { playerId: 'player-paul', points: 1 },
+    { playerSeat: 0, points: 6 },
+    { playerSeat: 1, points: 0 },
+    { playerSeat: 2, points: 3 },
+    { playerSeat: 3, points: 1 },
   ],
 };
 
@@ -152,7 +152,7 @@ export const TAKEN_TRICKS: EvaluatedTrick[] = [
       { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 3 },
       { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 0 },
     ],
-    trickWonBy: 'player-stacey',
+    trickWonBy: 2,
   },
   {
     pointValue: 6,
@@ -162,7 +162,7 @@ export const TAKEN_TRICKS: EvaluatedTrick[] = [
       { cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 }, playedBy: 0 },
       { cardPlayed: { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 1 },
     ],
-    trickWonBy: 'player-ryan',
+    trickWonBy: 0,
   },
 ];
 

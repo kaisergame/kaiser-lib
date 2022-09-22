@@ -341,7 +341,7 @@ export class Round implements RoundType {
     const totals = tricks.reduce((playerTricks, trick) => {
       const trickWonBy = this.playersRoundData.find((player) => player.seat === trick.trickWonBy)!;
       playerTricks[trickWonBy.seat] = {
-        playerId: trickWonBy,
+        playerSeat: trickWonBy,
         points: playerTricks[trickWonBy.seat].points + trick.pointValue,
       };
       return playerTricks;
