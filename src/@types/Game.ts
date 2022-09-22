@@ -10,10 +10,10 @@ export interface GameType {
   teams: TeamType[];
   scores: ScoreType[];
   dealer: Seat | null;
-  cards: Cards;
-  deck: Deck;
+  // cards: Cards;
+  // deck: Deck;
   curRound: RoundType | null;
-  RoundSummaries: RoundSummary[];
+  roundSummaries: RoundSummary[];
 }
 
 export type GameId = string;

@@ -1,5 +1,4 @@
 import {
-  Deck,
   GameConfig,
   GameType,
   PlayerType,
@@ -11,7 +10,6 @@ import {
   Seat,
   TeamType,
 } from '../@types/index';
-import { Cards } from '../Cards/Cards';
 import { Round } from '../Round/Round';
 
 export class Game implements GameType {
@@ -19,10 +17,10 @@ export class Game implements GameType {
   teams: TeamType[];
   scores: ScoreType[];
   dealer: Seat | null = null;
-  cards: Cards;
-  deck: Deck;
+  // cards: Cards;
+  // deck: Deck;
   curRound: RoundType | null = null;
-  RoundSummaries: RoundSummary[] = [];
+  roundSummaries: RoundSummary[] = [];
 
   constructor(public owner: { id: string; name: string }, readonly gameId: string, readonly config: GameConfig) {
     this.gameId = gameId;
@@ -34,8 +32,6 @@ export class Game implements GameType {
       { teamId: 'team0', teamScore: 0 },
       { teamId: 'team1', teamScore: 0 },
     ];
-    this.cards = new Cards(config.numPlayers);
-    this.deck = this.cards.createDeck();
   }
 
   addPlayer(id: string, name: string): PlayerType {
@@ -43,7 +39,7 @@ export class Game implements GameType {
     if (curPlayers.length === this.config.numPlayers)
       throw new Error(`Already ${this.config.numPlayers} players in game`);
 
-    const openSeat = this.findOpenSeat();
+    const openSeat = this.players.findIndex((player) => player.playerId === null);
     const player = { ...this.players[openSeat], playerId: id, name: name };
     const playerTeam = this.teams.find((team) => team.teamId === player.teamId);
 
@@ -52,11 +48,6 @@ export class Game implements GameType {
     this.players[openSeat] = player;
     playerTeam.teamMembers.push(player.playerId!);
     return player;
-  }
-
-  findOpenSeat(): number {
-    const openSeat = this.players.findIndex((player) => player.playerId === null);
-    return openSeat;
   }
 
   initializeTeams(): TeamType[] {
@@ -102,15 +93,6 @@ export class Game implements GameType {
     return seats;
   }
 
-  setTeam(seat: number) {
-    let team = -1;
-    if (this.config.numPlayers === 4) {
-      team = seat % 2;
-    }
-
-    return team;
-  }
-
   switchPlayerSeat(movePlayer: PlayerType, moveToSeat?: Seat): void {
     if (this.curRound) throw new Error('Cannot change seats while game is in progress');
 
@@ -151,16 +133,8 @@ export class Game implements GameType {
 
   createRound() {
     const dealer = this.setDealer();
-    if (!this.cards) return;
-    const shuffledDeck = this.cards.shuffleDeck(this.deck);
-    const round = new Round(
-      this.config.numPlayers,
-      this.config.minBid,
-      this.players,
-      dealer,
-      shuffledDeck,
-      this.endRound
-    );
+    // const shuffledDeck = this.cards.shuffleDeck(this.deck);
+    const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound);
 
     this.curRound = round;
     return round;

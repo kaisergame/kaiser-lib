@@ -2,7 +2,6 @@ import {
   BidAmount,
   BidType,
   CardType,
-  Deck,
   EvaluatedBid,
   EvaluatedTrick,
   Hand,
@@ -16,6 +15,7 @@ import {
   Suit,
   TrickType,
 } from '../@types/index';
+import { Cards } from '../Cards/Cards';
 import { TRUMP_VALUE } from '../constants/game';
 import { HAND_SIZE } from '../constants/game';
 
@@ -40,13 +40,12 @@ export class Round implements RoundType {
     public minBid: BidAmount,
     public players: PlayerType[],
     public dealer: Seat,
-    public deck: Deck,
     public endRound: (roundTotals: RoundTotals) => void
   ) {
     this.numPlayers = numPlayers;
     this.minBid = minBid;
     this.dealer = dealer;
-    this.deck = deck;
+    // this.deck = deck;
     this.playersRoundData = players.map((player) => {
       return {
         playerId: player.playerId!,
@@ -62,12 +61,14 @@ export class Round implements RoundType {
 
   // CARDS
   dealHands(): void {
+    const cards = new Cards(this.numPlayers);
+    const deck = cards.shuffleDeck(cards.createDeck());
     let dealToSeat = 0;
 
     for (let i = 0; i < this.numPlayers; i++) {
       this.hands.push([]);
     }
-    for (const card of this.deck) {
+    for (const card of deck) {
       this.hands[dealToSeat].push(card);
       dealToSeat !== this.numPlayers - 1 ? dealToSeat++ : (dealToSeat = 0);
     }
@@ -79,6 +80,7 @@ export class Round implements RoundType {
     }
 
     function cardSort(a: CardType, b: CardType) {
+      //FIXME: it would be nice to have the suits red/black/red/black
       return !lowToHigh
         ? a.suit.localeCompare(b.suit) || b.playValue - a.playValue
         : a.suit.localeCompare(b.suit) || a.playValue - b.playValue;

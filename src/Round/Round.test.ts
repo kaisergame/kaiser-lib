@@ -11,7 +11,7 @@ describe('Round', () => {
   const { numPlayers, minBid } = mock.MOCK_GAME_CONFIG;
   beforeEach(() => {
     game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
-    round = new Round(numPlayers, minBid, mock.MOCK_PLAYERS, dealer, mock.MOCK_SHUFFLED_DECK, game.endRound);
+    round = new Round(numPlayers, minBid, mock.MOCK_PLAYERS, dealer, game.endRound);
   });
 
   describe('create a new Round', () => {
@@ -54,12 +54,26 @@ describe('Round', () => {
     });
     test('sortHands should sort the dealt cards in each hand (C,D,H,S) high to low', () => {
       round.sortHands();
-      expect(round.hands[0]).toMatchObject(mock.MOCK_SORTED_HAND);
+      const sorted = round.hands[0].filter((card, i) => {
+        if (i + 1 === round.hands[0].length) return true;
+        if (card.suit === round.hands[0][i + 1].suit && card.playValue > round.hands[0][i + 1].playValue) return true;
+        if (card.suit !== round.hands[0][i + 1].suit) return true;
+
+        return false;
+      });
+      expect(sorted.length).toBe(8);
     });
 
     test('sortHands should sort low to high when lowToHigh is passed in', () => {
       round.sortHands('lowToHigh');
-      expect(round.hands[0]).toMatchObject(mock.MOCK_REVERSE_SORTED_HAND);
+      const sortedLH = round.hands[0].filter((card, i) => {
+        if (i + 1 === round.hands[0].length) return true;
+        if (card.suit === round.hands[0][i + 1].suit && card.playValue < round.hands[0][i + 1].playValue) return true;
+        if (card.suit !== round.hands[0][i + 1].suit) return true;
+
+        return false;
+      });
+      expect(sortedLH.length).toBe(8);
     });
   });
 
@@ -263,9 +277,9 @@ describe('Round', () => {
     });
 
     test('if passed card is not in hand, playCard throws error', () => {
-      playedCard = { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 };
+      playedCard = { suit: Suit.Hearts, name: CardName.Five, faceValue: 100, playValue: 100 };
       expect(() => round.playCard(playedCard)).toThrowError();
-      expect(round.hands[0]).toStrictEqual(mock.MOCK_SORTED_HAND);
+      expect(round.hands[0].length).toBe(8);
     });
 
     test('if passed card is in hand, that card is removed from activePlayer hand', () => {

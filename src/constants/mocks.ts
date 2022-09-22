@@ -26,6 +26,11 @@ export const MOCK_USER_3 = {
   name: 'Stacey',
 };
 
+export const MOCK_USER_4 = {
+  id: 'mockUser7777',
+  name: 'Paul',
+};
+
 export const MOCK_PLAYERS: PlayerType[] = [
   {
     playerId: 'mockUser1234',
@@ -185,3 +190,75 @@ export const MOCK_GAME_CONFIG: GameConfig = {
   minBid: 7,
   scoreToWin: 52,
 };
+
+// export const ROUND_MOCK: Round = {
+//   playersRoundData: PlayerRoundData[];
+//   hands: Hand[] = [];
+//   bids: BidType[] = [];
+//   winningBid: BidType = { amount: -1, bidder: -1, isTrump: false };
+//   trump: Suit | null = null;
+//   activePlayer: Seat = -1;
+//   playableCards: CardType[] = [];
+//   curTrick: TrickType = [];
+//   tricksTeam0: EvaluatedTrick[] = [];
+//   tricksTeam1: EvaluatedTrick[] = [];
+//   roundPoints: RoundPointTotals = [
+//     { teamId: 'team0', points: 0 },
+//     { teamId: 'team1', points: 1 },
+//   ];
+// }
+
+// playersRoundData: PlayerRoundData[];
+// hands: Hand[] = [];
+// bids: BidType[] = [];
+// winningBid: BidType = { amount: -1, bidder: -1, isTrump: false };
+// trump: Suit | null = null;
+// activePlayer: Seat = -1;
+// playableCards: CardType[] = [];
+// curTrick: TrickType = [];
+// tricksTeam0: EvaluatedTrick[] = [];
+// tricksTeam1: EvaluatedTrick[] = [];
+// roundPoints: RoundPointTotals = [
+//   { teamId: 'team0', points: 0 },
+//   { teamId: 'team1', points: 1 },
+//   numPlayers: 4;
+//   minBid: 7;
+//   dealer: 0;
+//   deck: MOCK_SHUFFLED_DECK;
+//   playersRoundData: MOCK.map((player) => {
+//     return {
+//       playerId: player.playerId!,
+//       name: player.name!,
+//       seat: player.seat,
+//       teamId: player.teamId,
+//       bid: null,
+//       isDealer: dealer === player.seat,
+//     };
+//   });
+//   endRound = endRound;
+// ];
+
+// constructor(
+//   public numPlayers: number,
+//   public minBid: BidAmount,
+//   public players: PlayerType[],
+//   public dealer: Seat,
+//   public deck: Deck,
+//   public endRound: (roundTotals: RoundTotals) => void
+// ) {
+//   this.numPlayers = numPlayers;
+//   this.minBid = minBid;
+//   this.dealer = dealer;
+//   this.deck = deck;
+//   this.playersRoundData = players.map((player) => {
+//     return {
+//       playerId: player.playerId!,
+//       name: player.name!,
+//       seat: player.seat,
+//       teamId: player.teamId,
+//       bid: null,
+//       isDealer: dealer === player.seat,
+//     };
+//   });
+//   this.endRound = endRound;
+// }

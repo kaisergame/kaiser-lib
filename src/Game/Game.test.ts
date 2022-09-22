@@ -3,7 +3,7 @@ import { Round } from '../Round/Round';
 import { Game } from './Game';
 
 describe('Game with 4 players', () => {
-  let game: InstanceType<typeof Game>;
+  let game: Game;
   beforeAll(() => {
     game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
   });
@@ -24,18 +24,6 @@ describe('Game with 4 players', () => {
       expect(game.players[1].teamId).toBe('team1');
       expect(game.players[2].seat).toBe(2);
       expect(game.players[2].teamId).toBe('team0');
-    });
-  });
-
-  describe('setTeam method', () => {
-    test('setTeam should return 0 for even/zero Seat numbers, 1 for odd', () => {
-      const zeroSeat = game.setTeam(0);
-      const twoSeat = game.setTeam(2);
-      const threeSeat = game.setTeam(3);
-
-      expect(zeroSeat).toBe(0);
-      expect(twoSeat).toBe(0);
-      expect(threeSeat).toBe(1);
     });
   });
 
@@ -134,4 +122,31 @@ describe('Game with 4 players', () => {
       expect(spy).toBeCalledTimes(1);
     });
   });
+});
+
+describe('4 Player Game playthrough', () => {
+  let game: Game;
+  beforeAll(() => {
+    game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
+  });
+
+  describe('add players to game', () => {
+    test('addPlayer', () => {
+      game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
+      game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
+      expect(game.players.filter((player) => player.playerId !== null).length).toBe(2);
+      game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
+      game.addPlayer(mock.MOCK_USER_4.id, mock.MOCK_USER_4.name);
+
+      expect(game.players.filter((player) => player.playerId !== null).length).toBe(4);
+      expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
+    });
+  });
+
+  // describe('create Round', () => {
+  //   test('round is created', () => {
+  //     game.createRound();
+  //     expect(game.curRound).toMatchObject<InstanceType<typeof Round>>();
+  //   });
+  // });
 });

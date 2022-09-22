@@ -1,11 +1,10 @@
 import { CardType, Suit } from './Cards';
-import { PlayerId, PlayerType, Seat } from './Game';
+import { PlayerType, Seat } from './Game';
 
 export interface RoundType {
   playersRoundData: PlayerRoundData[];
   numPlayers: number;
   dealer: Seat;
-  deck: CardType[];
   hands: Hand[];
   minBid: BidAmount;
   bids: BidType[];
