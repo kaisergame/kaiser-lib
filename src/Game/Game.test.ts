@@ -1,5 +1,3 @@
-import { CardName, Suit } from '../@types';
-import { Cards } from '../Cards/Cards';
 import * as mock from '../constants/mocks';
 import { Round } from '../Round/Round';
 import { Game } from './Game';
@@ -7,25 +5,25 @@ import { Game } from './Game';
 describe('Game with 4 players', () => {
   let game: InstanceType<typeof Game>;
   beforeAll(() => {
-    game = new Game(mock.MOCK_USER_1, mock.MOCK_GAME_CONFIG);
+    game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
   });
 
   describe('addPlayer method', () => {
-    test('addPlayer should increase Game players by 1', () => {
-      const initialPlayerNum = game.players.length;
-      game.addPlayer(mock.MOCK_USER_2);
+    test('addPlayer should increase non-null Game players.playerId by 1', () => {
+      const initialPlayerNum = 0;
+      game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
 
-      expect(game.players.length).toBe(initialPlayerNum + 1);
+      expect(game.players.filter((player) => player.playerId !== null).length).toBe(initialPlayerNum + 1);
     });
 
     test('addPlayer should give expected values for userId, seat, and team', () => {
-      game.addPlayer(mock.MOCK_USER_2);
-      game.addPlayer(mock.MOCK_USER_3);
+      game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
+      game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
 
-      expect(game.players[1].playerId).toBe(mock.MOCK_USER_2.userId);
-      expect(game.players[1].team).toBe(1);
+      expect(game.players[1].playerId).toBe(mock.MOCK_USER_2.id);
+      expect(game.players[1].teamId).toBe('team1');
       expect(game.players[2].seat).toBe(2);
-      expect(game.players[2].team).toBe(0);
+      expect(game.players[2].teamId).toBe('team0');
     });
   });
 
@@ -38,21 +36,6 @@ describe('Game with 4 players', () => {
       expect(zeroSeat).toBe(0);
       expect(twoSeat).toBe(0);
       expect(threeSeat).toBe(1);
-    });
-  });
-
-  describe('initializeDeck method', () => {
-    test('cards should be instance of Cards', () => {
-      game.initializeDeck();
-
-      expect(game.cards).toBeInstanceOf(Cards);
-    });
-
-    test('the deck should have 32 cards', () => {
-      game.initializeDeck();
-
-      expect(game.deck.length).toBe(32);
-      expect(game.deck[0]).toStrictEqual({ suit: Suit.Spades, name: CardName.Ace, faceValue: 1, playValue: 14 });
     });
   });
 
@@ -89,35 +72,44 @@ describe('Game with 4 players', () => {
 
   describe('updateScore method', () => {
     beforeEach(() => {
-      game.teams[0].score = 23;
-      game.teams[0].score = -10;
+      game.scores[0] = { teamId: 'team0', teamScore: 23 };
+      game.scores[1] = { teamId: 'team1', teamScore: -10 };
     });
 
-    test('score of 8 and 2 should be added to respective teams', () => {
-      game.updateScores([8, 2]);
-      expect(game.teams).toStrictEqual([31, -8]);
+    test('score of -9 and 4 should be added to respective teams', () => {
+      game.updateScores(mock.MOCK_ROUND_TOTALS.roundPoints);
+      expect(game.scores).toStrictEqual([
+        { teamId: 'team0', teamScore: 14 },
+        { teamId: 'team1', teamScore: -6 },
+      ]);
     });
-    test('score of -16 and 5 should be added to respective teams', () => {
-      game.updateScores([-16, 5]);
-      expect(game.scores).toStrictEqual([7, -5]);
+    test('score of -1 and 22 should be added to respective teams', () => {
+      game.updateScores(mock.MOCK_ROUND_TOTALS_2.roundPoints);
+      expect(game.scores).toStrictEqual([
+        { teamId: 'team0', teamScore: 22 },
+        { teamId: 'team1', teamScore: 12 },
+      ]);
     });
   });
 
   describe('checkIsWinner method', () => {
     test('team 1 should be winner', () => {
-      game.scores = [30, 54];
+      game.scores[0] = { teamId: 'team0', teamScore: 30 };
+      game.scores[1] = { teamId: 'team1', teamScore: 54 };
       const isWinner = game.checkIsWinner();
-      expect(isWinner).toBe(1);
+      expect(isWinner).toBe('team1');
     });
     test('there should be no winner (return -1)', () => {
-      game.scores = [-53, 51];
+      game.scores[0] = { teamId: 'team0', teamScore: -53 };
+      game.scores[1] = { teamId: 'team1', teamScore: 51 };
       const isWinner = game.checkIsWinner();
-      expect(isWinner).toBe(-1);
+      expect(isWinner).toBe(null);
     });
     test('if both teams are over scoreToWin the higher score should win', () => {
-      game.scores = [58, 53];
+      game.scores[0] = { teamId: 'team0', teamScore: 58 };
+      game.scores[1] = { teamId: 'team1', teamScore: 53 };
       const isWinner = game.checkIsWinner();
-      expect(isWinner).toBe(0);
+      expect(isWinner).toBe('team0');
     });
   });
 
@@ -127,14 +119,16 @@ describe('Game with 4 players', () => {
     });
 
     test('if a team score is over scoreToWin endGame is called', () => {
-      game.scores = [50, 42];
+      game.scores[0] = { teamId: 'team0', teamScore: 42 };
+      game.scores[1] = { teamId: 'team1', teamScore: 50 };
       const spy = jest.spyOn(game, 'endGame');
       game.endRound(mock.MOCK_ROUND_TOTALS);
       expect(spy).toBeCalledTimes(1);
     });
 
     test('if a team score is not over scoreToWin createRound is called', () => {
-      game.scores = [12, 18];
+      game.scores[0] = { teamId: 'team0', teamScore: 12 };
+      game.scores[1] = { teamId: 'team1', teamScore: 18 };
       const spy = jest.spyOn(game, 'createRound');
       game.endRound(mock.MOCK_ROUND_TOTALS);
       expect(spy).toBeCalledTimes(1);

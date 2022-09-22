@@ -9,7 +9,7 @@ export interface GameType {
   players: PlayerType[];
   teams: TeamType[];
   scores: ScoreType[];
-  dealer: Seat;
+  dealer: Seat | null;
   cards: Cards;
   deck: Deck;
   curRound: RoundType | null;

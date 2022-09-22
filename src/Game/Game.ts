@@ -18,7 +18,7 @@ export class Game implements GameType {
   players: PlayerType[];
   teams: TeamType[];
   scores: ScoreType[];
-  dealer: Seat = 0;
+  dealer: Seat | null = null;
   cards: Cards;
   deck: Deck;
   curRound: RoundType | null = null;
@@ -28,8 +28,8 @@ export class Game implements GameType {
     this.gameId = gameId;
     this.owner = owner;
     this.config = config;
-    this.teams = [];
-    this.players = [];
+    this.teams = this.initializeTeams();
+    this.players = this.initializePlayers();
     this.scores = [
       { teamId: 'team0', teamScore: 0 },
       { teamId: 'team1', teamScore: 0 },
@@ -38,14 +38,9 @@ export class Game implements GameType {
     this.deck = this.cards.createDeck();
   }
 
-  initializeGame = (() => {
-    this.initializeTeams();
-    this.initializePlayers();
-    this.addPlayer(this.owner.id, this.owner.name);
-  })();
-
   addPlayer(id: string, name: string): PlayerType {
-    if (this.players.length === this.config.numPlayers)
+    const curPlayers = this.players.filter((player) => player.playerId !== null);
+    if (curPlayers.length === this.config.numPlayers)
       throw new Error(`Already ${this.config.numPlayers} players in game`);
 
     const openSeat = this.findOpenSeat();

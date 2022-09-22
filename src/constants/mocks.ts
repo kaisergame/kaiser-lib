@@ -123,16 +123,30 @@ export const MOCK_PASS_BIDS: BidType[] = [
 ];
 
 export const MOCK_ROUND_TOTALS: RoundTotals = {
-  bid: { amount: 10, bidder: 3, isTrump: true, bidMade: true },
+  bid: { amount: 9, bidder: 2, isTrump: true, bidMade: false },
   roundPoints: [
-    { teamId: 'team0', points: 9 },
-    { teamId: 'team1', points: 1 },
+    { teamId: 'team0', points: -9 },
+    { teamId: 'team1', points: 4 },
   ],
   playerPoints: [
-    { playerSeat: 0, points: 6 },
-    { playerSeat: 1, points: 0 },
-    { playerSeat: 2, points: 3 },
+    { playerSeat: 0, points: 2 },
+    { playerSeat: 1, points: 3 },
+    { playerSeat: 2, points: 4 },
     { playerSeat: 3, points: 1 },
+  ],
+};
+
+export const MOCK_ROUND_TOTALS_2: RoundTotals = {
+  bid: { amount: 10, bidder: 3, isTrump: false, bidMade: true },
+  roundPoints: [
+    { teamId: 'team0', points: -1 },
+    { teamId: 'team1', points: 22 },
+  ],
+  playerPoints: [
+    { playerSeat: 0, points: -2 },
+    { playerSeat: 1, points: 2 },
+    { playerSeat: 2, points: 1 },
+    { playerSeat: 3, points: 9 },
   ],
 };
 
