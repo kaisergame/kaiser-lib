@@ -68,10 +68,10 @@ export enum BidAmount {
 export type EvaluatedTrick = {
   cardsPlayed: TrickType;
   pointValue: number;
-  trickWonBy: PlayerId;
+  trickWonBy: Seat;
 };
 
-export type TrickType = { cardPlayed: CardType; playedBy: PlayerId }[];
+export type TrickType = { cardPlayed: CardType; playedBy: Seat }[];
 
 export type RoundTotals = {
   bid: EvaluatedBid;
@@ -81,4 +81,4 @@ export type RoundTotals = {
 
 export type RoundPointTotals = { teamId: string; points: number }[];
 
-export type PlayerPointTotals = { playerId: string; points: number }[];
+export type PlayerPointTotals = { playerId: string; seat: Seat; points: number }[];

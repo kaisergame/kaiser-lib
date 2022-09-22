@@ -216,14 +216,10 @@ export class Round implements RoundType {
     return hand;
   }
 
-  findPlayer(): PlayerType {
-    return this.playersRoundData.find((player) => player.seat === this.activePlayer)!;
-  }
-
   private updateCardsPlayed(cardPlayed: CardType): TrickType {
     const play = {
       cardPlayed,
-      playedBy: this.findPlayer().playerId!,
+      playedBy: this.activePlayer,
     };
     const updatedTrick = [...this.curTrick];
     updatedTrick.push(play);
@@ -251,7 +247,7 @@ export class Round implements RoundType {
       cardsPlayed: this.curTrick,
       trickWonBy: trickWinner,
     };
-    const wonByPlayer = this.playersRoundData.find((player) => player.playerId === trickWinner)!;
+    const wonByPlayer = this.playersRoundData.find((player) => player.seat === trickWinner)!;
     if (wonByPlayer.teamId === 'team0') this.tricksTeam0.push(trickData);
     if (wonByPlayer.teamId === 'team1') this.tricksTeam1.push(trickData);
     this.updateRoundPoints(trickData, wonByPlayer);
@@ -275,11 +271,11 @@ export class Round implements RoundType {
     return value;
   }
 
-  private getTrickWinner(): PlayerId {
+  private getTrickWinner(): Seat {
     const ledSuit = this.curTrick[0].cardPlayed.suit;
 
     const winner = this.curTrick.reduce(
-      (winningCard, play): { playedBy: PlayerId; playValue: number } => {
+      (winningCard, play): { playedBy: Seat; playValue: number } => {
         if (play.cardPlayed.suit !== ledSuit && play.cardPlayed.suit !== this.trump) {
           play.cardPlayed.playValue = 0;
         }
@@ -294,7 +290,7 @@ export class Round implements RoundType {
           : winningCard;
       },
       {
-        playedBy: '',
+        playedBy: -1,
         playValue: -1,
       }
     );
@@ -343,7 +339,7 @@ export class Round implements RoundType {
     const initialPoints = new Array(this.numPlayers).fill({ playerId: '', points: 0 });
 
     const totals = tricks.reduce((playerTricks, trick) => {
-      const trickWonBy = this.playersRoundData.find((player) => player.playerId === trick.trickWonBy)!;
+      const trickWonBy = this.playersRoundData.find((player) => player.seat === trick.trickWonBy)!;
       playerTricks[trickWonBy.seat] = {
         playerId: trickWonBy,
         points: playerTricks[trickWonBy.seat].points + trick.pointValue,

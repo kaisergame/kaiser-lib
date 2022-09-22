@@ -123,7 +123,7 @@ export const MOCK_PASS_BIDS: BidType[] = [
 ];
 
 export const MOCK_ROUND_TOTALS: RoundTotals = {
-  bidMade: true,
+  bid: { amount: 10, bidder: 3, isTrump: true, bidMade: true },
   roundPoints: [
     { teamId: 'team0', points: 9 },
     { teamId: 'team1', points: 1 },
@@ -152,7 +152,7 @@ export const TAKEN_TRICKS: EvaluatedTrick[] = [
       { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 3 },
       { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 0 },
     ],
-    trickWonBy: 2,
+    trickWonBy: 'player-stacey',
   },
   {
     pointValue: 6,
@@ -162,7 +162,7 @@ export const TAKEN_TRICKS: EvaluatedTrick[] = [
       { cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 }, playedBy: 0 },
       { cardPlayed: { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 1 },
     ],
-    trickWonBy: 0,
+    trickWonBy: 'player-ryan',
   },
 ];
 
