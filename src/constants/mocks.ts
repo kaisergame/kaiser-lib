@@ -121,6 +121,92 @@ export const MOCK_REVERSE_SORTED_HAND: Hand = [
   { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
 ];
 
+export const MOCK_HANDS: Hand[] = [
+  [
+    { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
+    { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 },
+    { suit: Suit.Hearts, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    { suit: Suit.Diamonds, name: CardName.King, faceValue: 13, playValue: 13 },
+    { suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 },
+    { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 },
+    { suit: Suit.Clubs, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    { suit: Suit.Hearts, name: CardName.Ten, faceValue: 10, playValue: 10 },
+  ],
+  [
+    { suit: Suit.Spades, name: CardName.Queen, faceValue: 12, playValue: 12 },
+    { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    { suit: Suit.Clubs, name: CardName.Ten, faceValue: 10, playValue: 10 },
+    { suit: Suit.Clubs, name: CardName.Jack, faceValue: 11, playValue: 11 },
+    { suit: Suit.Hearts, name: CardName.Queen, faceValue: 12, playValue: 12 },
+    { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 13 },
+    { suit: Suit.Diamonds, name: CardName.Queen, faceValue: 12, playValue: 12 },
+    { suit: Suit.Hearts, name: CardName.Jack, faceValue: 11, playValue: 11 },
+  ],
+  [
+    { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    { suit: Suit.Diamonds, name: CardName.Seven, faceValue: 7, playValue: 7 },
+    { suit: Suit.Spades, name: CardName.Jack, faceValue: 11, playValue: 11 },
+    { suit: Suit.Diamonds, name: CardName.Nine, faceValue: 9, playValue: 9 },
+    { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 },
+    { suit: Suit.Clubs, name: CardName.Ace, faceValue: 1, playValue: 14 },
+    { suit: Suit.Clubs, name: CardName.Seven, faceValue: 7, playValue: 7 },
+    { suit: Suit.Clubs, name: CardName.Queen, faceValue: 12, playValue: 12 },
+  ],
+  [
+    { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 },
+    { suit: Suit.Diamonds, name: CardName.Ten, faceValue: 10, playValue: 10 },
+    { suit: Suit.Spades, name: CardName.Ace, faceValue: 1, playValue: 14 },
+    { suit: Suit.Diamonds, name: CardName.Jack, faceValue: 11, playValue: 11 },
+    { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 3 },
+    { suit: Suit.Clubs, name: CardName.Nine, faceValue: 9, playValue: 9 },
+    { suit: Suit.Hearts, name: CardName.Nine, faceValue: 9, playValue: 9 },
+    { suit: Suit.Spades, name: CardName.Ten, faceValue: 10, playValue: 10 },
+  ],
+];
+
+export const MOCK_HANDS_SORTED: Hand[] = [
+  [
+    { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 },
+    { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 },
+    { suit: Suit.Hearts, name: CardName.Ten, faceValue: 10, playValue: 10 },
+    { suit: Suit.Hearts, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
+    { suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 },
+    { suit: Suit.Diamonds, name: CardName.King, faceValue: 13, playValue: 13 },
+    { suit: Suit.Clubs, name: CardName.Eight, faceValue: 8, playValue: 8 },
+  ],
+  [
+    { suit: Suit.Hearts, name: CardName.Queen, faceValue: 12, playValue: 12 },
+    { suit: Suit.Hearts, name: CardName.Jack, faceValue: 11, playValue: 11 },
+    { suit: Suit.Spades, name: CardName.Queen, faceValue: 12, playValue: 12 },
+    { suit: Suit.Diamonds, name: CardName.Queen, faceValue: 12, playValue: 12 },
+    { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 13 },
+    { suit: Suit.Clubs, name: CardName.Jack, faceValue: 11, playValue: 11 },
+    { suit: Suit.Clubs, name: CardName.Ten, faceValue: 10, playValue: 10 },
+  ],
+  [
+    { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 },
+    { suit: Suit.Spades, name: CardName.Jack, faceValue: 11, playValue: 11 },
+    { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    { suit: Suit.Diamonds, name: CardName.Nine, faceValue: 9, playValue: 9 },
+    { suit: Suit.Diamonds, name: CardName.Seven, faceValue: 7, playValue: 7 },
+    { suit: Suit.Clubs, name: CardName.Ace, faceValue: 1, playValue: 14 },
+    { suit: Suit.Clubs, name: CardName.Queen, faceValue: 12, playValue: 12 },
+    { suit: Suit.Clubs, name: CardName.Seven, faceValue: 7, playValue: 7 },
+  ],
+  [
+    { suit: Suit.Hearts, name: CardName.Nine, faceValue: 9, playValue: 9 },
+    { suit: Suit.Spades, name: CardName.Ace, faceValue: 1, playValue: 14 },
+    { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 },
+    { suit: Suit.Spades, name: CardName.Ten, faceValue: 10, playValue: 10 },
+    { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 3 },
+    { suit: Suit.Diamonds, name: CardName.Jack, faceValue: 11, playValue: 11 },
+    { suit: Suit.Diamonds, name: CardName.Ten, faceValue: 10, playValue: 10 },
+    { suit: Suit.Clubs, name: CardName.Nine, faceValue: 9, playValue: 9 },
+  ],
+];
+
 export const MOCK_VALID_BIDS = [
   BidAmount.Pass,
   BidAmount.Seven,

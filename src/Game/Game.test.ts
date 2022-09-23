@@ -211,11 +211,20 @@ describe('4 Player Game playthrough', () => {
       game.round?.setPlayerBid(BidAmount.Eight);
 
       game.round?.updateActivePlayer();
-      const spy = jest.spyOn(game.round!, 'setWinningBid');
       expect(game.round?.activePlayer).toBe(game.round?.dealer);
+
+      const spyWin = jest.spyOn(game.round!, 'setWinningBid');
+      const spyOrder = jest.spyOn(game.round!, 'orderOfPlay');
+
       game.round?.setPlayerBid(BidAmount.Eight);
-      expect(spy).toBeCalledTimes(1);
+      expect(spyWin).toBeCalledTimes(1);
+      expect(spyOrder).toBeCalledTimes(1);
       expect(game.round?.winningBid).toStrictEqual({ amount: 8, bidder: 0, isTrump: true });
+      expect(game.round?.activePlayer).toBe(0);
+    });
+
+    test('setPlayerBid will throw error if 4 bids have already been made', () => {
+      expect(() => game.round?.setPlayerBid(BidAmount.Ten)).toThrowError();
     });
 
     test('setPlayerBid will throw error if 4 bids have already been made', () => {
@@ -227,9 +236,25 @@ describe('4 Player Game playthrough', () => {
         game.round?.playCard({ suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 })
       ).toThrowError();
     });
+
     test('setTrump asigns passed suit to round trump', () => {
       game.round?.setTrump(Suit.Hearts);
       expect(game.round?.trump).toBe(Suit.Hearts);
+    });
+  });
+
+  describe('card play', () => {
+    beforeAll(() => {
+      game.round!.hands = mock.MOCK_HANDS;
+      game.round?.sortHands();
+      console.log(game.round?.hands);
+    });
+    test('activePlayer will be bid winner', () => {
+      expect(game.round?.activePlayer).toBe(game.round?.winningBid.bidder);
+    });
+
+    test('activePlayer will be bid winning', () => {
+      expect(game.round?.activePlayer).toBe(0);
     });
   });
 });

@@ -83,10 +83,21 @@ export class Round implements RoundType {
     }
 
     function cardSort(a: CardType, b: CardType) {
-      //FIXME: it would be nice to have the suits red/black/red/black
-      return !lowToHigh
-        ? a.suit.localeCompare(b.suit) || b.playValue - a.playValue
-        : a.suit.localeCompare(b.suit) || a.playValue - b.playValue;
+      let suitOrder;
+      if (a.suit === Suit.Hearts && a.suit === b.suit) suitOrder = 0;
+      else if (a.suit === Suit.Hearts) suitOrder = -1;
+      else if (b.suit === Suit.Hearts) suitOrder = 1;
+      else if (a.suit === Suit.Spades && a.suit === b.suit) suitOrder = 0;
+      else if (a.suit === Suit.Spades) suitOrder = -1;
+      else if (b.suit === Suit.Spades) suitOrder = 1;
+      else if (a.suit === Suit.Diamonds && a.suit === b.suit) suitOrder = 0;
+      else if (a.suit === Suit.Diamonds) suitOrder = -1;
+      else if (b.suit === Suit.Diamonds) suitOrder = 1;
+      else if (a.suit === Suit.Clubs && a.suit === b.suit) suitOrder = 0;
+      else if (a.suit === Suit.Clubs) suitOrder = -1;
+      else if (b.suit === Suit.Clubs) suitOrder = 1;
+
+      return !lowToHigh ? suitOrder || b.playValue - a.playValue : suitOrder || a.playValue - b.playValue;
     }
   }
 
@@ -139,6 +150,8 @@ export class Round implements RoundType {
     );
 
     this.winningBid = winningBid;
+    this.orderOfPlay(winningBid.bidder);
+
     return winningBid;
   }
 
