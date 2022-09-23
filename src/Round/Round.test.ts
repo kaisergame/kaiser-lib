@@ -5,13 +5,18 @@ import { Game } from '../Game/Game';
 import { Round } from './Round';
 
 describe('Round', () => {
-  let game: InstanceType<typeof Game>;
-  let round: InstanceType<typeof Round>;
+  let game: Game;
+  let round: Round;
   const dealer = 0;
-  const { numPlayers, minBid } = mock.MOCK_GAME_CONFIG;
   beforeEach(() => {
     game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
-    round = new Round(numPlayers, minBid, mock.MOCK_PLAYERS, dealer, game.endRound);
+    round = new Round(
+      mock.MOCK_GAME_CONFIG.numPlayers,
+      mock.MOCK_GAME_CONFIG.minBid,
+      mock.MOCK_PLAYERS,
+      dealer,
+      game.endRound
+    );
   });
 
   describe('create a new Round', () => {
@@ -203,7 +208,6 @@ describe('Round', () => {
     });
 
     test('after a trick is taken, activePlayer is set to player that took trick', () => {
-      round.activePlayer = 0;
       round.orderOfPlay(0);
       expect(round.activePlayer).toBe(0);
     });
@@ -273,10 +277,13 @@ describe('Round', () => {
       round.dealHands();
       round.sortHands();
       round.updateActivePlayer(0);
+      round.bids = mock.MOCK_BIDS_3;
       playedCard = round.hands[0][6];
     });
 
     test('if passed card is not in hand, playCard throws error', () => {
+      expect(round.bids.length).toBe(4);
+      expect(round.numPlayers).toEqual(round.bids.length);
       playedCard = { suit: Suit.Hearts, name: CardName.Five, faceValue: 100, playValue: 100 };
       expect(() => round.playCard(playedCard)).toThrowError();
       expect(round.hands[0].length).toBe(8);

@@ -38,6 +38,8 @@ export class Game implements GameType {
     const curPlayers = this.players.filter((player) => player.playerId !== null);
     if (curPlayers.length === this.config.numPlayers)
       throw new Error(`Already ${this.config.numPlayers} players in game`);
+    if (curPlayers.find((player) => player.playerId === id))
+      throw new Error(`Player ${name} has alread joined the game`);
 
     const openSeat = this.players.findIndex((player) => player.playerId === null);
     const player = { ...this.players[openSeat], playerId: id, name: name };
@@ -116,12 +118,6 @@ export class Game implements GameType {
     };
   }
 
-  startGame() {
-    if (this.players.length !== this.config.numPlayers)
-      throw new Error(`Game requires ${this.config.numPlayers} to start`);
-    this.createRound();
-  }
-
   setDealer() {
     let dealer = this.dealer;
     if (dealer === null) dealer = 0;
@@ -132,8 +128,10 @@ export class Game implements GameType {
   }
 
   createRound() {
+    if (this.players.find((player) => player.playerId === null))
+      throw new Error(`Game requires ${this.config.numPlayers} to start`);
+
     const dealer = this.setDealer();
-    // const shuffledDeck = this.cards.shuffleDeck(this.deck);
     const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound);
 
     this.curRound = round;

@@ -12,46 +12,51 @@ import {
 } from '../@types/index';
 
 export const MOCK_USER_1 = {
-  id: 'mockUser1234',
+  id: 'mockUser1111',
   name: 'Ryan',
 };
 
 export const MOCK_USER_2 = {
-  id: 'mockUser5678',
+  id: 'mockUser2222',
   name: 'Cody',
 };
 
 export const MOCK_USER_3 = {
-  id: 'mockUser9999',
+  id: 'mockUser3333',
   name: 'Stacey',
 };
 
 export const MOCK_USER_4 = {
-  id: 'mockUser7777',
+  id: 'mockUser4444',
   name: 'Paul',
+};
+
+export const MOCK_USER_5 = {
+  id: 'mockUser5555',
+  name: 'Chris',
 };
 
 export const MOCK_PLAYERS: PlayerType[] = [
   {
-    playerId: 'mockUser1234',
+    playerId: 'mockUser1111',
     name: 'Ryan',
     seat: 0,
     teamId: 'team0',
   },
   {
-    playerId: 'mockUser5678',
+    playerId: 'mockUser2222',
     name: 'Cody',
     seat: 1,
     teamId: 'team1',
   },
   {
-    playerId: 'mockUser9999',
+    playerId: 'mockUser3333',
     name: 'Stacey',
     seat: 2,
     teamId: 'team0',
   },
   {
-    playerId: 'mockUser7777',
+    playerId: 'mockUser4444',
     name: 'Paul',
     seat: 3,
     teamId: 'team1',
@@ -126,6 +131,12 @@ export const MOCK_PASS_BIDS: BidType[] = [
   { amount: 0, bidder: 2, isTrump: true },
   { amount: 0, bidder: 3, isTrump: true },
 ];
+export const MOCK_BIDS_3: BidType[] = [
+  { amount: 7, bidder: 1, isTrump: true },
+  { amount: 7.5, bidder: 2, isTrump: false },
+  { amount: 10, bidder: 3, isTrump: true },
+  { amount: 0, bidder: 0, isTrump: false },
+];
 
 export const MOCK_ROUND_TOTALS: RoundTotals = {
   bid: { amount: 9, bidder: 2, isTrump: true, bidMade: false },
@@ -191,74 +202,30 @@ export const MOCK_GAME_CONFIG: GameConfig = {
   scoreToWin: 52,
 };
 
-// export const ROUND_MOCK: Round = {
-//   playersRoundData: PlayerRoundData[];
-//   hands: Hand[] = [];
-//   bids: BidType[] = [];
-//   winningBid: BidType = { amount: -1, bidder: -1, isTrump: false };
-//   trump: Suit | null = null;
-//   activePlayer: Seat = -1;
-//   playableCards: CardType[] = [];
-//   curTrick: TrickType = [];
-//   tricksTeam0: EvaluatedTrick[] = [];
-//   tricksTeam1: EvaluatedTrick[] = [];
-//   roundPoints: RoundPointTotals = [
-//     { teamId: 'team0', points: 0 },
-//     { teamId: 'team1', points: 1 },
-//   ];
-// }
-
-// playersRoundData: PlayerRoundData[];
-// hands: Hand[] = [];
-// bids: BidType[] = [];
-// winningBid: BidType = { amount: -1, bidder: -1, isTrump: false };
-// trump: Suit | null = null;
-// activePlayer: Seat = -1;
-// playableCards: CardType[] = [];
-// curTrick: TrickType = [];
-// tricksTeam0: EvaluatedTrick[] = [];
-// tricksTeam1: EvaluatedTrick[] = [];
-// roundPoints: RoundPointTotals = [
-//   { teamId: 'team0', points: 0 },
-//   { teamId: 'team1', points: 1 },
-//   numPlayers: 4;
-//   minBid: 7;
-//   dealer: 0;
-//   deck: MOCK_SHUFFLED_DECK;
-//   playersRoundData: MOCK.map((player) => {
-//     return {
+// export const ROUND_MOCK: Round =         {
+//   hands: expect.any(Array),
+//   bids: expect.any([]),
+//   winningBid: expect.objectContaining({ amount: -1, bidder: -1, isTrump: false }),
+//   trump: expect.any(null),
+//   activePlayer: expect.any(-1),
+//   playableCards: expect.any([]),
+//   curTrick: expect.any([]),
+//   tricksTeam0: expect.any([]),
+//   tricksTeam1: expect.any([]),
+//   roundPoints: expect.arrayContaining(
+//     { teamId: expect.any(String), points: expect.any(Number) }
+//   ),
+//     minBid: expect.any(Number),
+//   dealer: expect.any(0),
+//   deck: expect.arrayContaining({suit: expect.any(String),name: expect.any(String),faceValue: expect.any(Number),playValue: expect.any(Number)}),
+//   playersRoundData: {
 //       playerId: player.playerId!,
 //       name: player.name!,
 //       seat: player.seat,
 //       teamId: player.teamId,
 //       bid: null,
 //       isDealer: dealer === player.seat,
-//     };
+//     },
 //   });
-//   endRound = endRound;
-// ];
-
-// constructor(
-//   public numPlayers: number,
-//   public minBid: BidAmount,
-//   public players: PlayerType[],
-//   public dealer: Seat,
-//   public deck: Deck,
-//   public endRound: (roundTotals: RoundTotals) => void
-// ) {
-//   this.numPlayers = numPlayers;
-//   this.minBid = minBid;
-//   this.dealer = dealer;
-//   this.deck = deck;
-//   this.playersRoundData = players.map((player) => {
-//     return {
-//       playerId: player.playerId!,
-//       name: player.name!,
-//       seat: player.seat,
-//       teamId: player.teamId,
-//       bid: null,
-//       isDealer: dealer === player.seat,
-//     };
-//   });
-//   this.endRound = endRound;
+//   endRound: endRound;
 // }

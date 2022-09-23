@@ -1,3 +1,4 @@
+import { CardName, Suit } from '../@types';
 import * as mock from '../constants/mocks';
 import { Round } from '../Round/Round';
 import { Game } from './Game';
@@ -11,7 +12,7 @@ describe('Game with 4 players', () => {
   describe('addPlayer method', () => {
     test('addPlayer should increase non-null Game players.playerId by 1', () => {
       const initialPlayerNum = 0;
-      game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
+      game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
 
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(initialPlayerNum + 1);
     });
@@ -124,6 +125,7 @@ describe('Game with 4 players', () => {
   });
 });
 
+// GAME START AND ROUND PLAYTHROUGH
 describe('4 Player Game playthrough', () => {
   let game: Game;
   beforeAll(() => {
@@ -131,22 +133,52 @@ describe('4 Player Game playthrough', () => {
   });
 
   describe('add players to game', () => {
-    test('addPlayer', () => {
+    test('addPlayer adds players to game.players', () => {
       game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
       game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(2);
-      game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
-      game.addPlayer(mock.MOCK_USER_4.id, mock.MOCK_USER_4.name);
+      expect(game.players[1]).toStrictEqual(mock.MOCK_PLAYERS[1]);
+    });
 
+    test('if less than 4 players, cannot start gameplay (createRound)', () => {
+      game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
+      expect(() => game.createRound()).toThrowError();
+    });
+    test('cannot add the same player twice', () => {
+      expect(() => game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name)).toThrowError();
+    });
+
+    test('if 4 players are added, cannot add more players to game of 4', () => {
+      game.addPlayer(mock.MOCK_USER_4.id, mock.MOCK_USER_4.name);
+      expect(() => game.addPlayer(mock.MOCK_USER_5.id, mock.MOCK_USER_5.name)).toThrowError();
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(4);
       expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
     });
+
+    test('if 4 players, can call createRound', () => {
+      const spy = jest.spyOn(game, 'createRound');
+      game.createRound();
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
   });
 
-  // describe('create Round', () => {
-  //   test('round is created', () => {
-  //     game.createRound();
-  //     expect(game.curRound).toMatchObject<InstanceType<typeof Round>>();
-  //   });
-  // });
+  describe('create Round', () => {
+    test('curRound is an instance of Round', () => {
+      game.createRound();
+      expect(game.curRound).toBeInstanceOf(Round);
+    });
+  });
+
+  describe('bidding', () => {
+    test('curRound is an instance of Round', () => {
+      game.createRound();
+      expect(game.curRound).toBeInstanceOf(Round);
+    });
+
+    test('cannot call playCard before each player has bid', () => {
+      expect(() =>
+        game.curRound?.playCard({ suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 })
+      ).toThrowError();
+    });
+  });
 });
