@@ -12,7 +12,7 @@ export interface GameType {
   dealer: Seat | null;
   // cards: Cards;
   // deck: Deck;
-  curRound: RoundType | null;
+  round: RoundType | null;
   roundSummaries: RoundSummary[];
 }
 

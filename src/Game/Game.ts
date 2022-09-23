@@ -17,9 +17,7 @@ export class Game implements GameType {
   teams: TeamType[];
   scores: ScoreType[];
   dealer: Seat | null = null;
-  // cards: Cards;
-  // deck: Deck;
-  curRound: RoundType | null = null;
+  round: RoundType | null = null;
   roundSummaries: RoundSummary[] = [];
 
   constructor(public owner: { id: string; name: string }, readonly gameId: string, readonly config: GameConfig) {
@@ -96,7 +94,7 @@ export class Game implements GameType {
   }
 
   switchPlayerSeat(movePlayer: PlayerType, moveToSeat?: Seat): void {
-    if (this.curRound) throw new Error('Cannot change seats while game is in progress');
+    if (this.round) throw new Error('Cannot change seats while game is in progress');
 
     const seatLeft = movePlayer.seat < this.config.numPlayers - 1 ? movePlayer.seat + 1 : 0;
     const switchSeat = moveToSeat || seatLeft;
@@ -134,7 +132,7 @@ export class Game implements GameType {
     const dealer = this.setDealer();
     const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound);
 
-    this.curRound = round;
+    this.round = round;
     return round;
   }
 

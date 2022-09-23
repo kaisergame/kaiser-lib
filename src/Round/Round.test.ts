@@ -83,9 +83,9 @@ describe('Round', () => {
   });
 
   describe('validBids method', () => {
-    test('players must bid higher than the minimum bid', () => {
+    test('players must bid greater or equal to the minimum bid', () => {
       round.updateActivePlayer(1);
-      expect(round.validBids().filter((bid) => bid <= round.minBid && bid !== BidAmount.Pass).length).toBe(0);
+      expect(round.validBids().filter((bid) => bid < round.minBid && bid !== BidAmount.Pass).length).toBe(0);
     });
 
     test('players (other than dealer) must bid higher than the previous bids', () => {
@@ -131,12 +131,12 @@ describe('Round', () => {
 
     test('for a trump bid isTrump is true; a no trump bid isTrump is false', () => {
       round.updateActivePlayer(1);
-      round.setPlayerBid(BidAmount.Five);
+      round.setPlayerBid(BidAmount.Seven);
       round.updateActivePlayer(2);
       round.setPlayerBid(BidAmount.SevenNo);
       expect(round.bids).toStrictEqual([
         {
-          amount: 5,
+          amount: 7,
           bidder: 1,
           isTrump: true,
         },

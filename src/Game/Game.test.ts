@@ -1,4 +1,4 @@
-import { CardName, Suit } from '../@types';
+import { BidAmount, CardName, Suit } from '../@types';
 import * as mock from '../constants/mocks';
 import { Round } from '../Round/Round';
 import { Game } from './Game';
@@ -50,12 +50,12 @@ describe('Game with 4 players', () => {
       game.createRound();
     });
 
-    test('curRound should be instance of Round', () => {
-      expect(game.curRound).toBeInstanceOf(Round);
+    test('round should be instance of Round', () => {
+      expect(game.round).toBeInstanceOf(Round);
     });
 
     test('4 player round should have 4 players', () => {
-      expect(game.curRound?.playersRoundData.length).toBe(4);
+      expect(game.round?.playersRoundData.length).toBe(4);
     });
   });
 
@@ -154,31 +154,70 @@ describe('4 Player Game playthrough', () => {
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(4);
       expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
     });
+  });
 
+  describe('create Round', () => {
     test('if 4 players, can call createRound', () => {
       const spy = jest.spyOn(game, 'createRound');
       game.createRound();
       expect(spy).toHaveBeenCalledTimes(1);
     });
+
+    test('round is an instance of Round', () => {
+      expect(game.round).toBeInstanceOf(Round);
+    });
   });
 
-  describe('create Round', () => {
-    test('curRound is an instance of Round', () => {
-      game.createRound();
-      expect(game.curRound).toBeInstanceOf(Round);
+  describe('orderOfPlay', () => {
+    test('orderOfPlay will initiate activePlayer to Seat 1', () => {
+      const spy = jest.spyOn(game.round!, 'orderOfPlay');
+      game.round?.orderOfPlay();
+      expect(spy).toBeCalledTimes(1);
+      expect(game.round?.dealer).toBe(0);
+      expect(game.round?.activePlayer).toBe(1);
     });
   });
 
   describe('bidding', () => {
-    test('curRound is an instance of Round', () => {
-      game.createRound();
-      expect(game.curRound).toBeInstanceOf(Round);
-    });
-
     test('cannot call playCard before each player has bid', () => {
       expect(() =>
-        game.curRound?.playCard({ suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 })
+        game.round?.playCard({ suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 })
       ).toThrowError();
+    });
+
+    test('validBids will return all valid bids to player', () => {
+      expect(game.round?.validBids()).toStrictEqual(mock.MOCK_VALID_BIDS);
+    });
+
+    test('if setPlayerBid is passed an invalid bid it throws an error', () => {
+      expect(() => game.round?.setPlayerBid(BidAmount.Five)).toThrowError();
+    });
+
+    test('if setPlayerBid is passed a valid bid it is added to end of bids array', () => {
+      expect(game.round?.activePlayer).toBe(1);
+      game.round?.setPlayerBid(BidAmount.Seven);
+    });
+
+    test('updateActivePlayer will move turn one position "left"', () => {
+      game.round?.updateActivePlayer();
+      expect(game.round?.activePlayer).toBe(2);
+    });
+
+    test('setPlayerBid will throw error if 4 bids have already been made', () => {
+      game.round?.setPlayerBid(BidAmount.SevenNo);
+      game.round?.updateActivePlayer();
+      expect(game.round?.activePlayer).toBe(3);
+      expect(() => game.round?.setPlayerBid(BidAmount.SevenNo)).toThrowError();
+      game.round?.setPlayerBid(BidAmount.Eight);
+      game.round?.updateActivePlayer();
+      expect(game.round?.activePlayer).toBe(game.round?.dealer);
+      game.round?.setPlayerBid(BidAmount.EightNo);
+    });
+    test('', () => {
+      //
+    });
+    test('', () => {
+      //
     });
   });
 });

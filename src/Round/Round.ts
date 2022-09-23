@@ -102,8 +102,8 @@ export class Round implements RoundType {
       // FIXME: Object.values is adding a string type union
       ...Object.values(BidAmount).filter((bid) =>
         this.playersRoundData[this.activePlayer].isDealer
-          ? bid > this.minBid && bid >= curHighBid
-          : bid > this.minBid && bid > curHighBid
+          ? bid >= this.minBid && bid >= curHighBid
+          : bid >= this.minBid && bid > curHighBid
       ),
     ];
     noDealerPass && validBids.shift();
@@ -112,11 +112,16 @@ export class Round implements RoundType {
   }
 
   setPlayerBid(bid: BidAmount): void {
+    if (!this.validBids().includes(bid)) throw new Error('That bid is not valid');
+    if (this.bids.find((bid) => bid.bidder === this.activePlayer)) throw new Error('Player has already bid');
+    if (this.bids.length >= this.numPlayers) throw new Error('Bids have already been placed');
+
     const playerBid = {
       amount: bid,
       bidder: this.activePlayer,
       isTrump: bid % 1 === 0,
     };
+
     this.bids.push(playerBid);
     this.playersRoundData[this.activePlayer].bid = playerBid.amount;
     if (this.bids.length === this.numPlayers) this.setWinningBid();
@@ -204,8 +209,12 @@ export class Round implements RoundType {
 
   playCard(cardPlayed: CardType): void {
     if (this.bids.length !== this.numPlayers || this.activePlayer < 0) throw new Error('Cannot play a card now');
+    if (this.curTrick.find((card) => card.playedBy === this.activePlayer))
+      throw new Error('Player has already played a card');
+
     const inHand = this.hands[this.activePlayer].includes(cardPlayed);
     if (!inHand) throw new Error('Card not in hand');
+
     this.removeCardFromHand(cardPlayed);
     this.updateCardsPlayed(cardPlayed);
     this.endPlayerTurn();

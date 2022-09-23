@@ -1,4 +1,5 @@
 import {
+  BidAmount,
   BidType,
   CardName,
   Deck,
@@ -118,6 +119,24 @@ export const MOCK_REVERSE_SORTED_HAND: Hand = [
   { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 },
   { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 },
   { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
+];
+
+export const MOCK_VALID_BIDS = [
+  BidAmount.Pass,
+  BidAmount.Seven,
+  BidAmount.SevenNo,
+  BidAmount.Eight,
+  BidAmount.EightNo,
+  BidAmount.Nine,
+  BidAmount.NineNo,
+  BidAmount.Ten,
+  BidAmount.TenNo,
+  BidAmount.Eleven,
+  BidAmount.ElevenNo,
+  BidAmount.Twelve,
+  BidAmount.TwelveNo,
+  BidAmount.Troika,
+  BidAmount.Kaiser,
 ];
 
 export const MOCK_BIDS: BidType[] = [
