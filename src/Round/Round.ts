@@ -131,7 +131,7 @@ export class Round implements RoundType {
     // const bidAmount = Math.max(...this.bids) as BidAmount;
     const winningBid = this.bids.reduce(
       (highBid, bid): { bidder: number; amount: BidAmount; isTrump: boolean } => {
-        return bid.amount > highBid.amount
+        return bid.amount >= highBid.amount
           ? { bidder: bid.bidder, amount: bid.amount, isTrump: bid.amount % 1 === 0 }
           : highBid;
       },
@@ -211,6 +211,7 @@ export class Round implements RoundType {
     if (this.bids.length !== this.numPlayers || this.activePlayer < 0) throw new Error('Cannot play a card now');
     if (this.curTrick.find((card) => card.playedBy === this.activePlayer))
       throw new Error('Player has already played a card');
+    if (this.winningBid.isTrump && !this.trump) throw new Error('Trump must be set before card play');
 
     const inHand = this.hands[this.activePlayer].includes(cardPlayed);
     if (!inHand) throw new Error('Card not in hand');

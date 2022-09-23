@@ -201,23 +201,35 @@ describe('4 Player Game playthrough', () => {
     test('updateActivePlayer will move turn one position "left"', () => {
       game.round?.updateActivePlayer();
       expect(game.round?.activePlayer).toBe(2);
+      game.round?.setPlayerBid(BidAmount.SevenNo);
     });
 
-    test('setPlayerBid will throw error if 4 bids have already been made', () => {
-      game.round?.setPlayerBid(BidAmount.SevenNo);
+    test('dealer can take bid for current high bid; setWinningBid is called after 4 bids', () => {
       game.round?.updateActivePlayer();
       expect(game.round?.activePlayer).toBe(3);
       expect(() => game.round?.setPlayerBid(BidAmount.SevenNo)).toThrowError();
       game.round?.setPlayerBid(BidAmount.Eight);
+
       game.round?.updateActivePlayer();
+      const spy = jest.spyOn(game.round!, 'setWinningBid');
       expect(game.round?.activePlayer).toBe(game.round?.dealer);
-      game.round?.setPlayerBid(BidAmount.EightNo);
+      game.round?.setPlayerBid(BidAmount.Eight);
+      expect(spy).toBeCalledTimes(1);
+      expect(game.round?.winningBid).toStrictEqual({ amount: 8, bidder: 0, isTrump: true });
     });
-    test('', () => {
-      //
+
+    test('setPlayerBid will throw error if 4 bids have already been made', () => {
+      expect(() => game.round?.setPlayerBid(BidAmount.Ten)).toThrowError();
     });
-    test('', () => {
-      //
+
+    test('setTrump must be called for trump bids before playCard', () => {
+      expect(() =>
+        game.round?.playCard({ suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 })
+      ).toThrowError();
+    });
+    test('setTrump asigns passed suit to round trump', () => {
+      game.round?.setTrump(Suit.Hearts);
+      expect(game.round?.trump).toBe(Suit.Hearts);
     });
   });
 });
