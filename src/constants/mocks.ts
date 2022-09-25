@@ -231,16 +231,17 @@ export const MOCK_BIDS: BidType[] = [
   { amount: 10, bidder: 3, isTrump: true },
 ];
 
-export const MOCK_PASS_BIDS: BidType[] = [
-  { amount: 0, bidder: 1, isTrump: true },
-  { amount: 0, bidder: 2, isTrump: true },
-  { amount: 0, bidder: 3, isTrump: true },
-];
-export const MOCK_BIDS_3: BidType[] = [
+export const MOCK_BIDS_2: BidType[] = [
   { amount: 7, bidder: 1, isTrump: true },
   { amount: 7.5, bidder: 2, isTrump: false },
   { amount: 10, bidder: 3, isTrump: true },
   { amount: 0, bidder: 0, isTrump: false },
+];
+
+export const MOCK_PASS_BIDS: BidType[] = [
+  { amount: 0, bidder: 1, isTrump: true },
+  { amount: 0, bidder: 2, isTrump: true },
+  { amount: 0, bidder: 3, isTrump: true },
 ];
 
 export const MOCK_ROUND_TOTALS: RoundTotals = {
@@ -271,7 +272,14 @@ export const MOCK_ROUND_TOTALS_2: RoundTotals = {
   ],
 };
 
-export const MOCK_TRICK: TrickType = [
+export const MOCK_TRICK_0: TrickType = [
+  { cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 }, playedBy: 0 },
+  { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 1 },
+  { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
+  { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 3 },
+];
+
+export const MOCK_TRICK_SPADE_LED: TrickType = [
   { cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 1 },
   { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
   { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 3 },
@@ -314,7 +322,7 @@ export const MOCK_GAME_CONFIG: GameConfig = {
 //   trump: expect.any(null),
 //   activePlayer: expect.any(-1),
 //   playableCards: expect.any([]),
-//   curTrick: expect.any([]),
+//   trick: expect.any([]),
 //   tricksTeam0: expect.any([]),
 //   tricksTeam1: expect.any([]),
 //   roundPoints: expect.arrayContaining(

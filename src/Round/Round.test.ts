@@ -18,6 +18,9 @@ describe('Round', () => {
       game.endRound
     );
   });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
   describe('create a new Round', () => {
     test('4 player round should have 4 players', () => {
@@ -57,7 +60,7 @@ describe('Round', () => {
     beforeEach(() => {
       round.dealHands();
     });
-    test('sortHands should sort the dealt cards in each hand (C,D,H,S) high to low', () => {
+    test('sortHands should sort the dealt cards in each hand (H,S,D,C) high to low', () => {
       round.sortHands();
       const sorted = round.hands[0].filter((card, i) => {
         if (i + 1 === round.hands[0].length) return true;
@@ -161,7 +164,7 @@ describe('Round', () => {
 
   describe('setWinningBid method', () => {
     test('setWinningBid should reduce bids returning the highest bid', () => {
-      round.bids = mock.MOCK_BIDS;
+      round.bids = mock.MOCK_BIDS_2;
       expect(round.setWinningBid()).toStrictEqual({ amount: 10, bidder: 3, isTrump: true });
     });
   });
@@ -198,11 +201,11 @@ describe('Round', () => {
     });
 
     test('after bidding, activePlayer is set to highest bidder', () => {
-      round.winningBid = mock.MOCK_BIDS[1];
+      round.winningBid = mock.MOCK_BIDS_2[1];
       round.orderOfPlay();
       expect(round.activePlayer).toBe(2);
 
-      round.winningBid = mock.MOCK_BIDS[2];
+      round.winningBid = mock.MOCK_BIDS_2[2];
       round.orderOfPlay();
       expect(round.activePlayer).toBe(3);
     });
@@ -254,7 +257,7 @@ describe('Round', () => {
     });
 
     test('if player has led suit, playable cards are of that suit', () => {
-      round.curTrick = [
+      round.trick = [
         { cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 }, playedBy: 1 },
       ];
       round.setPlayableCards(mock.MOCK_SORTED_HAND);
@@ -262,7 +265,7 @@ describe('Round', () => {
     });
 
     test('if player does not have led suit, all cards in hand are playable', () => {
-      round.curTrick = [
+      round.trick = [
         { cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 }, playedBy: 1 },
       ];
       const noHeartsHand = mock.MOCK_SORTED_HAND.filter((card) => card.suit === Suit.Hearts);
@@ -272,25 +275,23 @@ describe('Round', () => {
   });
 
   describe('playCard method', () => {
-    let playedCard: CardType;
     beforeEach(() => {
-      round.dealHands();
-      round.sortHands();
+      round.hands = mock.MOCK_HANDS_SORTED;
+      round.bids = mock.MOCK_BIDS_2;
+      round.winningBid = { amount: 7, bidder: 0, isTrump: true };
+      round.trump = Suit.Clubs;
       round.updateActivePlayer(0);
-      round.bids = mock.MOCK_BIDS_3;
-      playedCard = round.hands[0][6];
     });
 
     test('if passed card is not in hand, playCard throws error', () => {
-      expect(round.bids.length).toBe(4);
-      expect(round.numPlayers).toEqual(round.bids.length);
-      playedCard = { suit: Suit.Hearts, name: CardName.Five, faceValue: 100, playValue: 100 };
-      expect(() => round.playCard(playedCard)).toThrowError();
+      const fakeCard = { suit: Suit.Hearts, name: CardName.Five, faceValue: 100, playValue: 100 };
+      expect(() => round.playCard(fakeCard)).toThrowError();
       expect(round.hands[0].length).toBe(8);
     });
 
     test('if passed card is in hand, that card is removed from activePlayer hand', () => {
-      const updatedHand = [...round.hands[0]];
+      const playedCard = round.hands[0][6];
+      const updatedHand = JSON.parse(JSON.stringify(round.hands[0]));
       updatedHand.splice(6, 1);
       round.playCard(playedCard);
 
@@ -298,12 +299,15 @@ describe('Round', () => {
     });
 
     test('valid passed card is added to current Trick', () => {
+      const playedCard = round.hands[0][1];
       round.playCard(playedCard);
-      expect(round.curTrick[0].cardPlayed).toStrictEqual(playedCard);
+      expect(round.trick[0].cardPlayed).toStrictEqual(playedCard);
     });
 
     test('endPlayerTurn turn is called', () => {
+      const playedCard = round.hands[0][1];
       const spy = jest.spyOn(round, 'endPlayerTurn');
+
       round.playCard(playedCard);
 
       expect(spy).toBeCalledTimes(1);
@@ -313,8 +317,8 @@ describe('Round', () => {
   describe('endPlayerTurn method', () => {
     test('if 4 cards have been played endTrick is called', () => {
       round.updateActivePlayer(0);
-      round.curTrick = mock.MOCK_TRICK;
-      expect(round.curTrick.length).toEqual(round.numPlayers);
+      round.trick = mock.MOCK_TRICK_SPADE_LED;
+      expect(round.trick.length).toEqual(round.numPlayers);
       const spy = jest.spyOn(round, 'endTrick');
 
       round.endPlayerTurn();
@@ -323,27 +327,19 @@ describe('Round', () => {
 
     test('if less than 4 cards have been played updateActivePlayer is called', () => {
       round.updateActivePlayer(1);
-      round.curTrick = [];
-      expect(round.curTrick.length).not.toEqual(round.numPlayers);
+      round.trick = [];
+      expect(round.trick.length).not.toEqual(round.numPlayers);
       const spy = jest.spyOn(round, 'updateActivePlayer');
 
       round.endPlayerTurn();
       expect(spy).toBeCalledTimes(1);
-    });
-
-    test('endPlayerTurn calls resetPlayableCards; playableCards is set to an empty array', () => {
-      round.dealHands();
-      round.updateActivePlayer(1);
-      round.setPlayableCards(round.hands[1]);
-      round.endPlayerTurn();
-      expect(round.playableCards).toStrictEqual([]);
     });
   });
 
   describe('endTrick method', () => {
     beforeEach(() => {
       round.updateActivePlayer(0);
-      round.curTrick = mock.MOCK_TRICK;
+      round.trick = mock.MOCK_TRICK_SPADE_LED;
       round.endTrick();
     });
     test('endTrick sends pointValue, trickWinner, and cardsPlayed data to tricksTaken', () => {

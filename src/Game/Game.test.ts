@@ -131,6 +131,9 @@ describe('4 Player Game playthrough', () => {
   beforeAll(() => {
     game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
   });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
   describe('add players to game', () => {
     test('addPlayer adds players to game.players', () => {
@@ -168,93 +171,161 @@ describe('4 Player Game playthrough', () => {
     });
   });
 
-  describe('orderOfPlay', () => {
-    test('orderOfPlay will initiate activePlayer to Seat 1', () => {
-      const spy = jest.spyOn(game.round!, 'orderOfPlay');
-      game.round?.orderOfPlay();
-      expect(spy).toBeCalledTimes(1);
-      expect(game.round?.dealer).toBe(0);
-      expect(game.round?.activePlayer).toBe(1);
-    });
-  });
-
-  describe('bidding', () => {
-    test('cannot call playCard before each player has bid', () => {
-      expect(() =>
-        game.round?.playCard({ suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 })
-      ).toThrowError();
-    });
-
-    test('validBids will return all valid bids to player', () => {
-      expect(game.round?.validBids()).toStrictEqual(mock.MOCK_VALID_BIDS);
-    });
-
-    test('if setPlayerBid is passed an invalid bid it throws an error', () => {
-      expect(() => game.round?.setPlayerBid(BidAmount.Five)).toThrowError();
-    });
-
-    test('if setPlayerBid is passed a valid bid it is added to end of bids array', () => {
-      expect(game.round?.activePlayer).toBe(1);
-      game.round?.setPlayerBid(BidAmount.Seven);
-    });
-
-    test('updateActivePlayer will move turn one position "left"', () => {
-      game.round?.updateActivePlayer();
-      expect(game.round?.activePlayer).toBe(2);
-      game.round?.setPlayerBid(BidAmount.SevenNo);
-    });
-
-    test('dealer can take bid for current high bid; setWinningBid is called after 4 bids', () => {
-      game.round?.updateActivePlayer();
-      expect(game.round?.activePlayer).toBe(3);
-      expect(() => game.round?.setPlayerBid(BidAmount.SevenNo)).toThrowError();
-      game.round?.setPlayerBid(BidAmount.Eight);
-
-      game.round?.updateActivePlayer();
-      expect(game.round?.activePlayer).toBe(game.round?.dealer);
-
-      const spyWin = jest.spyOn(game.round!, 'setWinningBid');
-      const spyOrder = jest.spyOn(game.round!, 'orderOfPlay');
-
-      game.round?.setPlayerBid(BidAmount.Eight);
-      expect(spyWin).toBeCalledTimes(1);
-      expect(spyOrder).toBeCalledTimes(1);
-      expect(game.round?.winningBid).toStrictEqual({ amount: 8, bidder: 0, isTrump: true });
-      expect(game.round?.activePlayer).toBe(0);
-    });
-
-    test('setPlayerBid will throw error if 4 bids have already been made', () => {
-      expect(() => game.round?.setPlayerBid(BidAmount.Ten)).toThrowError();
-    });
-
-    test('setPlayerBid will throw error if 4 bids have already been made', () => {
-      expect(() => game.round?.setPlayerBid(BidAmount.Ten)).toThrowError();
-    });
-
-    test('setTrump must be called for trump bids before playCard', () => {
-      expect(() =>
-        game.round?.playCard({ suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 })
-      ).toThrowError();
-    });
-
-    test('setTrump asigns passed suit to round trump', () => {
-      game.round?.setTrump(Suit.Hearts);
-      expect(game.round?.trump).toBe(Suit.Hearts);
-    });
-  });
-
-  describe('card play', () => {
+  describe('Round play', () => {
     beforeAll(() => {
       game.round!.hands = mock.MOCK_HANDS;
       game.round?.sortHands();
-      console.log(game.round?.hands);
-    });
-    test('activePlayer will be bid winner', () => {
-      expect(game.round?.activePlayer).toBe(game.round?.winningBid.bidder);
     });
 
-    test('activePlayer will be bid winning', () => {
-      expect(game.round?.activePlayer).toBe(0);
+    describe('orderOfPlay', () => {
+      test('orderOfPlay will initiate activePlayer to Seat 1', () => {
+        const spy = jest.spyOn(game.round!, 'orderOfPlay');
+        game.round?.orderOfPlay();
+        expect(spy).toBeCalledTimes(1);
+        expect(game.round?.dealer).toBe(0);
+        expect(game.round?.activePlayer).toBe(1);
+      });
+    });
+
+    describe('bidding', () => {
+      test('cannot call playCard before each player has bid', () => {
+        expect(() =>
+          game.round?.playCard({ suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 })
+        ).toThrowError();
+      });
+
+      test('validBids will return all valid bids to player', () => {
+        expect(game.round?.validBids()).toStrictEqual(mock.MOCK_VALID_BIDS);
+      });
+
+      test('if setPlayerBid is passed an invalid bid it throws an error', () => {
+        expect(() => game.round?.setPlayerBid(BidAmount.Five)).toThrowError();
+      });
+
+      test('if setPlayerBid is passed a valid bid it is added to end of bids array', () => {
+        expect(game.round?.activePlayer).toBe(1);
+        game.round?.setPlayerBid(BidAmount.Seven);
+      });
+
+      test('updateActivePlayer will move turn one position "left"', () => {
+        game.round?.updateActivePlayer();
+        expect(game.round?.activePlayer).toBe(2);
+        game.round?.setPlayerBid(BidAmount.SevenNo);
+      });
+
+      test('dealer can take bid for current high bid; setWinningBid is called after 4 bids', () => {
+        game.round?.updateActivePlayer();
+        expect(game.round?.activePlayer).toBe(3);
+        expect(() => game.round?.setPlayerBid(BidAmount.SevenNo)).toThrowError();
+        game.round?.setPlayerBid(BidAmount.Eight);
+
+        game.round?.updateActivePlayer();
+        expect(game.round?.activePlayer).toBe(game.round?.dealer);
+
+        const spyWin = jest.spyOn(game.round!, 'setWinningBid');
+        const spyOrder = jest.spyOn(game.round!, 'orderOfPlay');
+        const spyPlay = jest.spyOn(game.round!, 'setPlayableCards');
+
+        game.round?.setPlayerBid(BidAmount.Eight);
+        expect(spyWin).toBeCalledTimes(1);
+        expect(spyOrder).toBeCalledTimes(1);
+        expect(game.round?.winningBid.bidder !== -1).toBe(true);
+        expect(spyPlay).toBeCalledTimes(1);
+        expect(game.round?.winningBid).toStrictEqual({ amount: 8, bidder: 0, isTrump: true });
+        expect(game.round?.activePlayer).toBe(0);
+      });
+
+      test('setPlayerBid will throw error if 4 bids have already been made', () => {
+        expect(() => game.round?.setPlayerBid(BidAmount.Ten)).toThrowError();
+      });
+
+      test('setPlayerBid will throw error if 4 bids have already been made', () => {
+        expect(() => game.round?.setPlayerBid(BidAmount.Ten)).toThrowError();
+      });
+
+      test('setTrump must be called for trump bids before playCard', () => {
+        expect(() =>
+          game.round?.playCard({ suit: Suit.Diamonds, name: CardName.Ace, faceValue: 1, playValue: 14 })
+        ).toThrowError();
+      });
+
+      test('setTrump asigns passed suit to round trump', () => {
+        game.round?.setTrump(Suit.Hearts);
+        expect(game.round?.trump).toBe(Suit.Hearts);
+      });
+    });
+
+    describe('card play', () => {
+      test('sortHands will sort hands H,S,D,C', () => {
+        expect(game.round?.hands).toStrictEqual(mock.MOCK_HANDS_SORTED);
+      });
+
+      test('activePlayer will be bid winner', () => {
+        expect(game.round?.activePlayer).toBe(game.round?.winningBid.bidder);
+        expect(game.round?.activePlayer).toBe(0);
+      });
+
+      test('playable cards are set from active players hand', () => {
+        // console.log(
+        //   'MOCK',
+        //   mock.MOCK_HANDS_SORTED[0],
+        //   '\nGAME',
+        //   game.round?.hands[0],
+        //   '\nPLAYABLE',
+        //   game.round?.playableCards
+        // );
+
+        expect(game.round?.playableCards).toStrictEqual(mock.MOCK_HANDS_SORTED[0]);
+      });
+
+      test('playCard will remove card from activePlayer hand', () => {
+        const playedCard = game.round!.hands[0][0];
+        expect(playedCard).toStrictEqual({ suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 });
+
+        const spyRemove = jest.spyOn(game.round!, 'removeCardFromHand');
+        const spyUpdate = jest.spyOn(game.round!, 'updateCardsPlayed');
+        const spyEnd = jest.spyOn(game.round!, 'endPlayerTurn');
+        game.round?.playCard(playedCard);
+
+        expect(spyRemove).toBeCalledTimes(1);
+        expect(spyUpdate).toBeCalledTimes(1);
+        expect(spyEnd).toBeCalledTimes(1);
+
+        mock.MOCK_HANDS_SORTED[0].splice(0, 1);
+        expect(game.round?.hands[0]).toStrictEqual(mock.MOCK_HANDS_SORTED[0]);
+      });
+
+      test('played card will be added to trick', () => {
+        expect(game.round?.trick).toStrictEqual(mock.MOCK_TRICK_0.splice(0, 1));
+      });
+
+      test('turn will pass to player in seat 1 (to the "left")', () => {
+        expect(game.round?.activePlayer).toBe(1);
+      });
+
+      test('players must follow suit if possible or an error will be throw', () => {
+        const invalidCard = game.round!.hands[1][3];
+        expect(invalidCard).toStrictEqual({ suit: Suit.Diamonds, name: CardName.Queen, faceValue: 12, playValue: 12 });
+        expect(() => game.round?.playCard(invalidCard)).toThrowError();
+      });
+
+      test('after each player plays, trick will be evaluated', () => {
+        const spyEndTrick = jest.spyOn(game.round!, 'endTrick');
+
+        expect(game.round?.activePlayer).toBe(1);
+        const playedCardSeat1 = game.round!.hands[1][0];
+        game.round?.playCard(playedCardSeat1);
+
+        expect(game.round?.activePlayer).toBe(2);
+        const playedCardSeat2 = game.round!.hands[2][0];
+        game.round?.playCard(playedCardSeat2);
+
+        expect(game.round?.activePlayer).toBe(3);
+        const playedCardSeat3 = game.round!.hands[3][0];
+        game.round?.playCard(playedCardSeat3);
+
+        expect(spyEndTrick).toBeCalledTimes(1);
+      });
     });
   });
 });

@@ -12,7 +12,7 @@ export interface RoundType {
   trump: Suit | null;
   activePlayer: Seat;
   playableCards: CardType[];
-  curTrick: TrickType;
+  trick: TrickType;
   tricksTeam0: EvaluatedTrick[];
   tricksTeam1: EvaluatedTrick[];
   roundPoints: RoundPointTotals;
@@ -24,7 +24,7 @@ export interface RoundType {
   setTrump(trump: Suit): void;
   orderOfPlay(nextToPlay?: Seat): Seat;
   updateActivePlayer(makeActivePlayer?: number): Seat;
-  setPlayableCards(hand: Hand): Hand;
+  setPlayableCards(hand: Hand): CardType[];
   playCard(cardPlayed: CardType): void;
   removeCardFromHand(cardPlayed: CardType): Hand;
   updateCardsPlayed(cardPlayed: CardType): TrickType;

@@ -39,7 +39,7 @@ export type RoundSummary = {
 //   trump: Suit | null;
 //   activePlayer: Seat;
 //   playableCards: CardType[];
-//   curTrick: TrickType;
+//   trick: TrickType;
 //   roundPoints: RoundPointTotals;
 //   tricksTaken: EvaluatedTrick[];
 // }
