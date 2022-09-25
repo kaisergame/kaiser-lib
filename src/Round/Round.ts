@@ -203,22 +203,6 @@ export class Round implements RoundType {
     return nextActivePlayer;
   }
 
-  // turnTimer(autoPlay?: boolean, pointPenalty?: boolean) {
-  //   const timer = setTimeout(() => {
-  //     if (autoPlay) {
-  //       const cards = this.playableCards;
-  //       const randomCard = cards[Math.floor(Math.random() * cards.length)];
-  //       this.playCard(randomCard);
-  //     }
-  //     if (pointPenalty) {
-  //       const penaltyTeam = this.playersRoundData[this.activePlayer].teamId;
-  //       this.roundPoints[penaltyTeam].points = this.roundPoints[penaltyTeam].points - 1;
-  //     }
-  //   }, TURN_LENGTH);
-
-  //   return timer;
-  // }
-
   setPlayableCards(hand: Hand): Hand {
     const ledSuit = this.trick[0]?.cardPlayed.suit;
     const playable = ledSuit ? hand.filter((card) => card.suit === ledSuit) : hand;
