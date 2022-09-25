@@ -266,15 +266,6 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('playable cards are set from active players hand', () => {
-        // console.log(
-        //   'MOCK',
-        //   mock.MOCK_HANDS_SORTED[0],
-        //   '\nGAME',
-        //   game.round?.hands[0],
-        //   '\nPLAYABLE',
-        //   game.round?.playableCards
-        // );
-
         expect(game.round?.playableCards).toStrictEqual(mock.MOCK_HANDS_SORTED[0]);
       });
 
@@ -313,18 +304,31 @@ describe('4 Player Game playthrough', () => {
         const spyEndTrick = jest.spyOn(game.round!, 'endTrick');
 
         expect(game.round?.activePlayer).toBe(1);
-        const playedCardSeat1 = game.round!.hands[1][0];
-        game.round?.playCard(playedCardSeat1);
+        game.round?.playCard(game.round!.hands[1][0]);
 
         expect(game.round?.activePlayer).toBe(2);
-        const playedCardSeat2 = game.round!.hands[2][0];
-        game.round?.playCard(playedCardSeat2);
+        game.round?.playCard(game.round!.hands[2][0]);
 
         expect(game.round?.activePlayer).toBe(3);
-        const playedCardSeat3 = game.round!.hands[3][0];
-        game.round?.playCard(playedCardSeat3);
+        game.round?.playCard(game.round!.hands[3][0]);
 
         expect(spyEndTrick).toBeCalledTimes(1);
+      });
+
+      test('after trick, activePlayer is set to trick winner', () => {
+        // expect(game.round?.tricksTeam0[0].trickWonBy).toBe(0);
+        console.log(game.round?.tricksTeam0[0], game.round?.tricksTeam0[1]);
+
+        const spyEval = jest.spyOn(game.round!, 'evaluateRound');
+        const spyEnd = jest.spyOn(game.round!, 'endRound');
+        for (let i = 0; i < game.round!.hands[0].length; i++) {
+          for (let j = 0; j < game.config.numPlayers; j++) {
+            expect(game.round?.playableCards).toContain(game.round!.hands[j][0]);
+            game.round?.playCard(game.round!.hands[j][0]);
+          }
+        }
+        expect(spyEval).toBeCalledTimes(1);
+        expect(spyEnd).toBeCalledTimes(1);
       });
     });
   });

@@ -286,21 +286,25 @@ export class Round implements RoundType {
   endTrick(): EvaluatedTrick {
     const pointValue = this.getTrickValue();
     const trickWinner = this.getTrickWinner();
-    const trickData = {
+    const trickEvaluation = {
       pointValue: pointValue,
       cardsPlayed: this.trick,
       trickWonBy: trickWinner,
     };
+
     const wonByPlayer = this.playersRoundData.find((player) => player.seat === trickWinner)!;
-    if (wonByPlayer.teamId === 'team0') this.tricksTeam0.push(trickData);
-    if (wonByPlayer.teamId === 'team1') this.tricksTeam1.push(trickData);
-    this.updateRoundPoints(trickData, wonByPlayer);
+    if (wonByPlayer.teamId === 'team0') this.tricksTeam0.push(trickEvaluation);
+    if (wonByPlayer.teamId === 'team1') this.tricksTeam1.push(trickEvaluation);
+    console.log('\n eval', trickEvaluation, '\n wonBy', wonByPlayer, '\n tricks', this.tricksTeam0, this.tricksTeam1);
+    this.updateRoundPoints(trickEvaluation, wonByPlayer);
+
+    this.resetTrick();
 
     this.tricksTeam0.length + this.tricksTeam1.length === HAND_SIZE
       ? this.evaluateRound()
       : this.orderOfPlay(wonByPlayer.seat);
 
-    return trickData;
+    return trickEvaluation;
   }
 
   // private
@@ -326,10 +330,10 @@ export class Round implements RoundType {
           play.cardPlayed.playValue = 0;
         }
         if (play.cardPlayed.suit === this.trump) {
-          play.cardPlayed.playValue = play.cardPlayed.faceValue + TRUMP_VALUE;
+          play.cardPlayed.playValue = play.cardPlayed.playValue + TRUMP_VALUE;
         }
         if (play.cardPlayed.suit === ledSuit && play.cardPlayed.suit !== this.trump) {
-          play.cardPlayed.playValue = play.cardPlayed.faceValue;
+          play.cardPlayed.playValue = play.cardPlayed.playValue;
         }
         return play.cardPlayed.playValue > winningCard.playValue
           ? { playedBy: play.playedBy, playValue: play.cardPlayed.playValue }
@@ -349,6 +353,10 @@ export class Round implements RoundType {
   updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void {
     const addPointsToTeam = this.roundPoints.findIndex((team) => team.teamId === takenBy.teamId);
     this.roundPoints[addPointsToTeam].points = this.roundPoints[addPointsToTeam].points + takenTrick.pointValue;
+  }
+
+  resetTrick(): void {
+    this.trick = [];
   }
 
   evaluateRound(): RoundTotals {

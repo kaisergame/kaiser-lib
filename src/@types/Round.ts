@@ -34,9 +34,11 @@ export interface RoundType {
   getTrickValue(): number;
   getTrickWinner(): Seat;
   updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void;
+  resetTrick(): void;
   evaluateRound(): RoundTotals;
   isBidMade(): EvaluatedBid;
   playerTrickTotals(): PlayerPointTotals;
+  endRound: (roundTotals: RoundTotals) => void;
 }
 
 export type Hand = CardType[];
