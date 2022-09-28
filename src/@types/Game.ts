@@ -1,5 +1,4 @@
-import type { Cards } from '../Cards/Cards';
-import { Deck, Suit } from './Cards';
+import { Suit } from './Cards';
 import { BidAmount, RoundPointTotals, RoundType } from './Round';
 
 export interface GameType {
@@ -10,8 +9,6 @@ export interface GameType {
   teams: TeamType[];
   scores: ScoreType[];
   dealer: Seat | null;
-  // cards: Cards;
-  // deck: Deck;
   round: RoundType | null;
   roundSummaries: RoundSummary[];
 }
@@ -26,23 +23,6 @@ export type RoundSummary = {
   roundPoints: RoundPointTotals;
   roundTeams?: TeamType[];
 };
-
-// export interface RoundType {
-//   playersRoundData: PlayerRoundData[];
-//   numPlayers: number;
-//   dealer: Seat;
-//   deck: CardType[];
-//   hands: Hand[];
-//   minBid: BidAmount;
-//   bids: BidType[];
-//   winningBid: BidType;
-//   trump: Suit | null;
-//   activePlayer: Seat;
-//   playableCards: CardType[];
-//   trick: TrickType;
-//   roundPoints: RoundPointTotals;
-//   tricksTaken: EvaluatedTrick[];
-// }
 
 export type GameConfig = {
   numPlayers: number;
@@ -61,7 +41,6 @@ export type TeamType = {
   teamId: string;
   teamSeats: Seat[];
   teamMembers: PlayerId[];
-  // teamScore: number;
 };
 
 export type Seat = number;

@@ -183,10 +183,12 @@ export class Round implements RoundType {
     return nextActivePlayer;
   }
 
+  // private
   validateSeat(numSeat: Seat | undefined): boolean {
     return typeof numSeat === 'number' && numSeat < this.numPlayers && numSeat >= 0;
   }
 
+  // private
   setPlayableCards(hand: Hand): Hand {
     const ledSuit = this.trick[0]?.cardPlayed.suit;
     const followSuit = hand.filter((card) => card.suit === ledSuit);
@@ -237,6 +239,7 @@ export class Round implements RoundType {
     return updatedTrick;
   }
 
+  // private
   endPlayerTurn(): void {
     this.resetPlayableCards();
 
@@ -250,6 +253,7 @@ export class Round implements RoundType {
     this.playableCards = [];
   }
 
+  // private
   endTrick(): EvaluatedTrick {
     const pointValue = this.getTrickValue();
     const trickWinner = this.getTrickWinner();

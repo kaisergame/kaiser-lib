@@ -50,6 +50,7 @@ export class Game implements GameType {
     return player;
   }
 
+  // private
   initializeTeams(): TeamType[] {
     const numTeams = this.config.numPlayers / 2;
     const teams = [];
@@ -66,6 +67,7 @@ export class Game implements GameType {
     return teams;
   }
 
+  // private
   initializePlayers(): PlayerType[] {
     const players: PlayerType[] = [];
 
@@ -82,6 +84,7 @@ export class Game implements GameType {
     return players;
   }
 
+  // private
   getTeamSeats(teamIndex: number): number[] {
     const seats = [];
     const { numPlayers } = this.config;
@@ -116,15 +119,12 @@ export class Game implements GameType {
     };
   }
 
-  setDealer() {
-    let dealer = this.dealer;
-    if (dealer === null) dealer = 0;
-    else dealer !== this.players.length - 1 ? dealer++ : (dealer = 0);
-
-    this.dealer = dealer;
-    return dealer;
+  startGame(): void {
+    if (this.scores.find((score) => score.teamScore !== 0)) throw new Error('Cannot start game during play');
+    this.createRound();
   }
 
+  // private
   createRound() {
     if (this.players.find((player) => player.playerId === null))
       throw new Error(`Game requires ${this.config.numPlayers} to start`);
@@ -136,6 +136,16 @@ export class Game implements GameType {
     return round;
   }
 
+  // private
+  setDealer() {
+    let dealer = this.dealer;
+    if (dealer === null) dealer = 0;
+    else dealer !== this.players.length - 1 ? dealer++ : (dealer = 0);
+
+    this.dealer = dealer;
+    return dealer;
+  }
+
   endRound(roundTotals: RoundTotals): void {
     this.updateScores(roundTotals.roundPoints);
     const winner = this.checkIsWinner();
@@ -144,6 +154,7 @@ export class Game implements GameType {
     if (!winner) this.createRound();
   }
 
+  // private
   updateScores(roundPoints: RoundPointTotals): void {
     for (const pointData of roundPoints) {
       for (const score of this.scores) {
@@ -152,6 +163,7 @@ export class Game implements GameType {
     }
   }
 
+  // private
   checkIsWinner(): string | null {
     const winScore = this.config.scoreToWin;
     const isWinner = this.scores.reduce<{ teamId: string | null; teamScore: number }>(
@@ -165,6 +177,7 @@ export class Game implements GameType {
     return isWinner.teamId;
   }
 
+  // private
   endGame(teamId: string): void {
     console.log(`Team ${teamId} wins!`);
   }

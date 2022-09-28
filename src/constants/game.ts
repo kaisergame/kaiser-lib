@@ -1,7 +1,5 @@
 import { Suit } from '../@types/index';
 
-// export const PLAYER_NUM = 4;
-
 export const HAND_SIZE = 8;
 
 export const SUITS_NUM = Object.keys(Suit).length;
