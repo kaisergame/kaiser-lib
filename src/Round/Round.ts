@@ -270,6 +270,8 @@ export class Round implements RoundType {
       ? this.evaluateRound()
       : this.updateActivePlayer(trickWinner);
 
+    console.log(trickEvaluation);
+
     return trickEvaluation;
   }
 

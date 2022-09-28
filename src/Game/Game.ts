@@ -130,7 +130,7 @@ export class Game implements GameType {
       throw new Error(`Game requires ${this.config.numPlayers} to start`);
 
     const dealer = this.setDealer();
-    const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound.bind(null));
+    const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound.bind(this));
 
     this.round = round;
     return round;

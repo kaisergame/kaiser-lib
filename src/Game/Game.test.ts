@@ -321,9 +321,9 @@ describe('4 Player Game playthrough', () => {
 
       test('after 8 tricks, evaluateRound and endRound are called', () => {
         const spyEval = jest.spyOn(game.round!, 'evaluateRound');
-        const spyEnd = jest.spyOn(game, 'endRound');
+        const spyEnd = jest.spyOn(game.round!, 'endRound');
 
-        for (let i = 0; i < HAND_SIZE; i++) {
+        for (let i = 0; i < 7; i++) {
           expect(game.round?.activePlayer).toBe(0);
           for (let j = 0; j < game.config.numPlayers; j++) {
             expect(game.round?.playableCards).toContain(game.round!.hands[j][0]);
