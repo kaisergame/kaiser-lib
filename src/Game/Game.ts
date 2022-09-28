@@ -130,13 +130,13 @@ export class Game implements GameType {
       throw new Error(`Game requires ${this.config.numPlayers} to start`);
 
     const dealer = this.setDealer();
-    const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound);
+    const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound.bind(null));
 
     this.round = round;
     return round;
   }
 
-  endRound(roundTotals: RoundTotals) {
+  endRound(roundTotals: RoundTotals): void {
     this.updateScores(roundTotals.roundPoints);
     const winner = this.checkIsWinner();
 
@@ -144,7 +144,7 @@ export class Game implements GameType {
     if (!winner) this.createRound();
   }
 
-  updateScores(roundPoints: RoundPointTotals) {
+  updateScores(roundPoints: RoundPointTotals): void {
     for (const pointData of roundPoints) {
       for (const score of this.scores) {
         if (pointData.teamId === score.teamId) score.teamScore += pointData.points;
@@ -152,7 +152,7 @@ export class Game implements GameType {
     }
   }
 
-  checkIsWinner() {
+  checkIsWinner(): string | null {
     const winScore = this.config.scoreToWin;
     const isWinner = this.scores.reduce<{ teamId: string | null; teamScore: number }>(
       (highScore, team) => {
@@ -165,7 +165,7 @@ export class Game implements GameType {
     return isWinner.teamId;
   }
 
-  endGame(teamId: string) {
+  endGame(teamId: string): void {
     console.log(`Team ${teamId} wins!`);
   }
 }

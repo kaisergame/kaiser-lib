@@ -1,4 +1,4 @@
-import { BidAmount, CardName, CardType, PlayerRoundData, Suit } from '../@types/index';
+import { BidAmount, CardName, PlayerRoundData, Suit } from '../@types/index';
 import { HAND_SIZE } from '../constants/index';
 import * as mock from '../constants/mocks';
 import { Game } from '../Game/Game';
@@ -186,44 +186,21 @@ describe('Round', () => {
     });
   });
 
-  describe('orderOfPlay method', () => {
+  describe('updateActivePlayer method', () => {
     test('if no bids, expect activePlayer to be set to "left" of dealer (seat 1)', () => {
       expect(round.dealer).toBe(0);
       expect(round.bids.length).toBe(0);
-      expect(round.orderOfPlay()).toBe(1);
+      round.updateActivePlayer();
       expect(round.activePlayer).toBe(1);
     });
 
     test('if no bids and dealer is seat 3, activePlayer set to "left" of dealer (0)', () => {
       round.dealer = 3;
-      round.orderOfPlay();
+      round.updateActivePlayer();
       expect(round.activePlayer).toBe(0);
     });
 
-    test('after bidding, activePlayer is set to highest bidder', () => {
-      round.winningBid = mock.MOCK_BIDS_2[1];
-      round.orderOfPlay();
-      expect(round.activePlayer).toBe(2);
-
-      round.winningBid = mock.MOCK_BIDS_2[2];
-      round.orderOfPlay();
-      expect(round.activePlayer).toBe(3);
-    });
-
-    test('after a trick is taken, activePlayer is set to player that took trick', () => {
-      round.orderOfPlay(0);
-      expect(round.activePlayer).toBe(0);
-    });
-  });
-
-  describe('updateActivePlayer method', () => {
-    test('if activePlayer is -1, updateActivePlayer should throw error if no arg is passed', () => {
-      expect(() => {
-        round.updateActivePlayer();
-      }).toThrowError();
-    });
-
-    test('updateActivePlayer should throw error if no arg is number > numPlayers - 1', () => {
+    test('updateActivePlayer should throw error if arg is number > numPlayers - 1', () => {
       expect(() => {
         round.updateActivePlayer(round.numPlayers + 1);
       }).toThrowError();
@@ -239,7 +216,7 @@ describe('Round', () => {
 
     test('updateActivePlayer should increment activePlayer to highest player seat, then back to 0', () => {
       expect(round.activePlayer).toBe(-1);
-      round.orderOfPlay();
+      round.updateActivePlayer();
       expect(round.activePlayer).toBe(1);
 
       const active = [2, 3, 0, 1];
@@ -329,10 +306,10 @@ describe('Round', () => {
       round.updateActivePlayer(1);
       round.trick = [];
       expect(round.trick.length).not.toEqual(round.numPlayers);
-      const spy = jest.spyOn(round, 'updateActivePlayer');
+      const spyUpdate = jest.spyOn(round, 'updateActivePlayer');
 
       round.endPlayerTurn();
-      expect(spy).toBeCalledTimes(1);
+      expect(spyUpdate).toBeCalledTimes(1);
     });
   });
 

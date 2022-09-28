@@ -12,6 +12,14 @@ import {
   TrickType,
 } from '../@types/index';
 
+// CONFIG
+export const MOCK_GAME_CONFIG: GameConfig = {
+  numPlayers: 4,
+  minBid: 7,
+  scoreToWin: 52,
+};
+
+// PLAYERS
 export const MOCK_USER_1 = {
   id: 'mockUser1111',
   name: 'Ryan',
@@ -64,6 +72,7 @@ export const MOCK_PLAYERS: PlayerType[] = [
   },
 ];
 
+// CARDS
 export const MOCK_SHUFFLED_DECK: Deck = [
   { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
   { suit: Suit.Spades, name: CardName.Queen, faceValue: 12, playValue: 12 },
@@ -207,6 +216,7 @@ export const MOCK_HANDS_SORTED: Hand[] = [
   ],
 ];
 
+// BIDS
 export const MOCK_VALID_BIDS = [
   BidAmount.Pass,
   BidAmount.Seven,
@@ -244,34 +254,7 @@ export const MOCK_PASS_BIDS: BidType[] = [
   { amount: 0, bidder: 3, isTrump: true },
 ];
 
-export const MOCK_ROUND_TOTALS: RoundTotals = {
-  bid: { amount: 9, bidder: 2, isTrump: true, bidMade: false },
-  roundPoints: [
-    { teamId: 'team0', points: -9 },
-    { teamId: 'team1', points: 4 },
-  ],
-  playerPoints: [
-    { playerSeat: 0, points: 2 },
-    { playerSeat: 1, points: 3 },
-    { playerSeat: 2, points: 4 },
-    { playerSeat: 3, points: 1 },
-  ],
-};
-
-export const MOCK_ROUND_TOTALS_2: RoundTotals = {
-  bid: { amount: 10, bidder: 3, isTrump: false, bidMade: true },
-  roundPoints: [
-    { teamId: 'team0', points: -1 },
-    { teamId: 'team1', points: 22 },
-  ],
-  playerPoints: [
-    { playerSeat: 0, points: -2 },
-    { playerSeat: 1, points: 2 },
-    { playerSeat: 2, points: 1 },
-    { playerSeat: 3, points: 9 },
-  ],
-};
-
+// TRICKS
 export const MOCK_TRICK_0: TrickType = [
   { cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 }, playedBy: 0 },
   { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 1 },
@@ -309,36 +292,31 @@ export const TAKEN_TRICKS_NO_TRUMP: EvaluatedTrick[] = [
   },
 ];
 
-export const MOCK_GAME_CONFIG: GameConfig = {
-  numPlayers: 4,
-  minBid: 7,
-  scoreToWin: 52,
+// ROUND TOTALS
+export const MOCK_ROUND_TOTALS: RoundTotals = {
+  bid: { amount: 9, bidder: 2, isTrump: true, bidMade: false },
+  roundPoints: [
+    { teamId: 'team0', points: -9 },
+    { teamId: 'team1', points: 4 },
+  ],
+  playerPoints: [
+    { playerSeat: 0, points: 2 },
+    { playerSeat: 1, points: 3 },
+    { playerSeat: 2, points: 4 },
+    { playerSeat: 3, points: 1 },
+  ],
 };
 
-// export const ROUND_MOCK: Round =         {
-//   hands: expect.any(Array),
-//   bids: expect.any([]),
-//   winningBid: expect.objectContaining({ amount: -1, bidder: -1, isTrump: false }),
-//   trump: expect.any(null),
-//   activePlayer: expect.any(-1),
-//   playableCards: expect.any([]),
-//   trick: expect.any([]),
-//   tricksTeam0: expect.any([]),
-//   tricksTeam1: expect.any([]),
-//   roundPoints: expect.arrayContaining(
-//     { teamId: expect.any(String), points: expect.any(Number) }
-//   ),
-//     minBid: expect.any(Number),
-//   dealer: expect.any(0),
-//   deck: expect.arrayContaining({suit: expect.any(String),name: expect.any(String),faceValue: expect.any(Number),playValue: expect.any(Number)}),
-//   playersRoundData: {
-//       playerId: player.playerId!,
-//       name: player.name!,
-//       seat: player.seat,
-//       teamId: player.teamId,
-//       bid: null,
-//       isDealer: dealer === player.seat,
-//     },
-//   });
-//   endRound: endRound;
-// }
+export const MOCK_ROUND_TOTALS_2: RoundTotals = {
+  bid: { amount: 10, bidder: 3, isTrump: false, bidMade: true },
+  roundPoints: [
+    { teamId: 'team0', points: -1 },
+    { teamId: 'team1', points: 22 },
+  ],
+  playerPoints: [
+    { playerSeat: 0, points: -2 },
+    { playerSeat: 1, points: 2 },
+    { playerSeat: 2, points: 1 },
+    { playerSeat: 3, points: 9 },
+  ],
+};

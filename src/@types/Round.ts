@@ -22,7 +22,6 @@ export interface RoundType {
   setPlayerBid(bid: BidAmount): void;
   setWinningBid(): BidType;
   setTrump(trump: Suit): void;
-  orderOfPlay(nextToPlay?: Seat): Seat;
   updateActivePlayer(makeActivePlayer?: number): Seat;
   setPlayableCards(hand: Hand): CardType[];
   playCard(cardPlayed: CardType): void;

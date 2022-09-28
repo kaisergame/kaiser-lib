@@ -32,7 +32,7 @@ export class Round implements RoundType {
   tricksTeam1: EvaluatedTrick[] = [];
   roundPoints: RoundPointTotals = [
     { teamId: 'team0', points: 0 },
-    { teamId: 'team1', points: 1 },
+    { teamId: 'team1', points: 0 },
   ];
 
   constructor(
@@ -139,7 +139,6 @@ export class Round implements RoundType {
   }
 
   setWinningBid(): BidType {
-    // const bidAmount = Math.max(...this.bids) as BidAmount;
     const winningBid = this.bids.reduce(
       (highBid, bid): { bidder: number; amount: BidAmount; isTrump: boolean } => {
         return bid.amount >= highBid.amount
@@ -150,7 +149,7 @@ export class Round implements RoundType {
     );
 
     this.winningBid = winningBid;
-    this.orderOfPlay(winningBid.bidder);
+    this.updateActivePlayer(winningBid.bidder);
 
     return winningBid;
   }
@@ -161,41 +160,22 @@ export class Round implements RoundType {
   }
 
   // CARD PLAY
-  orderOfPlay(next?: Seat): Seat {
-    let nextPlayer = -1;
-
-    if (typeof next === 'number' && next <= this.numPlayers && next >= 0) {
-      nextPlayer = next;
-    }
-    // bidding (left of dealer to play)
-    if (typeof next !== 'number' && this.bids.length === 0) {
-      nextPlayer = this.dealer + 1 < this.numPlayers ? this.dealer + 1 : 0;
-    }
-    // first turn (bid winner to play)
-    if (
-      typeof next !== 'number' &&
-      this.winningBid.bidder !== -1 &&
-      this.tricksTeam0.length === 0 &&
-      this.tricksTeam1.length === 0
-    ) {
-      nextPlayer = this.winningBid.bidder;
-    }
-
-    this.updateActivePlayer(nextPlayer);
-
-    return nextPlayer;
-  }
-
-  updateActivePlayer(makeActivePlayer?: number): Seat {
-    if (typeof makeActivePlayer === 'undefined' && this.activePlayer === -1)
-      throw new Error('Must initialize orderOfPlay');
-    if (typeof makeActivePlayer === 'number' && makeActivePlayer > this.numPlayers - 1)
-      throw new Error(`There is no player in seat ${makeActivePlayer}`);
-
+  updateActivePlayer(makeActivePlayer?: Seat): Seat {
     let nextActivePlayer = -1;
-    if (typeof makeActivePlayer === 'number') nextActivePlayer = makeActivePlayer;
-    if (typeof makeActivePlayer === 'undefined')
-      nextActivePlayer = this.activePlayer < this.numPlayers - 1 ? this.activePlayer + 1 : 0;
+
+    if (typeof makeActivePlayer === 'undefined') {
+      // init bidding
+      if (this.activePlayer === -1 && this.bids.length === 0)
+        nextActivePlayer = this.dealer + 1 < this.numPlayers ? this.dealer + 1 : 0;
+
+      // advance play around table
+      if (nextActivePlayer === -1)
+        nextActivePlayer = this.validateSeat(this.activePlayer + 1) ? this.activePlayer + 1 : 0;
+    }
+
+    // specific player to play (bid or trick is won)
+    if (this.validateSeat(makeActivePlayer)) nextActivePlayer = makeActivePlayer!;
+    if (!this.validateSeat(nextActivePlayer)) throw new Error(`There is no player asigned to seat ${nextActivePlayer}`);
 
     this.activePlayer = nextActivePlayer;
     this.setPlayableCards(this.hands[nextActivePlayer]);
@@ -203,23 +183,27 @@ export class Round implements RoundType {
     return nextActivePlayer;
   }
 
+  validateSeat(numSeat: Seat | undefined): boolean {
+    return typeof numSeat === 'number' && numSeat < this.numPlayers && numSeat >= 0;
+  }
+
   setPlayableCards(hand: Hand): Hand {
     const ledSuit = this.trick[0]?.cardPlayed.suit;
-    const playable = ledSuit ? hand.filter((card) => card.suit === ledSuit) : hand;
+    const followSuit = hand.filter((card) => card.suit === ledSuit);
+    const playable = followSuit.length > 0 ? followSuit : hand;
 
     this.playableCards = playable;
     return playable;
   }
 
   playCard(cardPlayed: CardType): void {
-    if (this.bids.length !== this.numPlayers || this.activePlayer < 0) throw new Error('Cannot play a card now');
-    if (!this.playableCards.includes(cardPlayed)) throw new Error('That card cannot be played');
+    if (this.bids.length !== this.numPlayers) throw new Error('Game requires 4 players for play');
+    if (this.activePlayer === -1) throw new Error(`There is no player in seat ${this.activePlayer}`);
+    if (!this.playableCards.includes(cardPlayed))
+      throw new Error(`${cardPlayed} cannot be played by ${this.activePlayer}; they must play ${this.playableCards}`);
     if (this.trick.find((card) => card.playedBy === this.activePlayer))
-      throw new Error('Player has already played a card');
+      throw new Error(`Player ${this.activePlayer} has already played a card in this trick`);
     if (this.winningBid.isTrump && !this.trump) throw new Error('Trump must be set before card play');
-
-    // const inHand = this.hands[this.activePlayer].includes(cardPlayed);
-    // if (!inHand) throw new Error('Card not in hand');
 
     this.removeCardFromHand(cardPlayed);
     this.updateCardsPlayed(cardPlayed);
@@ -254,12 +238,11 @@ export class Round implements RoundType {
   }
 
   endPlayerTurn(): void {
-    if (this.trick.length === this.numPlayers) {
-      this.endTrick();
-    } else {
-      this.resetPlayableCards();
-      this.updateActivePlayer();
-    }
+    this.resetPlayableCards();
+
+    if (this.trick.length > this.numPlayers) throw new Error('Too many cards were played');
+    if (this.trick.length < this.numPlayers) this.updateActivePlayer();
+    if (this.trick.length === this.numPlayers) this.endTrick();
   }
 
   // private
@@ -279,14 +262,13 @@ export class Round implements RoundType {
     const wonByPlayer = this.playersRoundData.find((player) => player.seat === trickWinner)!;
     if (wonByPlayer.teamId === 'team0') this.tricksTeam0.push(trickEvaluation);
     if (wonByPlayer.teamId === 'team1') this.tricksTeam1.push(trickEvaluation);
-    console.log('\n eval', trickEvaluation, '\n wonBy', wonByPlayer, '\n tricks', this.tricksTeam0, this.tricksTeam1);
-    this.updateRoundPoints(trickEvaluation, wonByPlayer);
 
+    this.updateRoundPoints(trickEvaluation, wonByPlayer);
     this.resetTrick();
 
     this.tricksTeam0.length + this.tricksTeam1.length === HAND_SIZE
       ? this.evaluateRound()
-      : this.orderOfPlay(wonByPlayer.seat);
+      : this.updateActivePlayer(trickWinner);
 
     return trickEvaluation;
   }
@@ -329,6 +311,8 @@ export class Round implements RoundType {
       }
     );
 
+    if (!this.validateSeat(winner.playedBy))
+      throw new Error(`Could not determine who won the trick ${winner.playedBy}`);
     const trickWinner = winner.playedBy;
     return trickWinner;
   }
@@ -339,6 +323,7 @@ export class Round implements RoundType {
     this.roundPoints[addPointsToTeam].points = this.roundPoints[addPointsToTeam].points + takenTrick.pointValue;
   }
 
+  // private
   resetTrick(): void {
     this.trick = [];
   }
@@ -353,7 +338,6 @@ export class Round implements RoundType {
   }
 
   isBidMade(): EvaluatedBid {
-    // const bidTeam = this.teams.find((team) => team.teamSeats.includes(this.winningBid.bidder))!.teamId;
     const bidTeam = this.players.find((player) => player.seat === this.winningBid.bidder)!.teamId;
     let pointsMade = this.roundPoints.find((points) => points.teamId === bidTeam)!.points;
 

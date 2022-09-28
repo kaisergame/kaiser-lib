@@ -1,4 +1,5 @@
 import { BidAmount, CardName, Suit } from '../@types';
+import { HAND_SIZE } from '../constants/index';
 import * as mock from '../constants/mocks';
 import { Round } from '../Round/Round';
 import { Game } from './Game';
@@ -147,11 +148,12 @@ describe('4 Player Game playthrough', () => {
       game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
       expect(() => game.createRound()).toThrowError();
     });
+
     test('cannot add the same player twice', () => {
       expect(() => game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name)).toThrowError();
     });
 
-    test('if 4 players are added, cannot add more players to game of 4', () => {
+    test('cannot add more players than game is configured for', () => {
       game.addPlayer(mock.MOCK_USER_4.id, mock.MOCK_USER_4.name);
       expect(() => game.addPlayer(mock.MOCK_USER_5.id, mock.MOCK_USER_5.name)).toThrowError();
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(4);
@@ -177,10 +179,10 @@ describe('4 Player Game playthrough', () => {
       game.round?.sortHands();
     });
 
-    describe('orderOfPlay', () => {
-      test('orderOfPlay will initiate activePlayer to Seat 1', () => {
-        const spy = jest.spyOn(game.round!, 'orderOfPlay');
-        game.round?.orderOfPlay();
+    describe('updateActivePlayer', () => {
+      test('updateActivePlayer will initiate activePlayer to Seat 1', () => {
+        const spy = jest.spyOn(game.round!, 'updateActivePlayer');
+        game.round?.updateActivePlayer();
         expect(spy).toBeCalledTimes(1);
         expect(game.round?.dealer).toBe(0);
         expect(game.round?.activePlayer).toBe(1);
@@ -223,20 +225,16 @@ describe('4 Player Game playthrough', () => {
         expect(game.round?.activePlayer).toBe(game.round?.dealer);
 
         const spyWin = jest.spyOn(game.round!, 'setWinningBid');
-        const spyOrder = jest.spyOn(game.round!, 'orderOfPlay');
+        const spyActive = jest.spyOn(game.round!, 'updateActivePlayer');
         const spyPlay = jest.spyOn(game.round!, 'setPlayableCards');
 
         game.round?.setPlayerBid(BidAmount.Eight);
         expect(spyWin).toBeCalledTimes(1);
-        expect(spyOrder).toBeCalledTimes(1);
+        expect(spyActive).toBeCalledTimes(1);
         expect(game.round?.winningBid.bidder !== -1).toBe(true);
         expect(spyPlay).toBeCalledTimes(1);
         expect(game.round?.winningBid).toStrictEqual({ amount: 8, bidder: 0, isTrump: true });
         expect(game.round?.activePlayer).toBe(0);
-      });
-
-      test('setPlayerBid will throw error if 4 bids have already been made', () => {
-        expect(() => game.round?.setPlayerBid(BidAmount.Ten)).toThrowError();
       });
 
       test('setPlayerBid will throw error if 4 bids have already been made', () => {
@@ -276,6 +274,7 @@ describe('4 Player Game playthrough', () => {
         const spyRemove = jest.spyOn(game.round!, 'removeCardFromHand');
         const spyUpdate = jest.spyOn(game.round!, 'updateCardsPlayed');
         const spyEnd = jest.spyOn(game.round!, 'endPlayerTurn');
+        expect(game.round?.activePlayer).toBe(0);
         game.round?.playCard(playedCard);
 
         expect(spyRemove).toBeCalledTimes(1);
@@ -287,7 +286,7 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('played card will be added to trick', () => {
-        expect(game.round?.trick).toStrictEqual(mock.MOCK_TRICK_0.splice(0, 1));
+        expect(game.round?.trick).toStrictEqual([mock.MOCK_TRICK_0[0]]);
       });
 
       test('turn will pass to player in seat 1 (to the "left")', () => {
@@ -316,12 +315,16 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('after trick, activePlayer is set to trick winner', () => {
-        // expect(game.round?.tricksTeam0[0].trickWonBy).toBe(0);
-        console.log(game.round?.tricksTeam0[0], game.round?.tricksTeam0[1]);
+        expect(game.round?.tricksTeam0[0].trickWonBy).toBe(0);
+        expect(game.round?.activePlayer).toBe(0);
+      });
 
+      test('after 8 tricks, evaluateRound and endRound are called', () => {
         const spyEval = jest.spyOn(game.round!, 'evaluateRound');
-        const spyEnd = jest.spyOn(game.round!, 'endRound');
-        for (let i = 0; i < game.round!.hands[0].length; i++) {
+        const spyEnd = jest.spyOn(game, 'endRound');
+
+        for (let i = 0; i < HAND_SIZE; i++) {
+          expect(game.round?.activePlayer).toBe(0);
           for (let j = 0; j < game.config.numPlayers; j++) {
             expect(game.round?.playableCards).toContain(game.round!.hands[j][0]);
             game.round?.playCard(game.round!.hands[j][0]);

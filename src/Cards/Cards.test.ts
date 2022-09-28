@@ -60,7 +60,6 @@ describe('Deck', () => {
       expect(deck).toEqual(deckCopy);
 
       cards.shuffleDeck(deckCopy);
-      console.log(deckCopy);
       expect(deck).not.toEqual(deckCopy);
     });
   });
