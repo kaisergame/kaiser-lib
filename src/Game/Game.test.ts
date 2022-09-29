@@ -351,5 +351,14 @@ describe('4 Player Game playthrough', () => {
         expect(spyEndGame).not.toBeCalled();
       });
     });
+    describe('new Round', () => {
+      test('dealer will be moved left to seat 1', () => {
+        expect(game.round?.dealer).toBe(1);
+      });
+
+      test('expect no bids', () => {
+        expect(game.round?.bids.length).toBe(0);
+      });
+    });
   });
 });
