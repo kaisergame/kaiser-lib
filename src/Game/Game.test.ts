@@ -323,7 +323,7 @@ describe('4 Player Game playthrough', () => {
         const spyEval = jest.spyOn(game.round!, 'evaluateRound');
         const spyEnd = jest.spyOn(game.round!, 'endRound');
 
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < HAND_SIZE - 1; i++) {
           expect(game.round?.activePlayer).toBe(0);
           for (let j = 0; j < game.config.numPlayers; j++) {
             expect(game.round?.playableCards).toContain(game.round!.hands[j][0]);
@@ -331,6 +331,19 @@ describe('4 Player Game playthrough', () => {
           }
         }
         expect(spyEval).toBeCalledTimes(1);
+        expect(spyEnd).toBeCalledWith({
+          bid: { amount: 8, bidder: 0, isTrump: true, bidMade: true },
+          roundPoints: [
+            { teamId: 'team0', points: 9 },
+            { teamId: 'team1', points: 1 },
+          ],
+          playerPoints: [
+            { playerSeat: 0, points: 9 },
+            { playerSeat: 1, points: 1 },
+            { playerSeat: 2, points: 0 },
+            { playerSeat: 3, points: 0 },
+          ],
+        });
         expect(spyEnd).toBeCalledTimes(1);
       });
     });

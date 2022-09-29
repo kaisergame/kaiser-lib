@@ -105,8 +105,7 @@ export class Round implements RoundType {
   validBids(): BidAmount[] {
     const curBids = this.bids.map((bid) => bid.amount);
     const curHighBid = Math.max(...curBids);
-    const noDealerPass =
-      curBids.length === this.numPlayers - 1 && this.bids.filter((bid) => bid.amount !== 0).length === 0;
+    const noDealerPass = this.activePlayer === this.dealer && this.bids.filter((bid) => bid.amount !== 0).length === 0;
 
     const validBids = [
       BidAmount.Pass,
@@ -274,8 +273,6 @@ export class Round implements RoundType {
       ? this.evaluateRound()
       : this.updateActivePlayer(trickWinner);
 
-    console.log(trickEvaluation);
-
     return trickEvaluation;
   }
 
@@ -334,6 +331,7 @@ export class Round implements RoundType {
     this.trick = [];
   }
 
+  // private
   evaluateRound(): RoundTotals {
     const bid = this.isBidMade();
     const playerPoints = this.playerTrickTotals();
@@ -343,6 +341,7 @@ export class Round implements RoundType {
     return totals;
   }
 
+  // private
   isBidMade(): EvaluatedBid {
     const bidTeam = this.players.find((player) => player.seat === this.winningBid.bidder)!.teamId;
     let pointsMade = this.roundPoints.find((points) => points.teamId === bidTeam)!.points;
@@ -363,14 +362,19 @@ export class Round implements RoundType {
     return totals;
   }
 
+  // private
   playerTrickTotals(): PlayerPointTotals {
     const tricks = this.tricksTeam0.concat(this.tricksTeam1);
-    const initialPoints = new Array(this.numPlayers).fill({ playerId: '', points: 0 });
+    const initialPoints = [];
+
+    for (let i = 0; i < this.numPlayers; i++) {
+      initialPoints.push({ playerSeat: i, points: 0 });
+    }
 
     const totals = tricks.reduce((playerTricks, trick) => {
       const trickWonBy = this.playersRoundData.find((player) => player.seat === trick.trickWonBy)!;
       playerTricks[trickWonBy.seat] = {
-        playerSeat: trickWonBy,
+        playerSeat: trickWonBy.seat,
         points: playerTricks[trickWonBy.seat].points + trick.pointValue,
       };
       return playerTricks;
