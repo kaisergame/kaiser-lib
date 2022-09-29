@@ -13,17 +13,34 @@ export interface GameType {
   roundSummaries: RoundSummary[];
   addPlayer(id: string, name: string): PlayerType;
   removePlayer(id: string): void;
-  initializeTeams(): TeamType[];
-  initializePlayers(): PlayerType[];
-  getTeamSeats(teamIndex: number): number[];
+  // initializeTeams(): TeamType[];
+  // initializePlayers(): PlayerType[];
+  // getTeamSeats(teamIndex: number): number[];
   switchPlayerSeat(movePlayer: PlayerType, moveToSeat?: Seat): void;
   startGame(): void;
-  createRound(): void;
-  setDealer(): Seat;
+  // createRound(): void;
+  // setDealer(): Seat;
   endRound(roundTotals: RoundTotals): void;
-  updateScores(roundPoints: RoundPointTotals): void;
-  checkIsWinner(): string | null;
-  endGame(teamId: string): void;
+  // updateScores(roundPoints: RoundPointTotals): void;
+  // checkIsWinner(): string | null;
+  // endGame(teamId: string): void;
+}
+
+export interface GameStateType {
+  gameId: GameId;
+  owner: { id: string; name: string };
+  config: GameConfig;
+  players: PlayerType[];
+  teams: TeamType[];
+  scores: ScoreType[];
+  dealer: Seat | null;
+  round: RoundType | null;
+  roundSummaries: RoundSummary[];
+  version: GameVersion;
+}
+
+export enum GameVersion {
+  One = '1.0.0',
 }
 
 export type GameId = string;
