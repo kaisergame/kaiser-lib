@@ -321,7 +321,9 @@ describe('4 Player Game playthrough', () => {
 
       test('after 8 tricks, evaluateRound and endRound are called', () => {
         const spyEval = jest.spyOn(game.round!, 'evaluateRound');
-        const spyEnd = jest.spyOn(game.round!, 'endRound');
+        const spyEndRound = jest.spyOn(game.round!, 'endRound');
+        const spyCreateRound = jest.spyOn(game, 'createRound');
+        const spyEndGame = jest.spyOn(game, 'endGame');
 
         for (let i = 0; i < HAND_SIZE - 1; i++) {
           expect(game.round?.activePlayer).toBe(0);
@@ -331,7 +333,8 @@ describe('4 Player Game playthrough', () => {
           }
         }
         expect(spyEval).toBeCalledTimes(1);
-        expect(spyEnd).toBeCalledWith({
+        expect(spyEndRound).toBeCalledTimes(1);
+        expect(spyEndRound).toBeCalledWith({
           bid: { amount: 8, bidder: 0, isTrump: true, bidMade: true },
           roundPoints: [
             { teamId: 'team0', points: 9 },
@@ -344,7 +347,8 @@ describe('4 Player Game playthrough', () => {
             { playerSeat: 3, points: 0 },
           ],
         });
-        expect(spyEnd).toBeCalledTimes(1);
+        expect(spyCreateRound).toBeCalledTimes(1);
+        expect(spyEndGame).not.toBeCalled();
       });
     });
   });
