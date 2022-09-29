@@ -1,5 +1,5 @@
 import { Suit } from './Cards';
-import { BidAmount, RoundPointTotals, RoundType } from './Round';
+import { BidAmount, RoundPointTotals, RoundTotals, RoundType } from './Round';
 
 export interface GameType {
   gameId: GameId;
@@ -11,6 +11,19 @@ export interface GameType {
   dealer: Seat | null;
   round: RoundType | null;
   roundSummaries: RoundSummary[];
+  addPlayer(id: string, name: string): PlayerType;
+  removePlayer(id: string): void;
+  initializeTeams(): TeamType[];
+  initializePlayers(): PlayerType[];
+  getTeamSeats(teamIndex: number): number[];
+  switchPlayerSeat(movePlayer: PlayerType, moveToSeat?: Seat): void;
+  startGame(): void;
+  createRound(): void;
+  setDealer(): Seat;
+  endRound(roundTotals: RoundTotals): void;
+  updateScores(roundPoints: RoundPointTotals): void;
+  checkIsWinner(): string | null;
+  endGame(teamId: string): void;
 }
 
 export type GameId = string;

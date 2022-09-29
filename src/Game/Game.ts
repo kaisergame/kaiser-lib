@@ -47,7 +47,26 @@ export class Game implements GameType {
 
     this.players[openSeat] = player;
     playerTeam.teamMembers.push(player.playerId!);
+    if (this.round) {
+      const playerData = this.round.playersRoundData.find((player) => player.playerId === null);
+      playerData!.playerId = id;
+      playerData!.name = name;
+    }
+
     return player;
+  }
+
+  removePlayer(id: string): void {
+    const player = this.players.find((player) => player.playerId === id);
+    player!.playerId = null;
+
+    this.teams.map((team) => team.teamMembers.filter((playerId) => playerId !== id));
+
+    if (this.round) {
+      const playerData = this.round.playersRoundData.find((player) => player.playerId === id);
+      playerData!.playerId = null;
+      playerData!.name = null;
+    }
   }
 
   // private
@@ -125,7 +144,7 @@ export class Game implements GameType {
   }
 
   // private
-  createRound() {
+  createRound(): void {
     if (this.players.find((player) => player.playerId === null))
       throw new Error(`Game requires ${this.config.numPlayers} to start`);
 
@@ -133,11 +152,10 @@ export class Game implements GameType {
     const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound.bind(this));
 
     this.round = round;
-    return round;
   }
 
   // private
-  setDealer() {
+  setDealer(): Seat {
     let dealer = this.dealer;
     if (dealer === null) dealer = 0;
     else dealer !== this.players.length - 1 ? dealer++ : (dealer = 0);
