@@ -8,8 +8,6 @@ export const CARDS_IN_DECK = 52;
 
 export const CARDS_PER_SUIT = 13;
 
-export const TURN_LENGTH = 20000;
-
 export const TRUMP_VALUE = 14;
 
 export const TOTAL_TRICK_POINTS = HAND_SIZE + 5 - 3;
