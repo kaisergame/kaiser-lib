@@ -36,7 +36,7 @@ export interface GameStateType {
   teams: TeamType[];
   scores: ScoreType[];
   dealer: Seat | null;
-  round: RoundType | null;
+  round: string | null;
   roundSummaries: RoundSummary[];
   version: GameVersion;
 }

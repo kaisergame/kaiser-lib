@@ -1,6 +1,8 @@
 import {
   GameConfig,
+  GameStateType,
   GameType,
+  GameVersion,
   PlayerId,
   PlayerType,
   RoundPointTotals,
@@ -35,7 +37,7 @@ export class Game implements GameType {
 
   // STATE
   gameStateToJson(): string {
-    const state = {
+    const state: GameStateType = {
       gameId: this.gameId,
       config: this.config,
       owner: this.owner,
@@ -45,6 +47,7 @@ export class Game implements GameType {
       dealer: this.dealer,
       round: this.round?.roundStateToJson() || null,
       roundSummaries: this.roundSummaries,
+      version: GameVersion.One
     };
     return JSON.stringify(state);
   }
