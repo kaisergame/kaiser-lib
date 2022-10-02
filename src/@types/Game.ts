@@ -15,17 +15,17 @@ export interface GameType {
   gameStateFromJson(jsonGameState: string): void;
   addPlayer(id: string, name: string): PlayerType;
   removePlayer(id: string): void;
-  initializeTeams(): TeamType[]; // private
-  initializePlayers(): PlayerType[]; // private
-  getTeamSeats(teamIndex: number): number[]; // private
+  // initializeTeams(): TeamType[]; // private
+  // initializePlayers(): PlayerType[]; // private
+  // getTeamSeats(teamIndex: number): number[]; // private
   switchPlayerSeat(movePlayer: PlayerId, moveToSeat?: Seat): void;
   startGame(): void;
-  createRound(): void; // private
-  setDealer(): Seat; // private
+  // createRound(): void; // private
+  // setDealer(): Seat; // private
   endRound(roundTotals: RoundTotals): void;
-  updateScores(roundPoints: RoundPointTotals): void; // private
-  checkIsWinner(): string | null; // private
-  endGame(teamId: string): void; // private
+  // updateScores(roundPoints: RoundPointTotals): void; // private
+  // checkIsWinner(): string | null; // private
+  // endGame(teamId: string): void; // private
 }
 
 export interface GameStateType {

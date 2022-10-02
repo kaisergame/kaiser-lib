@@ -100,8 +100,7 @@ export class Round implements RoundType {
   }
 
   // CARDS
-  // private
-  dealHands(): Hand[] {
+  private dealHands(): Hand[] {
     const cards = new Cards(this.numPlayers);
     const deck = cards.shuffleDeck(cards.createDeck());
     const hands: Hand[] = [];
@@ -178,8 +177,7 @@ export class Round implements RoundType {
     if (this.bids.length === this.numPlayers) this.setWinningBid();
   }
 
-  // private
-  setWinningBid(): BidType {
+  private setWinningBid(): BidType {
     const winningBid = this.bids.reduce(
       (highBid, bid): { bidder: number; amount: BidAmount; isTrump: boolean } => {
         return bid.amount >= highBid.amount
@@ -195,15 +193,13 @@ export class Round implements RoundType {
     return winningBid;
   }
 
-  // private
-  setTrump(trump: Suit): void {
+  private setTrump(trump: Suit): void {
     if (!this.winningBid.isTrump) throw new Error('Trump cannot be called on a no trump bid');
     this.trump = trump;
   }
 
   // CARD PLAY
-  // private
-  updateActivePlayer(makeActivePlayer?: Seat): Seat {
+  private updateActivePlayer(makeActivePlayer?: Seat): Seat {
     let nextActivePlayer = -1;
 
     if (typeof makeActivePlayer === 'undefined') {
@@ -226,13 +222,11 @@ export class Round implements RoundType {
     return nextActivePlayer;
   }
 
-  // private
-  validateSeat(numSeat: Seat | undefined): boolean {
+  private validateSeat(numSeat: Seat | undefined): boolean {
     return typeof numSeat === 'number' && numSeat < this.numPlayers && numSeat >= 0;
   }
 
-  // private
-  setPlayableCards(hand: Hand): Hand {
+  private setPlayableCards(hand: Hand): Hand {
     const ledSuit = this.trick[0]?.cardPlayed.suit;
     const followSuit = hand.filter((card) => card.suit === ledSuit);
     const playable = followSuit.length > 0 ? followSuit : hand;
@@ -255,8 +249,7 @@ export class Round implements RoundType {
     this.endPlayerTurn();
   }
 
-  // private
-  removeCardFromHand(cardPlayed: CardType): Hand {
+  private removeCardFromHand(cardPlayed: CardType): Hand {
     const hand = [...this.hands[this.activePlayer]];
     const cardIndex = this.hands[this.activePlayer].indexOf(cardPlayed);
 
@@ -269,8 +262,7 @@ export class Round implements RoundType {
     return hand;
   }
 
-  // private
-  updateCardsPlayed(cardPlayed: CardType): TrickType {
+  private updateCardsPlayed(cardPlayed: CardType): TrickType {
     const play = {
       cardPlayed,
       playedBy: this.activePlayer,
@@ -282,8 +274,7 @@ export class Round implements RoundType {
     return updatedTrick;
   }
 
-  // private
-  endPlayerTurn(): void {
+  private endPlayerTurn(): void {
     this.resetPlayableCards();
 
     if (this.trick.length > this.numPlayers) throw new Error('Too many cards were played');
@@ -291,13 +282,11 @@ export class Round implements RoundType {
     if (this.trick.length === this.numPlayers) this.endTrick();
   }
 
-  // private
-  resetPlayableCards(): void {
+  private resetPlayableCards(): void {
     this.playableCards = [];
   }
 
-  // private
-  endTrick(): EvaluatedTrick {
+  private endTrick(): EvaluatedTrick {
     const pointValue = this.getTrickValue();
     const trickWinner = this.getTrickWinner();
     const trickEvaluation = {
@@ -320,8 +309,7 @@ export class Round implements RoundType {
     return trickEvaluation;
   }
 
-  // private
-  getTrickValue(): number {
+  private getTrickValue(): number {
     let value = 1;
 
     const cardsPlayed = this.trick.map((play) => play.cardPlayed);
@@ -333,8 +321,7 @@ export class Round implements RoundType {
     return value;
   }
 
-  // private
-  getTrickWinner(): Seat {
+  private getTrickWinner(): Seat {
     const ledSuit = this.trick[0].cardPlayed.suit;
 
     const winner = this.trick.reduce(
@@ -364,19 +351,16 @@ export class Round implements RoundType {
     return trickWinner;
   }
 
-  // private
-  updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void {
+  private updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void {
     const addPointsToTeam = this.roundPoints.findIndex((team) => team.teamId === takenBy.teamId);
     this.roundPoints[addPointsToTeam].points = this.roundPoints[addPointsToTeam].points + takenTrick.pointValue;
   }
 
-  // private
-  resetTrick(): void {
+  private resetTrick(): void {
     this.trick = [];
   }
 
-  // private
-  evaluateRound(): RoundTotals {
+  private evaluateRound(): RoundTotals {
     const bid = this.isBidMade();
     const playerPoints = this.playerTrickTotals();
     const totals = { bid, roundPoints: this.roundPoints, playerPoints };
@@ -385,8 +369,7 @@ export class Round implements RoundType {
     return totals;
   }
 
-  // private
-  isBidMade(): EvaluatedBid {
+  private isBidMade(): EvaluatedBid {
     const bidTeam = this.players.find((player) => player.seat === this.winningBid.bidder)!.teamId;
     let pointsMade = this.roundPoints.find((points) => points.teamId === bidTeam)!.points;
 
@@ -406,8 +389,7 @@ export class Round implements RoundType {
     return totals;
   }
 
-  // private
-  playerTrickTotals(): PlayerPointTotals {
+  private playerTrickTotals(): PlayerPointTotals {
     const tricks = this.tricksTeam0.concat(this.tricksTeam1);
     const initialPoints = [];
 

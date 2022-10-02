@@ -63,8 +63,7 @@ export class Game implements GameType {
   }
 
   // PLAYERS
-  //private
-  initializeTeams(): TeamType[] {
+  private initializeTeams(): TeamType[] {
     const numTeams = this.config.numPlayers / 2;
     const teams = [];
 
@@ -80,8 +79,7 @@ export class Game implements GameType {
     return teams;
   }
 
-  //private
-  initializePlayers(): PlayerType[] {
+  private initializePlayers(): PlayerType[] {
     const players: PlayerType[] = [];
 
     for (let i = 0; i < this.config.numPlayers; i++) {
@@ -97,8 +95,7 @@ export class Game implements GameType {
     return players;
   }
 
-  // private
-  initializeOwner(owner: { id: string; name: string }): { id: string; name: string } {
+  private initializeOwner(owner: { id: string; name: string }): { id: string; name: string } {
     this.addPlayer(owner.id, owner.name);
     return owner;
   }
@@ -143,8 +140,7 @@ export class Game implements GameType {
     }
   }
 
-  //private
-  getTeamSeats(teamIndex: number): number[] {
+  private getTeamSeats(teamIndex: number): number[] {
     const seats = [];
     const { numPlayers } = this.config;
 
@@ -201,16 +197,14 @@ export class Game implements GameType {
     this.createRound();
   }
 
-  //private
-  createRound(): void {
+  private createRound(): void {
     const dealer = this.setDealer();
     const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound.bind(this));
 
     this.round = round;
   }
 
-  //private
-  setDealer(): Seat {
+  private setDealer(): Seat {
     let dealer = this.dealer;
     if (dealer === null) dealer = 0;
     else dealer !== this.players.length - 1 ? dealer++ : (dealer = 0);
@@ -227,8 +221,7 @@ export class Game implements GameType {
     if (!winner) this.createRound();
   }
 
-  //private
-  updateScores(roundPoints: RoundPointTotals): void {
+  private updateScores(roundPoints: RoundPointTotals): void {
     for (const pointData of roundPoints) {
       for (const score of this.scores) {
         if (pointData.teamId === score.teamId) score.teamScore += pointData.points;
@@ -236,8 +229,7 @@ export class Game implements GameType {
     }
   }
 
-  //private
-  checkIsWinner(): string | null {
+  private checkIsWinner(): string | null {
     const winScore = this.config.scoreToWin;
     const isWinner = this.scores.reduce<{ teamId: string | null; teamScore: number }>(
       (highScore, team) => {
@@ -250,8 +242,7 @@ export class Game implements GameType {
     return isWinner.teamId;
   }
 
-  //private
-  endGame(teamId: string): void {
+  private endGame(teamId: string): void {
     console.log(`Team ${teamId} wins!`);
   }
 }
