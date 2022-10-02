@@ -11,19 +11,21 @@ export interface GameType {
   dealer: Seat | null;
   round: RoundType | null;
   roundSummaries: RoundSummary[];
+  gameStateToJson(): string;
+  gameStateFromJson(jsonGameState: string): void;
   addPlayer(id: string, name: string): PlayerType;
   removePlayer(id: string): void;
-  // initializeTeams(): TeamType[];
-  // initializePlayers(): PlayerType[];
-  // getTeamSeats(teamIndex: number): number[];
-  switchPlayerSeat(movePlayer: PlayerType, moveToSeat?: Seat): void;
+  initializeTeams(): TeamType[]; // private
+  initializePlayers(): PlayerType[]; // private
+  getTeamSeats(teamIndex: number): number[]; // private
+  switchPlayerSeat(movePlayer: PlayerId, moveToSeat?: Seat): void;
   startGame(): void;
-  // createRound(): void;
-  // setDealer(): Seat;
+  createRound(): void; // private
+  setDealer(): Seat; // private
   endRound(roundTotals: RoundTotals): void;
-  // updateScores(roundPoints: RoundPointTotals): void;
-  // checkIsWinner(): string | null;
-  // endGame(teamId: string): void;
+  updateScores(roundPoints: RoundPointTotals): void; // private
+  checkIsWinner(): string | null; // private
+  endGame(teamId: string): void; // private
 }
 
 export interface GameStateType {

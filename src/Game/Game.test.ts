@@ -7,22 +7,21 @@ import { Game } from './Game';
 describe('Game with 4 players', () => {
   let game: Game;
   beforeAll(() => {
-    game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
+    game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
   });
 
   describe('addPlayer method', () => {
     test('addPlayer should increase non-null Game players.playerId by 1', () => {
       const initialPlayerNum = 0;
-      game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
 
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(initialPlayerNum + 1);
     });
 
     test('addPlayer should give expected values for userId, seat, and team', () => {
+      game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
       game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
-      game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
 
-      expect(game.players[1].playerId).toBe(mock.MOCK_USER_2.id);
+      expect(game.players[1].playerId).toBe(mock.MOCK_USER_1.id);
       expect(game.players[1].teamId).toBe('team1');
       expect(game.players[2].seat).toBe(2);
       expect(game.players[2].teamId).toBe('team0');
@@ -42,6 +41,70 @@ describe('Game with 4 players', () => {
         game.setDealer();
       }
       expect(game.dealer).toBe(0);
+    });
+  });
+
+  describe('switchPlayerSeat method', () => {
+    beforeEach(() => {
+      game.teams = game.initializeTeams();
+      game.players = game.initializePlayers();
+
+      game.addPlayer(mock.MOCK_USER_0.id, mock.MOCK_USER_0.name);
+      game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
+      game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
+      game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
+    });
+    test('a player passed to switchPlayerSeat will be moved 1 seat left', () => {
+      console.log(game.teams);
+
+      game.switchPlayerSeat('mockUser0000');
+      console.log(game.teams);
+
+      expect(game.players[0]).toStrictEqual({
+        playerId: 'mockUser0000',
+        name: 'Ryan',
+        teamId: 'team1',
+        seat: 1,
+      });
+      expect(game.players[1]).toStrictEqual({
+        playerId: 'mockUser1111',
+        name: 'Cody',
+        teamId: 'team0',
+        seat: 0,
+      });
+
+      expect(game.teams[0].teamMembers).toStrictEqual(['mockUser2222', 'mockUser1111']);
+      expect(game.teams[1].teamMembers).toStrictEqual(['mockUser3333', 'mockUser0000']);
+    });
+
+    test('if called with seat, player switches to that seat, player in that seat goes to player position', () => {
+      game.switchPlayerSeat('mockUser0000', 2);
+      expect(game.players[0]).toStrictEqual({
+        playerId: 'mockUser0000',
+        name: 'Ryan',
+        teamId: 'team0',
+        seat: 2,
+      });
+      expect(game.players[2]).toStrictEqual({
+        playerId: 'mockUser2222',
+        name: 'Stacey',
+        teamId: 'team0',
+        seat: 0,
+      });
+
+      game.switchPlayerSeat('mockUser2222', 3);
+      expect(game.players[2]).toStrictEqual({
+        playerId: 'mockUser2222',
+        name: 'Stacey',
+        teamId: 'team1',
+        seat: 3,
+      });
+      expect(game.players[3]).toStrictEqual({
+        playerId: 'mockUser3333',
+        name: 'Paul',
+        teamId: 'team0',
+        seat: 0,
+      });
     });
   });
 
@@ -130,7 +193,7 @@ describe('Game with 4 players', () => {
 describe('4 Player Game playthrough', () => {
   let game: Game;
   beforeAll(() => {
-    game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
+    game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
   });
   afterEach(() => {
     jest.restoreAllMocks();
@@ -139,32 +202,33 @@ describe('4 Player Game playthrough', () => {
   describe('add players to game', () => {
     test('addPlayer adds players to game.players', () => {
       game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
-      game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(2);
       expect(game.players[1]).toStrictEqual(mock.MOCK_PLAYERS[1]);
     });
 
     test('if less than 4 players, cannot start gameplay (createRound)', () => {
-      game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
-      expect(() => game.createRound()).toThrowError();
+      game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
+      expect(() => game.startGame()).toThrowError();
     });
 
     test('cannot add the same player twice', () => {
-      expect(() => game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name)).toThrowError();
+      expect(() => game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name)).toThrowError();
     });
 
     test('cannot add more players than game is configured for', () => {
-      game.addPlayer(mock.MOCK_USER_4.id, mock.MOCK_USER_4.name);
-      expect(() => game.addPlayer(mock.MOCK_USER_5.id, mock.MOCK_USER_5.name)).toThrowError();
+      game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
+      expect(() => game.addPlayer(mock.MOCK_USER_4.id, mock.MOCK_USER_4.name)).toThrowError();
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(4);
       expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
     });
   });
-
+  describe('gameStateToJson', () => {
+    //
+  });
   describe('create Round', () => {
-    test('if 4 players, can call createRound', () => {
+    test('if 4 players, can call startGame', () => {
       const spy = jest.spyOn(game, 'createRound');
-      game.createRound();
+      game.startGame();
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
