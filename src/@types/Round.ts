@@ -1,39 +1,67 @@
-import { CardType, Suit } from './Card';
+import { CardType, Suit } from './Cards';
 import { PlayerType, Seat } from './Game';
-import { UserId } from './User';
 
 export interface RoundType {
-  roundNumber: number;
-  hands: Hand;
-  bids: number[];
-  bid: number | undefined;
+  playersRoundData: PlayerRoundData[];
+  numPlayers: number;
   dealer: Seat;
-  turnOrder: number;
-  trump: Suit;
-  cardsPlayed: CardType[];
-  tricks: {
-    trickPoints: number;
-    cardsPlayed: CardType[];
-    trickWonBy: PlayerType;
-  };
-}
-
-export type PlayerTurn = {
-  turnNum: number;
+  hands: Hand[];
+  minBid: BidAmount;
+  bids: BidType[];
+  winningBid: BidType;
+  trump: Suit | null;
+  activePlayer: Seat;
   playableCards: CardType[];
-};
+  trick: TrickType;
+  tricksTeam0: EvaluatedTrick[];
+  tricksTeam1: EvaluatedTrick[];
+  roundPoints: RoundPointTotals;
+  // dealHands(): Hand[];
+  sortHands(lowToHigh?: 'lowToHigh'): void;
+  validBids(): BidAmount[];
+  setPlayerBid(bid: BidAmount): void;
+  // setWinningBid(): BidType;
+  // setTrump(trump: Suit): void;
+  // updateActivePlayer(makeActivePlayer?: number): Seat;
+  // setPlayableCards(hand: Hand): CardType[];
+  playCard(cardPlayed: CardType): void;
+  // removeCardFromHand(cardPlayed: CardType): Hand;
+  // updateCardsPlayed(cardPlayed: CardType): TrickType;
+  // endPlayerTurn(): void;
+  // resetPlayableCards(): void;
+  // endTrick(): EvaluatedTrick;
+  // getTrickValue(): number;
+  // getTrickWinner(): Seat;
+  // updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void;
+  // resetTrick(): void;
+  // evaluateRound(): RoundTotals;
+  // isBidMade(): EvaluatedBid;
+  // playerTrickTotals(): PlayerPointTotals;
+  endRound: (roundTotals: RoundTotals) => void;
+}
 
 export type Hand = CardType[];
 
-export type PlayerRoundData = {
-  userID: UserId;
-  seat: Seat;
-  bid: number | undefined;
+export type PlayerRoundData = PlayerType & {
+  // roundTeam?: number; // needed for 5 player?
+  bid: BidAmount | null;
+  // wonBid: boolean;
+  // madeBid: boolean;
   isDealer: boolean;
-  tricksTaken: number;
-}[];
+};
 
-export enum Bid {
+export type BidType = {
+  amount: BidAmount;
+  bidder: Seat;
+  isTrump: boolean;
+};
+
+export type EvaluatedBid = BidType & {
+  bidMade: boolean;
+};
+
+export enum BidAmount {
+  Pass = 0,
   Five = 5,
   FiveNo = 5.5,
   Six = 6,
@@ -50,6 +78,24 @@ export enum Bid {
   ElevenNo = 11.5,
   Twelve = 12,
   TwelveNo = 12.5,
-  Troika = 12.6,
+  Troika = 12.7,
   Kaiser = 12.9,
 }
+
+export type EvaluatedTrick = {
+  cardsPlayed: TrickType;
+  pointValue: number;
+  trickWonBy: Seat;
+};
+
+export type TrickType = { cardPlayed: CardType; playedBy: Seat }[];
+
+export type RoundTotals = {
+  bid: EvaluatedBid;
+  roundPoints: RoundPointTotals;
+  playerPoints: PlayerPointTotals;
+};
+
+export type RoundPointTotals = { teamId: string; points: number }[];
+
+export type PlayerPointTotals = { playerSeat: Seat; points: number }[];

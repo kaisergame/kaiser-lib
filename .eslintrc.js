@@ -33,6 +33,7 @@ module.exports = {
     'prettier/prettier': 'error',
     'simple-import-sort/sort': 'error',
     '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: true }],
+    '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-unused-vars': 'warn',
     '@typescript-eslint/no-var-requires': 0,
   },

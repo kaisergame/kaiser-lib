@@ -24,14 +24,8 @@ export enum CardName {
 export type CardType = {
   suit: Suit;
   name: CardName;
-  value: number;
+  faceValue: number;
   playValue: number;
-  trump: boolean;
 };
 
-export type CardPlayType = CardType & {
-  playValue: number;
-  trump: boolean;
-};
-
-export type Deck = CardType[] | CardPlayType[];
+export type Deck = CardType[];

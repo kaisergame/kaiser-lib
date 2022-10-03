@@ -4,15 +4,15 @@ import { CARDS_IN_DECK, CARDS_PER_SUIT, HAND_SIZE, SUITS_NUM } from '../constant
 export class Cards {
   cards: CardType[];
 
-  constructor(public playerNum: number) {
-    this.playerNum = playerNum;
+  constructor(public numPlayers: number) {
+    this.numPlayers = numPlayers;
     this.cards = [];
   }
 
-  public createCards(players: number): CardType[] {
-    const newCards: CardType[] = [];
+  createDeck(): CardType[] {
+    const newDeck: CardType[] = [];
 
-    const cardsInPlay = (players * HAND_SIZE) / SUITS_NUM;
+    const cardsInPlay = (this.numPlayers * HAND_SIZE) / SUITS_NUM;
     const suits: Suit[] = [Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds];
     let faceValue = 1;
 
@@ -34,17 +34,20 @@ export class Cards {
       let card = {
         suit: suits[0],
         name: name,
-        value: faceValue,
+        faceValue: faceValue,
+        playValue: playValue,
       };
 
-      // substitute 7H and 7S for 5H and 3S
-      if (card.suit === Suit.Hearts && card.value === 7) card = { ...card, name: CardName.Five, value: 5 };
-      if (card.suit === Suit.Spades && card.value === 7) card = { ...card, name: CardName.Three, value: 3 };
+      // substitute 5H and 3S into deck for 7H and 7S
+      if (card.suit === Suit.Hearts && card.faceValue === 7)
+        card = { ...card, name: CardName.Five, faceValue: 5, playValue: 5 };
+      if (card.suit === Suit.Spades && card.faceValue === 7)
+        card = { ...card, name: CardName.Three, faceValue: 3, playValue: 3 };
 
-      newCards.push(card as CardType);
+      newDeck.push(card);
       faceValue++;
     }
-    return newCards;
+    return newDeck;
   }
 
   public shuffleDeck(deck: CardType[]) {
