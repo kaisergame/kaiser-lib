@@ -16,27 +16,29 @@ export interface RoundType {
   tricksTeam0: EvaluatedTrick[];
   tricksTeam1: EvaluatedTrick[];
   roundPoints: RoundPointTotals;
-  // dealHands(): Hand[];
+  roundStateToJson(): string;
+  roundStateFromJson(jsonRoundState: string): void;
+  // dealHands(): Hand[]; // private
   sortHands(lowToHigh?: 'lowToHigh'): void;
   validBids(): BidAmount[];
   setPlayerBid(bid: BidAmount): void;
-  // setWinningBid(): BidType;
-  // setTrump(trump: Suit): void;
-  // updateActivePlayer(makeActivePlayer?: number): Seat;
-  // setPlayableCards(hand: Hand): CardType[];
+  // setWinningBid(): BidType; // private
+  // setTrump(trump: Suit): void; // private
+  // updateActivePlayer(makeActivePlayer?: number): Seat; // private
+  // setPlayableCards(hand: Hand): CardType[]; // private
   playCard(cardPlayed: CardType): void;
-  // removeCardFromHand(cardPlayed: CardType): Hand;
-  // updateCardsPlayed(cardPlayed: CardType): TrickType;
-  // endPlayerTurn(): void;
-  // resetPlayableCards(): void;
-  // endTrick(): EvaluatedTrick;
-  // getTrickValue(): number;
-  // getTrickWinner(): Seat;
-  // updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void;
-  // resetTrick(): void;
-  // evaluateRound(): RoundTotals;
-  // isBidMade(): EvaluatedBid;
-  // playerTrickTotals(): PlayerPointTotals;
+  // removeCardFromHand(cardPlayed: CardType): Hand; // private
+  // updateCardsPlayed(cardPlayed: CardType): TrickType; // private
+  // endPlayerTurn(): void; // private
+  // resetPlayableCards(): void; // private
+  // endTrick(): EvaluatedTrick; // private
+  // getTrickValue(): number; // private
+  // getTrickWinner(): Seat; // private
+  // updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void; // private
+  // resetTrick(): void; // private
+  // evaluateRound(): RoundTotals; // private
+  // isBidMade(): EvaluatedBid; // private
+  // playerTrickTotals(): PlayerPointTotals; // private
   endRound: (roundTotals: RoundTotals) => void;
 }
 

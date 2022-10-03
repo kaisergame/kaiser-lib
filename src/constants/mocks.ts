@@ -20,52 +20,52 @@ export const MOCK_GAME_CONFIG: GameConfig = {
 };
 
 // PLAYERS
+export const MOCK_USER_0 = {
+  id: 'mockUser0000',
+  name: 'Ryan',
+};
+
 export const MOCK_USER_1 = {
   id: 'mockUser1111',
-  name: 'Ryan',
+  name: 'Cody',
 };
 
 export const MOCK_USER_2 = {
   id: 'mockUser2222',
-  name: 'Cody',
+  name: 'Stacey',
 };
 
 export const MOCK_USER_3 = {
   id: 'mockUser3333',
-  name: 'Stacey',
+  name: 'Paul',
 };
 
 export const MOCK_USER_4 = {
   id: 'mockUser4444',
-  name: 'Paul',
-};
-
-export const MOCK_USER_5 = {
-  id: 'mockUser5555',
   name: 'Chris',
 };
 
 export const MOCK_PLAYERS: PlayerType[] = [
   {
-    playerId: 'mockUser1111',
+    playerId: 'mockUser0000',
     name: 'Ryan',
     seat: 0,
     teamId: 'team0',
   },
   {
-    playerId: 'mockUser2222',
+    playerId: 'mockUser1111',
     name: 'Cody',
     seat: 1,
     teamId: 'team1',
   },
   {
-    playerId: 'mockUser3333',
+    playerId: 'mockUser2222',
     name: 'Stacey',
     seat: 2,
     teamId: 'team0',
   },
   {
-    playerId: 'mockUser4444',
+    playerId: 'mockUser3333',
     name: 'Paul',
     seat: 3,
     teamId: 'team1',

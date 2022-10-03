@@ -59,6 +59,46 @@ export class Round implements RoundType {
     this.endRound = endRound;
   }
 
+  // STATE
+  roundStateToJson(): string {
+    const state = {
+      playersRoundData: this.playersRoundData,
+      numPlayers: this.numPlayers,
+      dealer: this.dealer,
+      hands: this.hands,
+      minBid: this.minBid,
+      bids: this.bids,
+      winningBid: this.winningBid,
+      trump: this.trump,
+      activePlayer: this.activePlayer,
+      playableCards: this.playableCards,
+      trick: this.trick,
+      tricksTeam0: this.tricksTeam0,
+      tricksTeam1: this.tricksTeam1,
+      roundPoints: this.roundPoints,
+    };
+    return JSON.stringify(state);
+  }
+
+  roundStateFromJson(jsonRoundState: string): void {
+    const state = JSON.parse(jsonRoundState);
+
+    this.playersRoundData = state.playersRoundData;
+    this.numPlayers = state.numPlayers;
+    this.dealer = state.dealer;
+    this.hands = state.hands;
+    this.minBid = state.minBid;
+    this.bids = state.bids;
+    this.winningBid = state.winningBid;
+    this.trump = state.trump;
+    this.activePlayer = state.activePlayer;
+    this.playableCards = state.playableCards;
+    this.trick = state.trick;
+    this.tricksTeam0 = state.tricksTeam0;
+    this.tricksTeam1 = state.tricksTeam1;
+    this.roundPoints = state.roundPoints;
+  }
+
   // CARDS
   private dealHands(): Hand[] {
     const cards = new Cards(this.numPlayers);
@@ -246,8 +286,7 @@ export class Round implements RoundType {
     this.playableCards = [];
   }
 
-  // private
-  endTrick(): EvaluatedTrick {
+  private endTrick(): EvaluatedTrick {
     const pointValue = this.getTrickValue();
     const trickWinner = this.getTrickWinner();
     const trickEvaluation = {
@@ -270,8 +309,7 @@ export class Round implements RoundType {
     return trickEvaluation;
   }
 
-  // private
-  getTrickValue(): number {
+  private getTrickValue(): number {
     let value = 1;
 
     const cardsPlayed = this.trick.map((play) => play.cardPlayed);
@@ -283,8 +321,7 @@ export class Round implements RoundType {
     return value;
   }
 
-  // private
-  getTrickWinner(): Seat {
+  private getTrickWinner(): Seat {
     const ledSuit = this.trick[0].cardPlayed.suit;
 
     const winner = this.trick.reduce(
@@ -314,19 +351,16 @@ export class Round implements RoundType {
     return trickWinner;
   }
 
-  // private
-  updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void {
+  private updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void {
     const addPointsToTeam = this.roundPoints.findIndex((team) => team.teamId === takenBy.teamId);
     this.roundPoints[addPointsToTeam].points = this.roundPoints[addPointsToTeam].points + takenTrick.pointValue;
   }
 
-  // private
-  resetTrick(): void {
+  private resetTrick(): void {
     this.trick = [];
   }
 
-  // private
-  evaluateRound(): RoundTotals {
+  private evaluateRound(): RoundTotals {
     const bid = this.isBidMade();
     const playerPoints = this.playerTrickTotals();
     const totals = { bid, roundPoints: this.roundPoints, playerPoints };
@@ -335,8 +369,7 @@ export class Round implements RoundType {
     return totals;
   }
 
-  // private
-  isBidMade(): EvaluatedBid {
+  private isBidMade(): EvaluatedBid {
     const bidTeam = this.players.find((player) => player.seat === this.winningBid.bidder)!.teamId;
     let pointsMade = this.roundPoints.find((points) => points.teamId === bidTeam)!.points;
 

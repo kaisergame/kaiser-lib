@@ -1,6 +1,9 @@
 import {
   GameConfig,
+  GameStateType,
   GameType,
+  GameVersion,
+  PlayerId,
   PlayerType,
   RoundPointTotals,
   RoundSummary,
@@ -22,53 +25,47 @@ export class Game implements GameType {
 
   constructor(public owner: { id: string; name: string }, readonly gameId: string, readonly config: GameConfig) {
     this.gameId = gameId;
-    this.owner = owner;
-    this.config = config;
     this.teams = this.initializeTeams();
     this.players = this.initializePlayers();
+    this.owner = this.initializeOwner(owner);
+    this.config = config;
     this.scores = [
       { teamId: 'team0', teamScore: 0 },
       { teamId: 'team1', teamScore: 0 },
     ];
   }
 
-  addPlayer(id: string, name: string): PlayerType {
-    const curPlayers = this.players.filter((player) => player.playerId !== null);
-    if (curPlayers.length === this.config.numPlayers)
-      throw new Error(`Already ${this.config.numPlayers} players in game`);
-    if (curPlayers.find((player) => player.playerId === id))
-      throw new Error(`Player ${name} has alread joined the game`);
-
-    const openSeat = this.players.findIndex((player) => player.playerId === null);
-    const player = { ...this.players[openSeat], playerId: id, name: name };
-    const playerTeam = this.teams.find((team) => team.teamId === player.teamId);
-
-    if (!playerTeam) throw new Error('Player not added could not asign player to team');
-
-    this.players[openSeat] = player;
-    playerTeam.teamMembers.push(player.playerId!);
-    if (this.round) {
-      const playerData = this.round.playersRoundData.find((player) => player.playerId === null);
-      playerData!.playerId = id;
-      playerData!.name = name;
-    }
-
-    return player;
+  // STATE
+  gameStateToJson(): string {
+    const state: GameStateType = {
+      gameId: this.gameId,
+      config: this.config,
+      owner: this.owner,
+      players: this.players,
+      teams: this.teams,
+      scores: this.scores,
+      dealer: this.dealer,
+      round: this.round?.roundStateToJson() || null,
+      roundSummaries: this.roundSummaries,
+      version: GameVersion.One
+    };
+    return JSON.stringify(state);
   }
 
-  removePlayer(id: string): void {
-    const player = this.players.find((player) => player.playerId === id);
-    player!.playerId = null;
-
-    this.teams.map((team) => team.teamMembers.filter((playerId) => playerId !== id));
-
-    if (this.round) {
-      const playerData = this.round.playersRoundData.find((player) => player.playerId === id);
-      playerData!.playerId = null;
-      playerData!.name = null;
-    }
+  gameStateFromJson(jsonGameState: string): void {
+    const state = JSON.parse(jsonGameState);
+    // this.gameId = state.gameId;
+    // this.config = state.config;
+    this.owner = state.owner;
+    this.players = state.players;
+    this.teams = state.teams;
+    this.scores = state.scores;
+    this.dealer = state.dealer;
+    if (this.round !== null) this.round.roundStateFromJson(state.round);
+    this.roundSummaries = state.roundSummaries;
   }
 
+  // PLAYERS
   private initializeTeams(): TeamType[] {
     const numTeams = this.config.numPlayers / 2;
     const teams = [];
@@ -101,6 +98,51 @@ export class Game implements GameType {
     return players;
   }
 
+  private initializeOwner(owner: { id: string; name: string }): { id: string; name: string } {
+    this.addPlayer(owner.id, owner.name);
+    return owner;
+  }
+
+  addPlayer(id: string, name: string): PlayerType {
+    const curPlayers = this.players.filter((player) => player.playerId !== null);
+    console.log(curPlayers);
+
+    if (curPlayers.length === this.config.numPlayers)
+      throw new Error(`Already ${this.config.numPlayers} players in game`);
+    if (curPlayers.find((player) => player.playerId === id))
+      throw new Error(`Player ${name} has alread joined the game`);
+
+    const openPlayer = this.players.findIndex((player) => player.playerId === null)!;
+    const player = { ...this.players[openPlayer], playerId: id, name: name };
+    const playerTeam = this.teams.find((team) => team.teamId === player.teamId);
+    console.log(this.players, player, playerTeam);
+
+    if (!playerTeam) throw new Error('Player not added could not asign player to team');
+
+    this.players[openPlayer] = player;
+    playerTeam.teamMembers.push(player.playerId!);
+    if (this.round) {
+      const playerData = this.round.playersRoundData.find((player) => player.playerId === null);
+      playerData!.playerId = id;
+      playerData!.name = name;
+    }
+
+    return player;
+  }
+
+  removePlayer(id: string): void {
+    const player = this.players.find((player) => player.playerId === id);
+    player!.playerId = null;
+
+    this.teams.map((team) => team.teamMembers.filter((playerId) => playerId !== id));
+
+    if (this.round) {
+      const playerData = this.round.playersRoundData.find((player) => player.playerId === id);
+      playerData!.playerId = null;
+      playerData!.name = null;
+    }
+  }
+
   private getTeamSeats(teamIndex: number): number[] {
     const seats = [];
     const { numPlayers } = this.config;
@@ -112,38 +154,53 @@ export class Game implements GameType {
     return seats;
   }
 
-  switchPlayerSeat(movePlayer: PlayerType, moveToSeat?: Seat): void {
+  switchPlayerSeat(playerToMove: PlayerId, moveToSeat?: Seat): void {
     if (this.round) throw new Error('Cannot change seats while game is in progress');
+    if (moveToSeat && (typeof moveToSeat !== 'number' || moveToSeat >= this.config.numPlayers || moveToSeat < 0))
+      throw new Error(`There is no seat ${moveToSeat}`);
+
+    const movePlayer = this.players.find((player) => player.playerId === playerToMove);
+    if (movePlayer === undefined) throw new Error('Could not find player to move');
 
     const seatLeft = movePlayer.seat < this.config.numPlayers - 1 ? movePlayer.seat + 1 : 0;
     const switchSeat = moveToSeat || seatLeft;
+    const switchPlayer = this.players.find((player) => player.seat === switchSeat);
+    if (switchPlayer === undefined) throw new Error('Could not find player to switch');
 
-    const movePlayerIndex = this.players.findIndex((player) => player.seat === movePlayer.seat);
-    const switchPlayerIndex = this.players.findIndex((player) => player.seat === switchSeat);
-    const { playerId: movePlayerId, name: movePlayerName } = [...this.players][movePlayerIndex];
-    const { playerId: switchPlayerId, name: switchPlayerName } = [...this.players][switchPlayerIndex];
+    const copyMovePlayer: PlayerType = JSON.parse(JSON.stringify(movePlayer));
+    const copySwitchPlayer: PlayerType = JSON.parse(JSON.stringify(switchPlayer));
+    const moveTeam = this.teams.find((team) => team.teamId === movePlayer.teamId)!;
+    const switchTeam = this.teams.find((team) => team.teamSeats.includes(switchSeat))!;
 
-    this.players[movePlayerIndex] = {
-      ...this.players[movePlayerIndex],
-      playerId: switchPlayerId,
-      name: switchPlayerName,
-    };
-    this.players[switchPlayerIndex] = {
-      ...this.players[switchPlayerIndex],
-      playerId: movePlayerId,
-      name: movePlayerName,
-    };
+    moveTeam.teamMembers.splice(moveTeam.teamMembers.indexOf(playerToMove), 1);
+    switchTeam.teamMembers.push(playerToMove);
+
+    if (switchPlayer.playerId) {
+      switchTeam.teamMembers.splice(switchTeam.teamMembers.indexOf(switchPlayer.playerId), 1);
+      moveTeam.teamMembers.push(switchPlayer.playerId);
+    }
+
+    movePlayer.playerId = copyMovePlayer.playerId;
+    movePlayer.name = copyMovePlayer.name;
+    movePlayer.teamId = copySwitchPlayer.teamId;
+    movePlayer.seat = copySwitchPlayer.seat;
+
+    switchPlayer.playerId = copySwitchPlayer.playerId;
+    switchPlayer.name = copySwitchPlayer.name;
+    switchPlayer.teamId = copyMovePlayer.teamId;
+    switchPlayer.seat = copyMovePlayer.seat;
   }
 
+  // GAMEPLAY
   startGame(): void {
     if (this.scores.find((score) => score.teamScore !== 0)) throw new Error('Cannot start game during play');
+    if (this.players.find((player) => player.playerId === null))
+      throw new Error(`Game requires ${this.config.numPlayers} to start`);
+
     this.createRound();
   }
 
   private createRound(): void {
-    if (this.players.find((player) => player.playerId === null))
-      throw new Error(`Game requires ${this.config.numPlayers} to start`);
-
     const dealer = this.setDealer();
     const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound.bind(this));
 

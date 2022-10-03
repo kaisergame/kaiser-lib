@@ -9,7 +9,7 @@ describe('Round', () => {
   let round: Round;
   const dealer = 0;
   beforeEach(() => {
-    game = new Game(mock.MOCK_USER_1, 'gameId12345', mock.MOCK_GAME_CONFIG);
+    game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
     round = new Round(
       mock.MOCK_GAME_CONFIG.numPlayers,
       mock.MOCK_GAME_CONFIG.minBid,
