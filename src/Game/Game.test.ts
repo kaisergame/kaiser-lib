@@ -223,7 +223,7 @@ describe('4 Player Game playthrough', () => {
     });
   });
   describe('gameStateToJson', () => {
-    //
+    it.todo('test gameStateToJson()');
   });
   describe('create Round', () => {
     test('if 4 players, can call startGame', () => {

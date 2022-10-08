@@ -36,8 +36,8 @@ export class Game implements GameType {
   }
 
   // STATE
-  gameStateToJson(): string {
-    const state: GameStateType = {
+  gameStateToJson(): GameStateType {
+    return {
       gameId: this.gameId,
       config: this.config,
       owner: this.owner,
@@ -49,19 +49,17 @@ export class Game implements GameType {
       roundSummaries: this.roundSummaries,
       version: GameVersion.One,
     };
-    return JSON.stringify(state);
   }
 
-  gameStateFromJson(jsonGameState: string): void {
-    const state = JSON.parse(jsonGameState);
-    // this.gameId = state.gameId;
-    // this.config = state.config;
+  gameStateFromJson(state: GameStateType): void {
     this.owner = state.owner;
     this.players = state.players;
     this.teams = state.teams;
     this.scores = state.scores;
     this.dealer = state.dealer;
-    if (this.round !== null) this.round.roundStateFromJson(state.round);
+    if (state.round) {
+      this.round = this.round?.roundStateFromJson(state.round) || null;
+    }
     this.roundSummaries = state.roundSummaries;
   }
 

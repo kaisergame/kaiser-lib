@@ -9,6 +9,7 @@ import {
   PlayerRoundData,
   PlayerType,
   RoundPointTotals,
+  RoundState,
   RoundTotals,
   RoundType,
   Seat,
@@ -60,8 +61,8 @@ export class Round implements RoundType {
   }
 
   // STATE
-  roundStateToJson(): string {
-    const state = {
+  roundStateToJson(): RoundState {
+    return {
       playersRoundData: this.playersRoundData,
       numPlayers: this.numPlayers,
       dealer: this.dealer,
@@ -77,12 +78,9 @@ export class Round implements RoundType {
       tricksTeam1: this.tricksTeam1,
       roundPoints: this.roundPoints,
     };
-    return JSON.stringify(state);
   }
 
-  roundStateFromJson(jsonRoundState: string): void {
-    const state = JSON.parse(jsonRoundState);
-
+  roundStateFromJson(state: RoundState): void {
     this.playersRoundData = state.playersRoundData;
     this.numPlayers = state.numPlayers;
     this.dealer = state.dealer;

@@ -1,5 +1,5 @@
 import { Suit } from './Cards';
-import { BidAmount, RoundPointTotals, RoundTotals, RoundType } from './Round';
+import { BidAmount, RoundPointTotals, RoundState, RoundTotals, RoundType } from './Round';
 
 export interface GameType {
   gameId: GameId;
@@ -11,8 +11,8 @@ export interface GameType {
   dealer: Seat | null;
   round: RoundType | null;
   roundSummaries: RoundSummary[];
-  gameStateToJson(): string;
-  gameStateFromJson(jsonGameState: string): void;
+  gameStateToJson(): GameStateType;
+  gameStateFromJson(jsonGameState: GameStateType): void;
   addPlayer(id: string, name: string): PlayerType;
   removePlayer(id: string): void;
   // initializeTeams(): TeamType[]; // private
@@ -36,7 +36,7 @@ export interface GameStateType {
   teams: TeamType[];
   scores: ScoreType[];
   dealer: Seat | null;
-  round: string | null;
+  round: RoundState | null;
   roundSummaries: RoundSummary[];
   version: GameVersion;
 }

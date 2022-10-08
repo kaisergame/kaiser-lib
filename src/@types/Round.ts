@@ -16,8 +16,8 @@ export interface RoundType {
   tricksTeam0: EvaluatedTrick[];
   tricksTeam1: EvaluatedTrick[];
   roundPoints: RoundPointTotals;
-  roundStateToJson(): string;
-  roundStateFromJson(jsonRoundState: string): void;
+  roundStateToJson(): RoundState;
+  roundStateFromJson(jsonRoundState: RoundState): void;
   // dealHands(): Hand[]; // private
   sortHands(lowToHigh?: 'lowToHigh'): void;
   validBids(): BidAmount[];
@@ -41,6 +41,23 @@ export interface RoundType {
   // playerTrickTotals(): PlayerPointTotals; // private
   endRound: (roundTotals: RoundTotals) => void;
 }
+
+export type RoundState = {
+  playersRoundData: PlayerRoundData[];
+  hands: Hand[];
+  bids: BidType[];
+  numPlayers: number;
+  dealer: Seat;
+  minBid: BidAmount;
+  winningBid: BidType;
+  trump: Suit | null;
+  activePlayer: Seat;
+  playableCards: CardType[];
+  trick: TrickType;
+  tricksTeam0: EvaluatedTrick[];
+  tricksTeam1: EvaluatedTrick[];
+  roundPoints: RoundPointTotals;
+};
 
 export type Hand = CardType[];
 
