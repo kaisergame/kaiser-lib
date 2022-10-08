@@ -22,21 +22,21 @@ export interface RoundType {
   sortHands(lowToHigh?: 'lowToHigh'): void;
   validBids(): BidAmount[];
   setPlayerBid(bid: BidAmount): void;
-  // setWinningBid(): BidType; // private
-  // setTrump(trump: Suit): void; // private
-  // updateActivePlayer(makeActivePlayer?: number): Seat; // private
-  // setPlayableCards(hand: Hand): CardType[]; // private
+  setWinningBid(): BidType; // private
+  setTrump(trump: Suit): void; // private
+  updateActivePlayer(makeActivePlayer?: number): Seat; // private
+  setPlayableCards(hand: Hand): CardType[]; // private
   playCard(cardPlayed: CardType): void;
-  // removeCardFromHand(cardPlayed: CardType): Hand; // private
-  // updateCardsPlayed(cardPlayed: CardType): TrickType; // private
-  // endPlayerTurn(): void; // private
+  removeCardFromHand(cardPlayed: CardType): Hand; // private
+  updateCardsPlayed(cardPlayed: CardType): TrickType; // private
+  endPlayerTurn(): void; // private
   // resetPlayableCards(): void; // private
-  // endTrick(): EvaluatedTrick; // private
+  endTrick(): EvaluatedTrick; // private
   // getTrickValue(): number; // private
   // getTrickWinner(): Seat; // private
   // updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void; // private
   // resetTrick(): void; // private
-  // evaluateRound(): RoundTotals; // private
+  evaluateRound(): RoundTotals; // private
   // isBidMade(): EvaluatedBid; // private
   // playerTrickTotals(): PlayerPointTotals; // private
   endRound: (roundTotals: RoundTotals) => void;

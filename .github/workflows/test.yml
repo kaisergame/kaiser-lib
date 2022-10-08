@@ -1,33 +1,26 @@
-name: Kaiser lib
+name: Kaiser data tests
 
 on:
   push:
-    tags:
-      - "v*"
+    branches-ignore:
+      - main
 
 jobs:
-  publish:
+  test:
+    runs-on: ubuntu-latest
     services:
       redis:
         image: redis
         ports:
           - 6379:6379
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GITHUB_NPM_TOKEN: ${{ secrets.KAISER_GITHUB_NPM_TOKEN }}
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: 14
-          registry-url: https://npm.pkg.github.com/
       - uses: actions/cache@v2
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn
       - run: yarn test
-      - run: yarn build
-      - run: yarn publish
-

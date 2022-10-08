@@ -44,7 +44,13 @@ describe('Round', () => {
 
   describe('dealHands method', () => {
     beforeEach(() => {
-      round.dealHands();
+      round = new Round(
+        mock.MOCK_GAME_CONFIG.numPlayers,
+        mock.MOCK_GAME_CONFIG.minBid,
+        mock.MOCK_PLAYERS,
+        dealer,
+        game.endRound
+      );
     });
     test('dealHands should deal cards to each player', () => {
       expect(round.hands.length).toBe(round.numPlayers);
@@ -58,7 +64,13 @@ describe('Round', () => {
 
   describe('sortHands method', () => {
     beforeEach(() => {
-      round.dealHands();
+      round = new Round(
+        mock.MOCK_GAME_CONFIG.numPlayers,
+        mock.MOCK_GAME_CONFIG.minBid,
+        mock.MOCK_PLAYERS,
+        dealer,
+        game.endRound
+      );
     });
     test('sortHands should sort the dealt cards in each hand (H,S,D,C) high to low', () => {
       round.sortHands();
