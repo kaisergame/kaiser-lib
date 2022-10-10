@@ -28,7 +28,7 @@ export interface GameType {
   // endGame(teamId: string): void; // private
 }
 
-export interface GameStateType {
+export type GameStateType = {
   gameId: GameId;
   owner: { id: string; name: string };
   config: GameConfig;
@@ -39,7 +39,7 @@ export interface GameStateType {
   round: RoundState | null;
   roundSummaries: RoundSummary[];
   version: GameVersion;
-}
+};
 
 export enum GameVersion {
   One = '1.0.0',
