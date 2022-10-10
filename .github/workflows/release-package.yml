@@ -3,7 +3,7 @@ name: Kaiser lib
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 jobs:
   publish:
@@ -24,10 +24,9 @@ jobs:
           registry-url: https://npm.pkg.github.com/
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn
       - run: yarn test
       - run: yarn build
       - run: yarn publish
-

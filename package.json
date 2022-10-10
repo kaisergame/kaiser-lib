@@ -1,6 +1,6 @@
 {
   "name": "@kaisergame/kaiser-lib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Library for the kaiser game",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,6 +12,9 @@
     "lint": "tsc --noEmit && eslint . --ext ts",
     "build": "tsc",
     "watch": "tsc -w"
+  },
+  "publishConfig": {
+    "@kaisergame:registry": "https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",
