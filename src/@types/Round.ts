@@ -16,8 +16,8 @@ export interface RoundType {
   tricksTeam0: EvaluatedTrick[];
   tricksTeam1: EvaluatedTrick[];
   roundPoints: RoundPointTotals;
-  roundStateToJson(): RoundState;
-  roundStateFromJson(jsonRoundState: RoundState): void;
+  toJSON(): RoundState;
+  updateStateFromJSON(state: RoundState): void;
   // dealHands(): Hand[]; // private
   sortHands(lowToHigh?: 'lowToHigh'): void;
   validBids(): BidAmount[];

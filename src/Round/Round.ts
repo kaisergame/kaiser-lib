@@ -60,8 +60,7 @@ export class Round implements RoundType {
     this.endRound = endRound;
   }
 
-  // STATE
-  roundStateToJson(): RoundState {
+  toJSON(): RoundState {
     return {
       playersRoundData: this.playersRoundData,
       numPlayers: this.numPlayers,
@@ -80,7 +79,14 @@ export class Round implements RoundType {
     };
   }
 
-  roundStateFromJson(state: RoundState): void {
+  static fromJSON(state: RoundState, endRound: (roundTotals: RoundTotals) => void): Round {
+    const round = new Round(state.numPlayers, state.minBid, [], state.dealer, endRound);
+    round.updateStateFromJSON(state);
+
+    return round;
+  }
+
+  updateStateFromJSON(state: RoundState): void {
     this.playersRoundData = state.playersRoundData;
     this.numPlayers = state.numPlayers;
     this.dealer = state.dealer;

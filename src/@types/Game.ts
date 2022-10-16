@@ -11,8 +11,8 @@ export interface GameType {
   dealer: Seat | null;
   round: RoundType | null;
   roundSummaries: RoundSummary[];
-  gameStateToJson(): GameStateType;
-  gameStateFromJson(jsonGameState: GameStateType): void;
+  toJSON(): GameStateType;
+  updateStateFromJSON(state: GameStateType): void;
   addPlayer(id: string, name: string): PlayerType;
   removePlayer(id: string): void;
   // initializeTeams(): TeamType[]; // private

@@ -35,8 +35,7 @@ export class Game implements GameType {
     ];
   }
 
-  // STATE
-  gameStateToJson(): GameStateType {
+  toJSON(): GameStateType {
     return {
       gameId: this.gameId,
       config: this.config,
@@ -45,20 +44,27 @@ export class Game implements GameType {
       teams: this.teams,
       scores: this.scores,
       dealer: this.dealer,
-      round: this.round?.roundStateToJson() || null,
+      round: this.round?.toJSON() || null,
       roundSummaries: this.roundSummaries,
       version: GameVersion.One,
     };
   }
 
-  gameStateFromJson(state: GameStateType): void {
+  static fromJSON(state: GameStateType): Game {
+    const game = new Game(state.owner, state.gameId, state.config);
+    game.updateStateFromJSON(state);
+
+    return game;
+  }
+
+  updateStateFromJSON(state: GameStateType): void {
     this.owner = state.owner;
     this.players = state.players;
     this.teams = state.teams;
     this.scores = state.scores;
     this.dealer = state.dealer;
     if (state.round) {
-      this.round = this.round?.roundStateFromJson(state.round) || null;
+      this.round = Round.fromJSON(state.round, this.endRound.bind(this));
     }
     this.roundSummaries = state.roundSummaries;
   }
