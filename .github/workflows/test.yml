@@ -7,6 +7,8 @@ on:
 
 jobs:
   test:
+    env:
+      GITHUB_NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     services:
       redis:
@@ -20,7 +22,7 @@ jobs:
           node-version: 14
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn
       - run: yarn test
