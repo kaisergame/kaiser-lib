@@ -53,7 +53,6 @@ export type RoundSummary = {
   bidMade: boolean;
   trump: Suit | null;
   roundPoints: RoundPointTotals;
-  roundTeams?: TeamType[];
 };
 
 export type GameConfig = {
