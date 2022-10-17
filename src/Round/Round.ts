@@ -436,4 +436,40 @@ export class Round implements RoundType {
 
     return totals;
   }
+
+  // todo test this
+  canBid(playerId: string): boolean {
+    if (!this.biddingOpen()) return false;
+
+    if (!this.isActivePlayer(playerId)) return false;
+
+    if (this.findBidForPlayer(this.activePlayer)) return false;
+
+    return true;
+  }
+
+  // todo test this
+  canSetTrump(playerId: string): boolean {
+    if (this.biddingOpen()) return false;
+
+    if (!this.isActivePlayer(playerId)) return false;
+
+    if (this.getTrump()) return false;
+
+    if (this.winningBid.bidder !== this.activePlayer) return false;
+
+    return true;
+  }
+
+  isActivePlayer(playerId: string): boolean {
+    const activePlayer = this.getActivePlayer();
+
+    return Boolean(activePlayer && activePlayer.playerId === playerId);
+  }
+
+  getActivePlayer(): PlayerType | null {
+    if (!this?.activePlayer) return null;
+
+    return this.players[this.activePlayer];
+  }
 }

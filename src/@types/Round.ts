@@ -43,6 +43,10 @@ export interface RoundType {
   // isBidMade(): EvaluatedBid; // private
   // playerTrickTotals(): PlayerPointTotals; // private
   endRound: (roundTotals: RoundTotals) => void;
+  canBid(playerId: string): boolean;
+  getActivePlayer(): PlayerType | null;
+  isActivePlayer(playerId: string): boolean;
+  canSetTrump(playerId: string): boolean;
 }
 
 export type RoundState = {

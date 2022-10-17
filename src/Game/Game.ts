@@ -20,6 +20,7 @@ export class Game implements GameType {
   teams: TeamType[];
   scores: ScoreType[];
   dealer: Seat | null = null;
+  // eventually round should be private
   round: RoundType | null = null;
   roundSummaries: RoundSummary[] = [];
 
@@ -249,43 +250,20 @@ export class Game implements GameType {
     return isWinner.teamId;
   }
 
-  // todo test this
   canBid(playerId: string): boolean {
-    if (!this.round?.biddingOpen()) return false;
-    console.log('bidding open');
-    if (!this.isActivePlayer(playerId)) return false;
-    console.log('is active');
-    if (this.round.findBidForPlayer(this.round.activePlayer)) return false;
-    console.log('uhh');
-    return true;
+    return Boolean(this.round?.canBid(playerId));
   }
 
-  // todo test this
   canSetTrump(playerId: string): boolean {
-    if (!this.round) return false;
-
-    if (this.round.biddingOpen()) return false;
-
-    if (!this.isActivePlayer(playerId)) return false;
-
-    if (this.round.getTrump()) return false;
-    console.log(this.round.winningBid);
-    if (this.round.winningBid.bidder !== this.round.activePlayer) return false;
-
-    return true;
+    return Boolean(this.round?.canSetTrump(playerId));
   }
 
   isActivePlayer(playerId: string): boolean {
-    const activePlayer = this.getActivePlayer();
-    console.log('activePlayer', activePlayer);
-    return Boolean(activePlayer && activePlayer.playerId === playerId);
+    return Boolean(this.round && this.round.isActivePlayer(playerId));
   }
 
   getActivePlayer(): PlayerType | null {
-    if (!this.round?.activePlayer) return null;
-    console.log('this.players', this.players);
-    console.log('this.round.activePlayer', this.round.activePlayer);
-    return this.players[this.round.activePlayer];
+    return this.round?.getActivePlayer() || null;
   }
 
   endGame(teamId: string): void {
