@@ -246,8 +246,7 @@ describe('4 Player Game playthrough', () => {
     describe('updateActivePlayer', () => {
       test('updateActivePlayer will initiate activePlayer to Seat 1', () => {
         const spy = jest.spyOn(game.round!, 'updateActivePlayer');
-        game.round?.updateActivePlayer();
-        expect(spy).toBeCalledTimes(1);
+        // expect(spy).toBeCalledTimes(1);
         expect(game.round?.dealer).toBe(0);
         expect(game.round?.activePlayer).toBe(1);
       });
@@ -274,18 +273,15 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('updateActivePlayer will move turn one position "left"', () => {
-        game.round?.updateActivePlayer();
         expect(game.round?.activePlayer).toBe(2);
         game.round?.setPlayerBid(BidAmount.SevenNo);
       });
 
       test('dealer can take bid for current high bid; setWinningBid is called after 4 bids', () => {
-        game.round?.updateActivePlayer();
         expect(game.round?.activePlayer).toBe(3);
         expect(() => game.round?.setPlayerBid(BidAmount.SevenNo)).toThrowError();
         game.round?.setPlayerBid(BidAmount.Eight);
 
-        // game.round?.updateActivePlayer();
         expect(game.round?.activePlayer).toBe(game.round?.dealer);
 
         const spyWin = jest.spyOn(game.round!, 'setWinningBid');
