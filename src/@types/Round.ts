@@ -24,12 +24,15 @@ export interface RoundType {
   setPlayerBid(bid: BidAmount): void;
   setWinningBid(): BidType; // private
   setTrump(trump: Suit): void; // private
+  getTrump(): Suit | null; // public
   updateActivePlayer(makeActivePlayer?: number): Seat; // private
   setPlayableCards(hand: Hand): CardType[]; // private
   playCard(cardPlayed: CardType): void;
   removeCardFromHand(cardPlayed: CardType): Hand; // private
   updateCardsPlayed(cardPlayed: CardType): TrickType; // private
   endPlayerTurn(): void; // private
+  biddingOpen(): boolean;
+  findBidForPlayer(player: number): BidType | null;
   // resetPlayableCards(): void; // private
   endTrick(): EvaluatedTrick; // private
   // getTrickValue(): number; // private

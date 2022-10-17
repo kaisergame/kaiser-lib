@@ -9,12 +9,17 @@ export interface GameType {
   teams: TeamType[];
   scores: ScoreType[];
   dealer: Seat | null;
+  // it is challenging that round isn't a guaranteed property
   round: RoundType | null;
   roundSummaries: RoundSummary[];
   toJSON(): GameStateType;
   updateStateFromJSON(state: GameStateType): void;
   addPlayer(id: string, name: string): PlayerType;
   removePlayer(id: string): void;
+  canBid(playerId: string): boolean;
+  getActivePlayer(): PlayerType | null;
+  isActivePlayer(playerId: string): boolean;
+  canSetTrump(playerId: string): boolean;
   // initializeTeams(): TeamType[]; // private
   // initializePlayers(): PlayerType[]; // private
   // getTeamSeats(teamIndex: number): number[]; // private

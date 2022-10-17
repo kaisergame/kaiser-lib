@@ -285,7 +285,7 @@ describe('4 Player Game playthrough', () => {
         expect(() => game.round?.setPlayerBid(BidAmount.SevenNo)).toThrowError();
         game.round?.setPlayerBid(BidAmount.Eight);
 
-        game.round?.updateActivePlayer();
+        // game.round?.updateActivePlayer();
         expect(game.round?.activePlayer).toBe(game.round?.dealer);
 
         const spyWin = jest.spyOn(game.round!, 'setWinningBid');
@@ -423,6 +423,60 @@ describe('4 Player Game playthrough', () => {
       test('expect no bids', () => {
         expect(game.round?.bids.length).toBe(0);
       });
+    });
+  });
+
+  describe('canBid', () => {
+    it('validates whether someone can bid', () => {
+      const game = new Game({ id: 'hashbrowns', name: 'hashbrowns' }, 'uuid', {
+        minBid: 7,
+        scoreToWin: 56,
+        numPlayers: 4,
+      });
+      game.addPlayer('bacon', 'bacon');
+      game.addPlayer('eggs', 'eggs');
+      game.addPlayer('toast', 'toast');
+      game.startGame();
+      expect(game.canBid('hashbrowns')).toBeFalsy(); // dealer so not first to bid
+      expect(game.canBid('bacon')).toBeTruthy();
+      game.round?.setPlayerBid(BidAmount.Eight);
+      expect(game.canBid('bacon')).toBeFalsy(); // can't bid again
+      expect(game.canBid('eggs')).toBeTruthy();
+      game.round?.setPlayerBid(BidAmount.EightNo);
+      game.round?.setPlayerBid(BidAmount.Pass);
+      game.round?.setPlayerBid(BidAmount.Pass);
+
+      expect(game.canBid('hashbrowns')).toBeFalsy();
+      expect(game.canBid('bacon')).toBeFalsy();
+      expect(game.canBid('eggs')).toBeFalsy();
+      expect(game.canBid('toast')).toBeFalsy();
+    });
+  });
+
+  describe('canSetTrump', () => {
+    it('validates whether someone can set trump', () => {
+      const game = new Game({ id: 'hashbrowns', name: 'hashbrowns' }, 'uuid', {
+        minBid: 7,
+        scoreToWin: 56,
+        numPlayers: 4,
+      });
+      game.addPlayer('bacon', 'bacon');
+      game.addPlayer('eggs', 'eggs');
+      game.addPlayer('toast', 'toast');
+
+      expect(game.canSetTrump('hashbrowns')).toBeFalsy();
+
+      game.startGame();
+      game.round?.setPlayerBid(BidAmount.Eight);
+
+      expect(game.canSetTrump('eggs')).toBeFalsy(); // bidding still open, falsy
+
+      game.round?.setPlayerBid(BidAmount.EightNo); // this would be ... eggs... I think we should track bid with player id
+      game.round?.setPlayerBid(BidAmount.Pass);
+      game.round?.setPlayerBid(BidAmount.Pass);
+
+      expect(game.canSetTrump('hashbrowns')).toBeFalsy();
+      expect(game.canSetTrump('eggs')).toBeTruthy();
     });
   });
 });

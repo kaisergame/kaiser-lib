@@ -57,6 +57,7 @@ export class Round implements RoundType {
         isDealer: dealer === player.seat,
       };
     });
+    this.updateActivePlayer();
     this.endRound = endRound;
   }
 
@@ -178,7 +179,26 @@ export class Round implements RoundType {
 
     this.bids.push(playerBid);
     this.playersRoundData[this.activePlayer].bid = playerBid.amount;
-    if (this.bids.length === this.numPlayers) this.setWinningBid();
+    if (this.bids.length === this.numPlayers) {
+      this.setWinningBid();
+    } else {
+      this.updateActivePlayer();
+    }
+  }
+
+  biddingOpen(): boolean {
+    console.log('checking bidding open');
+    if (this.bids.length >= this.numPlayers) return false;
+    console.log('bid length is good', this.winningBid.bidder);
+    if (this.winningBid.bidder >= 0) return false;
+    console.log('no winning bidder');
+    return true;
+  }
+
+  findBidForPlayer(player: number): BidType | null {
+    const bid = this.bids.find((bid) => bid.bidder === player);
+
+    return bid || null;
   }
 
   setWinningBid(): BidType {
@@ -200,6 +220,10 @@ export class Round implements RoundType {
   setTrump(trump: Suit): void {
     if (!this.winningBid.isTrump) throw new Error('Trump cannot be called on a no trump bid');
     this.trump = trump;
+  }
+
+  getTrump(): Suit | null {
+    return this.trump;
   }
 
   // CARD PLAY

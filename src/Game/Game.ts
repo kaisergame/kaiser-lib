@@ -109,7 +109,7 @@ export class Game implements GameType {
 
   addPlayer(id: string, name: string): PlayerType {
     const curPlayers = this.players.filter((player) => player.playerId !== null);
-    console.log(curPlayers);
+    // console.log(curPlayers);
 
     if (curPlayers.length === this.config.numPlayers)
       throw new Error(`Already ${this.config.numPlayers} players in game`);
@@ -119,7 +119,7 @@ export class Game implements GameType {
     const openPlayer = this.players.findIndex((player) => player.playerId === null)!;
     const player = { ...this.players[openPlayer], playerId: id, name: name };
     const playerTeam = this.teams.find((team) => team.teamId === player.teamId);
-    console.log(this.players, player, playerTeam);
+    // console.log(this.players, player, playerTeam);
 
     if (!playerTeam) throw new Error('Player not added could not asign player to team');
 
@@ -247,6 +247,45 @@ export class Game implements GameType {
     );
 
     return isWinner.teamId;
+  }
+
+  // todo test this
+  canBid(playerId: string): boolean {
+    if (!this.round?.biddingOpen()) return false;
+    console.log('bidding open');
+    if (!this.isActivePlayer(playerId)) return false;
+    console.log('is active');
+    if (this.round.findBidForPlayer(this.round.activePlayer)) return false;
+    console.log('uhh');
+    return true;
+  }
+
+  // todo test this
+  canSetTrump(playerId: string): boolean {
+    if (!this.round) return false;
+
+    if (this.round.biddingOpen()) return false;
+
+    if (!this.isActivePlayer(playerId)) return false;
+
+    if (this.round.getTrump()) return false;
+    console.log(this.round.winningBid);
+    if (this.round.winningBid.bidder !== this.round.activePlayer) return false;
+
+    return true;
+  }
+
+  isActivePlayer(playerId: string): boolean {
+    const activePlayer = this.getActivePlayer();
+    console.log('activePlayer', activePlayer);
+    return Boolean(activePlayer && activePlayer.playerId === playerId);
+  }
+
+  getActivePlayer(): PlayerType | null {
+    if (!this.round?.activePlayer) return null;
+    console.log('this.players', this.players);
+    console.log('this.round.activePlayer', this.round.activePlayer);
+    return this.players[this.round.activePlayer];
   }
 
   endGame(teamId: string): void {
