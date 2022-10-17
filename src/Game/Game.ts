@@ -20,6 +20,7 @@ export class Game implements GameType {
   teams: TeamType[];
   scores: ScoreType[];
   dealer: Seat | null = null;
+  // eventually round should be private
   round: RoundType | null = null;
   roundSummaries: RoundSummary[] = [];
 
@@ -35,8 +36,7 @@ export class Game implements GameType {
     ];
   }
 
-  // STATE
-  gameStateToJson(): GameStateType {
+  toJSON(): GameStateType {
     return {
       gameId: this.gameId,
       config: this.config,
@@ -45,20 +45,27 @@ export class Game implements GameType {
       teams: this.teams,
       scores: this.scores,
       dealer: this.dealer,
-      round: this.round?.roundStateToJson() || null,
+      round: this.round?.toJSON() || null,
       roundSummaries: this.roundSummaries,
       version: GameVersion.One,
     };
   }
 
-  gameStateFromJson(state: GameStateType): void {
+  static fromJSON(state: GameStateType): Game {
+    const game = new Game(state.owner, state.gameId, state.config);
+    game.updateStateFromJSON(state);
+
+    return game;
+  }
+
+  updateStateFromJSON(state: GameStateType): void {
     this.owner = state.owner;
     this.players = state.players;
     this.teams = state.teams;
     this.scores = state.scores;
     this.dealer = state.dealer;
     if (state.round) {
-      this.round = this.round?.roundStateFromJson(state.round) || null;
+      this.round = Round.fromJSON(state.round, this.endRound.bind(this));
     }
     this.roundSummaries = state.roundSummaries;
   }
@@ -103,7 +110,7 @@ export class Game implements GameType {
 
   addPlayer(id: string, name: string): PlayerType {
     const curPlayers = this.players.filter((player) => player.playerId !== null);
-    console.log(curPlayers);
+    // console.log(curPlayers);
 
     if (curPlayers.length === this.config.numPlayers)
       throw new Error(`Already ${this.config.numPlayers} players in game`);
@@ -113,7 +120,7 @@ export class Game implements GameType {
     const openPlayer = this.players.findIndex((player) => player.playerId === null)!;
     const player = { ...this.players[openPlayer], playerId: id, name: name };
     const playerTeam = this.teams.find((team) => team.teamId === player.teamId);
-    console.log(this.players, player, playerTeam);
+    // console.log(this.players, player, playerTeam);
 
     if (!playerTeam) throw new Error('Player not added could not asign player to team');
 
@@ -241,6 +248,22 @@ export class Game implements GameType {
     );
 
     return isWinner.teamId;
+  }
+
+  canBid(playerId: string): boolean {
+    return Boolean(this.round?.canBid(playerId));
+  }
+
+  canSetTrump(playerId: string): boolean {
+    return Boolean(this.round?.canSetTrump(playerId));
+  }
+
+  isActivePlayer(playerId: string): boolean {
+    return Boolean(this.round && this.round.isActivePlayer(playerId));
+  }
+
+  getActivePlayer(): PlayerType | null {
+    return this.round?.getActivePlayer() || null;
   }
 
   endGame(teamId: string): void {

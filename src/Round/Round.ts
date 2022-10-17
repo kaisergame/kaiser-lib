@@ -57,11 +57,11 @@ export class Round implements RoundType {
         isDealer: dealer === player.seat,
       };
     });
+    this.updateActivePlayer();
     this.endRound = endRound;
   }
 
-  // STATE
-  roundStateToJson(): RoundState {
+  toJSON(): RoundState {
     return {
       playersRoundData: this.playersRoundData,
       numPlayers: this.numPlayers,
@@ -80,7 +80,14 @@ export class Round implements RoundType {
     };
   }
 
-  roundStateFromJson(state: RoundState): void {
+  static fromJSON(state: RoundState, endRound: (roundTotals: RoundTotals) => void): Round {
+    const round = new Round(state.numPlayers, state.minBid, [], state.dealer, endRound);
+    round.updateStateFromJSON(state);
+
+    return round;
+  }
+
+  updateStateFromJSON(state: RoundState): void {
     this.playersRoundData = state.playersRoundData;
     this.numPlayers = state.numPlayers;
     this.dealer = state.dealer;
@@ -172,7 +179,26 @@ export class Round implements RoundType {
 
     this.bids.push(playerBid);
     this.playersRoundData[this.activePlayer].bid = playerBid.amount;
-    if (this.bids.length === this.numPlayers) this.setWinningBid();
+    if (this.bids.length === this.numPlayers) {
+      this.setWinningBid();
+    } else {
+      this.updateActivePlayer();
+    }
+  }
+
+  biddingOpen(): boolean {
+    console.log('checking bidding open');
+    if (this.bids.length >= this.numPlayers) return false;
+    console.log('bid length is good', this.winningBid.bidder);
+    if (this.winningBid.bidder >= 0) return false;
+    console.log('no winning bidder');
+    return true;
+  }
+
+  findBidForPlayer(player: number): BidType | null {
+    const bid = this.bids.find((bid) => bid.bidder === player);
+
+    return bid || null;
   }
 
   setWinningBid(): BidType {
@@ -194,6 +220,10 @@ export class Round implements RoundType {
   setTrump(trump: Suit): void {
     if (!this.winningBid.isTrump) throw new Error('Trump cannot be called on a no trump bid');
     this.trump = trump;
+  }
+
+  getTrump(): Suit | null {
+    return this.trump;
   }
 
   // CARD PLAY
@@ -405,5 +435,41 @@ export class Round implements RoundType {
     }, initialPoints);
 
     return totals;
+  }
+
+  // todo test this
+  canBid(playerId: string): boolean {
+    if (!this.biddingOpen()) return false;
+
+    if (!this.isActivePlayer(playerId)) return false;
+
+    if (this.findBidForPlayer(this.activePlayer)) return false;
+
+    return true;
+  }
+
+  // todo test this
+  canSetTrump(playerId: string): boolean {
+    if (this.biddingOpen()) return false;
+
+    if (!this.isActivePlayer(playerId)) return false;
+
+    if (this.getTrump()) return false;
+
+    if (this.winningBid.bidder !== this.activePlayer) return false;
+
+    return true;
+  }
+
+  isActivePlayer(playerId: string): boolean {
+    const activePlayer = this.getActivePlayer();
+
+    return Boolean(activePlayer && activePlayer.playerId === playerId);
+  }
+
+  getActivePlayer(): PlayerType | null {
+    if (!this?.activePlayer) return null;
+
+    return this.players[this.activePlayer];
   }
 }
