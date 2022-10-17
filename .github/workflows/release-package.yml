@@ -14,7 +14,7 @@ jobs:
           - 6379:6379
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GITHUB_NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_NPM_TOKEN: ${{ secrets.KAISER_GITHUB_NPM_TOKEN }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
