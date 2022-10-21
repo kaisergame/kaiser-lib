@@ -236,22 +236,22 @@ export const MOCK_VALID_BIDS = [
 ];
 
 export const MOCK_BIDS: BidType[] = [
-  { amount: 7, bidder: 1, isTrump: true },
-  { amount: 7.5, bidder: 2, isTrump: false },
-  { amount: 10, bidder: 3, isTrump: true },
+  { amount: BidAmount.Seven, bidder: 1, isTrump: true },
+  { amount: BidAmount.SevenNo, bidder: 2, isTrump: false },
+  { amount: BidAmount.Ten, bidder: 3, isTrump: true },
 ];
 
 export const MOCK_BIDS_2: BidType[] = [
-  { amount: 7, bidder: 1, isTrump: true },
-  { amount: 7.5, bidder: 2, isTrump: false },
-  { amount: 10, bidder: 3, isTrump: true },
-  { amount: 0, bidder: 0, isTrump: false },
+  { amount: BidAmount.Seven, bidder: 1, isTrump: true },
+  { amount: BidAmount.SevenNo, bidder: 2, isTrump: false },
+  { amount: BidAmount.Ten, bidder: 3, isTrump: true },
+  { amount: BidAmount.Pass, bidder: 0, isTrump: false },
 ];
 
 export const MOCK_PASS_BIDS: BidType[] = [
-  { amount: 0, bidder: 1, isTrump: true },
-  { amount: 0, bidder: 2, isTrump: true },
-  { amount: 0, bidder: 3, isTrump: true },
+  { amount: BidAmount.Pass, bidder: 1, isTrump: true },
+  { amount: BidAmount.Pass, bidder: 2, isTrump: true },
+  { amount: BidAmount.Pass, bidder: 3, isTrump: true },
 ];
 
 // TRICKS

@@ -6,6 +6,7 @@ import { Game } from './Game';
 
 describe('Game with 4 players', () => {
   let game: Game;
+
   beforeAll(() => {
     game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
   });
@@ -260,6 +261,9 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('validBids will return all valid bids to player', () => {
+        console.log('<<<<<<<<<<<<<>>>>>>>>>>>>>>>');
+        console.log('<<<<<<< VALID BIDS >>>>>>>>>', game.round?.validBids());
+        console.log('<<<<<<<<<<<<<>>>>>>>>>>>>>>>');
         expect(game.round?.validBids()).toStrictEqual(mock.MOCK_VALID_BIDS);
       });
 

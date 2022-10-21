@@ -149,18 +149,20 @@ export class Round implements RoundType {
   // BIDDING
   validBids(): BidAmount[] {
     const curBids = this.bids.map((bid) => bid.amount);
-    const curHighBid = Math.max(...curBids);
+    const curHighBid = curBids.length ? Math.max(...curBids) : BidAmount.Pass;
     const noDealerPass = this.activePlayer === this.dealer && this.bids.filter((bid) => bid.amount !== 0).length === 0;
 
-    const validBids = [
-      BidAmount.Pass,
-      // FIXME: Object.values is adding a string type union
-      ...Object.values(BidAmount).filter((bid) =>
-        this.playersRoundData[this.activePlayer].isDealer
-          ? bid >= this.minBid && bid >= curHighBid
-          : bid >= this.minBid && bid > curHighBid
-      ),
-    ];
+    console.log('<<<< MIN BID >>>>', this.minBid);
+    console.log('<<<< curHighBid >>>>', curHighBid);
+    // FIXME: Object.values is adding a string type union
+    const higherThanCurrBid = Object.values(BidAmount).filter((bid) =>
+      this.playersRoundData[this.activePlayer].isDealer
+        ? bid >= this.minBid && bid >= curHighBid
+        : bid >= this.minBid && bid > curHighBid
+    );
+
+    console.log('<<<< higherThanCurrBid >>>>', higherThanCurrBid);
+    const validBids = [BidAmount.Pass, ...higherThanCurrBid];
     noDealerPass && validBids.shift();
 
     return validBids as BidAmount[];

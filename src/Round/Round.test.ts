@@ -106,7 +106,16 @@ describe('Round', () => {
     test('players (other than dealer) must bid higher than the previous bids', () => {
       round.updateActivePlayer(1);
       round.bids = mock.MOCK_BIDS; // high bid is 10
-      expect(round.validBids()).toStrictEqual([0, 10.5, 11, 11.5, 12, 12.5, 12.7, 12.9]);
+      expect(round.validBids()).toStrictEqual([
+        BidAmount.Pass,
+        BidAmount.TenNo,
+        BidAmount.Eleven,
+        BidAmount.ElevenNo,
+        BidAmount.Twelve,
+        BidAmount.TwelveNo,
+        BidAmount.Troika,
+        BidAmount.Kaiser,
+      ]);
     });
 
     test('the dealer may take the bid for the current bid amount', () => {
@@ -151,12 +160,12 @@ describe('Round', () => {
       round.setPlayerBid(BidAmount.SevenNo);
       expect(round.bids).toStrictEqual([
         {
-          amount: 7,
+          amount: BidAmount.Seven,
           bidder: 1,
           isTrump: true,
         },
         {
-          amount: 7.5,
+          amount: BidAmount.SevenNo,
           bidder: 2,
           isTrump: false,
         },
