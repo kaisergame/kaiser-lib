@@ -1,13 +1,14 @@
+import { findPlayerById } from 'src/utils/helpers';
 import {
+  ActivePlayer,
   BidAmount,
   BidType,
   CardType,
   EvaluatedBid,
   EvaluatedTrick,
   Hand,
+  PlayerId,
   PlayerPointTotals,
-  PlayerPosition,
-  PlayerRoundData,
   PlayerType,
   RoundPointTotals,
   RoundState,
@@ -20,15 +21,13 @@ import {
 import { Cards } from '../Cards/Cards';
 import { TRUMP_VALUE } from '../constants/game';
 import { HAND_SIZE } from '../constants/game';
-import _ from 'lodash';
 
 export class Round implements RoundType {
-  playersRoundData: PlayerRoundData[];
   hands: Hand[];
   bids: BidType[] = [];
   winningBid: BidType = { amount: -1, bidder: '', seat: -1, isTrump: false };
   trump: Suit | null = null;
-  activePlayer: PlayerPosition = { seat: -1, playerId: null };
+  activePlayer: PlayerType;
   playableCards: CardType[] = [];
   trick: TrickType = [];
   tricksTeam0: EvaluatedTrick[] = [];
@@ -43,31 +42,23 @@ export class Round implements RoundType {
     public numPlayers: number,
     public minBid: BidAmount,
     public players: PlayerType[],
-    public dealer: PlayerPosition,
+    public dealer: PlayerType,
     public endRound: (roundTotals: RoundTotals) => void
   ) {
+    this.numRound = numRound;
     this.numPlayers = numPlayers;
     this.minBid = minBid;
     this.dealer = dealer;
     this.hands = this.dealHands();
-    this.playersRoundData = players.map((player) => {
-      return {
-        playerId: player.playerId!,
-        name: player.name!,
-        seat: player.seat,
-        teamId: player.teamId,
-        bid: null,
-        isDealer: dealer.seat === player.seat,
-      };
-    });
-    this.updateActivePlayer();
+    this.players = players;
+    this.activePlayer = this.updateActivePlayer();
     this.endRound = endRound;
   }
 
   toJSON(): RoundState {
     return {
       numRound: this.numRound,
-      playersRoundData: this.playersRoundData,
+      players: this.players,
       numPlayers: this.numPlayers,
       dealer: this.dealer,
       hands: this.hands,
@@ -92,7 +83,7 @@ export class Round implements RoundType {
   }
 
   updateStateFromJSON(state: RoundState): void {
-    this.playersRoundData = state.playersRoundData;
+    this.players = state.players;
     this.numPlayers = state.numPlayers;
     this.dealer = state.dealer;
     this.hands = state.hands;
@@ -155,13 +146,13 @@ export class Round implements RoundType {
     const curBids = this.bids.map((bid) => bid.amount);
     const curHighBid = Math.max(...curBids);
     const noDealerPass =
-      this.activePlayer.seat === this.dealer.seat && this.bids.filter((bid) => bid.amount !== 0).length === 0;
+      this.activePlayer.playerId === this.dealer && this.bids.filter((bid) => bid.amount !== 0).length === 0;
 
     const validBids = [
       BidAmount.Pass,
       // FIXME: Object.values is adding a string type union
       ...Object.values(BidAmount).filter((bid) =>
-        _.isEqual(this.activePlayer, this.dealer)
+        this.activePlayer.playerId === this.dealer
           ? bid >= this.minBid && bid >= curHighBid
           : bid >= this.minBid && bid > curHighBid
       ),
@@ -171,19 +162,19 @@ export class Round implements RoundType {
     return validBids as BidAmount[];
   }
 
-  setPlayerBid(bid: BidAmount): void {
+  setPlayerBid(bid: BidAmount, isTrump: boolean): void {
     if (!this.validBids().includes(bid)) throw new Error('That bid is not valid');
-    if (this.bids.find((bid) => bid.seat === this.activePlayer.seat)) throw new Error('Player has already bid');
+    if (this.bids.find((bid) => bid.bidder === this.activePlayer.playerId)) throw new Error('Player has already bid');
     if (this.bids.length >= this.numPlayers) throw new Error('Bids have already been placed');
 
     const playerBid = {
       amount: bid,
-      bidder: this.activePlayer,
-      isTrump: bid % 1 === 0,
+      bidder: this.activePlayer.playerId,
+      seat: this.activePlayer.seat,
+      isTrump,
     };
 
     this.bids.push(playerBid);
-    this.playersRoundData[this.activePlayer].bid = playerBid.amount;
     if (this.bids.length === this.numPlayers) {
       this.setWinningBid();
     } else {
@@ -195,29 +186,27 @@ export class Round implements RoundType {
     console.log('checking bidding open');
     if (this.bids.length >= this.numPlayers) return false;
     console.log('bid length is good', this.winningBid.bidder);
-    if (this.winningBid.bidder >= 0) return false;
+    if (this.winningBid.bidder) return false;
     console.log('no winning bidder');
     return true;
   }
 
-  findBidForPlayer(player: number): BidType | null {
-    const bid = this.bids.find((bid) => bid.bidder === player);
+  findPlayerBid(playerId: PlayerId): BidType | null {
+    const bid = this.bids.find((bid) => bid.bidder === playerId);
 
     return bid || null;
   }
 
   setWinningBid(): BidType {
     const winningBid = this.bids.reduce(
-      (highBid, bid): { bidder: number; amount: BidAmount; isTrump: boolean } => {
-        return bid.amount >= highBid.amount
-          ? { bidder: bid.bidder, amount: bid.amount, isTrump: bid.amount % 1 === 0 }
-          : highBid;
+      (highBid, bid): { bidder: PlayerId; amount: BidAmount; seat: Seat; isTrump: boolean } => {
+        return bid.amount >= highBid.amount ? bid : highBid;
       },
-      { bidder: -1, amount: -1, isTrump: false }
+      { bidder: '', amount: -1, seat: -1, isTrump: false }
     );
 
     this.winningBid = winningBid;
-    this.updateActivePlayer(winningBid.bidder);
+    this.updateActivePlayer(winningBid.seat);
 
     return winningBid;
   }
@@ -233,12 +222,12 @@ export class Round implements RoundType {
 
   // CARD PLAY
   updateActivePlayer(makeActivePlayer?: Seat): Seat {
-    let nextActivePlayer = -1;
+    let nextActivePlayer = { playerId: '', seat: -1 };
 
     if (typeof makeActivePlayer === 'undefined') {
       // init bidding
-      if (this.activePlayer === -1 && this.bids.length === 0)
-        nextActivePlayer = this.dealer + 1 < this.numPlayers ? this.dealer + 1 : 0;
+      if (this.activePlayer.seat === -1 && this.bids.length === 0)
+        nextActivePlayer = this.dealer + 1 < this.numPlayers ? { playerId: '', seat: -1 } this.dealer + 1 : 0;
 
       // advance play around table
       if (nextActivePlayer === -1)
@@ -448,7 +437,7 @@ export class Round implements RoundType {
 
     if (!this.isActivePlayer(playerId)) return false;
 
-    if (this.findBidForPlayer(this.activePlayer)) return false;
+    if (this.findPlayerBid(this.activePlayer)) return false;
 
     return true;
   }

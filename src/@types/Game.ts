@@ -8,7 +8,7 @@ export type GameState = {
   players: PlayerType[];
   teams: TeamType[];
   scores: ScoreType[];
-  dealer: PlayerId | null;
+  dealer: PlayerType | null;
   numRound: number;
   round: RoundState | null;
   roundSummaries: RoundSummary[];

@@ -13,13 +13,14 @@ import {
   Seat,
   TeamType,
 } from '../@types/index';
+import { findPlayerById, findPlayerBySeat, checkPlayerOrder } from 'src/utils/helpers';
 import { Round } from '../Round/Round';
 
 export class Game implements GameType {
   players: PlayerType[];
   teams: TeamType[];
   scores: ScoreType[];
-  dealer: PlayerId | null = null;
+  dealer: PlayerType | null = null;
   // eventually round should be private
   numRound: number = 0;
   round: RoundType | null = null;
@@ -130,7 +131,7 @@ export class Game implements GameType {
     this.players[openPlayer] = player;
     playerTeam.teamMembers.push(player.playerId!);
     if (this.round) {
-      const playerData = this.round.playersRoundData.find((player) => player.playerId === null);
+      const playerData = this.round.players.find((player) => player.playerId === null);
       playerData!.playerId = id;
       playerData!.name = name;
     }
@@ -145,24 +146,10 @@ export class Game implements GameType {
     this.teams.map((team) => team.teamMembers.filter((playerId) => playerId !== id));
 
     if (this.round) {
-      const playerData = this.round.playersRoundData.find((player) => player.playerId === id);
+      const playerData = this.round.players.find((player) => player.playerId === id);
       playerData!.playerId = null;
       playerData!.name = null;
     }
-  }
-
-  findPlayerBySeat(seat: Seat): PlayerType {
-    const player = this.players.find((player) => player.seat === seat);
-    if (!player || player.playerId === null) throw new Error('No player found');
-
-    return player;
-  }
-
-  findPlayerById(id: PlayerId): PlayerType {
-    const player = this.players.find((player) => player.playerId === id);
-    if (!player || player.playerId === null) throw new Error('No player found');
-
-    return player;
   }
 
   getTeamSeats(teamIndex: number): number[] {
@@ -212,6 +199,10 @@ export class Game implements GameType {
     switchPlayer.teamId = copyMovePlayer.teamId;
     switchPlayer.seat = copyMovePlayer.seat;
 
+    this.sortPlayers();
+  }
+
+  sortPlayers(): void {
     this.players.sort((playerA: PlayerType, playerB: PlayerType) => playerA.seat - playerB.seat);
   }
 
@@ -225,6 +216,7 @@ export class Game implements GameType {
   }
 
   createRound(): void {
+    if (!checkPlayerOrder(this.players)) this.sortPlayers;
     const dealer = this.setDealer();
     const round = new Round(
       this.numRound,
@@ -238,17 +230,18 @@ export class Game implements GameType {
     this.round = round;
   }
 
-  setDealer(): PlayerId {
-    let dealer = this.dealer;
-    if (dealer === null) dealer = this.players[0].playerId!;
+  setDealer(): PlayerType {
+    let nextDealer = this.dealer;
+    if (nextDealer === null) nextDealer = this.players[0];
     else {
-      const curDealerSeat = this.findPlayerById(this.dealer!).seat;
+      if (!checkPlayerOrder(this.players)) this.sortPlayers;
+      const curDealerSeat = this.dealer!.seat;
       curDealerSeat !== this.players.length - 1
-        ? (dealer = this.players[curDealerSeat + 1].playerId!)
-        : (dealer = this.players[0].playerId!);
+        ? (nextDealer = this.players[curDealerSeat + 1])
+        : (nextDealer = this.players[0]);
     }
-    this.dealer = dealer;
-    return dealer;
+    this.dealer = nextDealer;
+    return nextDealer;
   }
 
   endRound(roundTotals: RoundTotals): void {

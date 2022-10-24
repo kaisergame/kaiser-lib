@@ -3,15 +3,15 @@ import { PlayerId, PlayerType, Seat } from './Game';
 
 export type RoundState = {
   numRound: number;
-  playersRoundData: PlayerRoundData[];
+  players: PlayerType[];
   hands: Hand[];
   bids: BidType[];
   numPlayers: number;
-  dealer: PlayerId;
+  dealer: PlayerType;
   minBid: BidAmount;
   winningBid: BidType;
   trump: Suit | null;
-  activePlayer: PlayerId;
+  activePlayer: PlayerType;
   playableCards: CardType[];
   trick: TrickType;
   tricksTeam0: EvaluatedTrick[];
@@ -25,7 +25,7 @@ export interface RoundType extends RoundState {
   // dealHands(): Hand[]; // private
   sortHands(lowToHigh?: 'lowToHigh'): void;
   validBids(): BidAmount[];
-  setPlayerBid(bid: BidAmount): void;
+  setPlayerBid(bid: BidAmount, isTrump: boolean): void;
   setWinningBid(): BidType; // private
   setTrump(trump: Suit): void; // private
   getTrump(): Suit | null; // public
@@ -36,7 +36,7 @@ export interface RoundType extends RoundState {
   updateCardsPlayed(cardPlayed: CardType): TrickType; // private
   endPlayerTurn(): void; // private
   biddingOpen(): boolean;
-  findBidForPlayer(player: number): BidType | null;
+  findPlayerBid(playerId: PlayerId): BidType | null;
   // resetPlayableCards(): void; // private
   endTrick(): EvaluatedTrick; // private
   // getTrickValue(): number; // private
@@ -54,11 +54,6 @@ export interface RoundType extends RoundState {
 }
 
 export type Hand = CardType[];
-
-export type PlayerRoundData = PlayerType & {
-  bid: BidAmount | null;
-  isDealer: boolean;
-};
 
 export type BidType = {
   amount: BidAmount;
