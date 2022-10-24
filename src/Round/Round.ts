@@ -20,6 +20,7 @@ import {
 import { Cards } from '../Cards/Cards';
 import { TRUMP_VALUE } from '../constants/game';
 import { HAND_SIZE } from '../constants/game';
+import _ from 'lodash';
 
 export class Round implements RoundType {
   playersRoundData: PlayerRoundData[];
@@ -160,7 +161,7 @@ export class Round implements RoundType {
       BidAmount.Pass,
       // FIXME: Object.values is adding a string type union
       ...Object.values(BidAmount).filter((bid) =>
-        this.playersRoundData[this.activePlayer].isDealer
+        _.isEqual(this.activePlayer, this.dealer)
           ? bid >= this.minBid && bid >= curHighBid
           : bid >= this.minBid && bid > curHighBid
       ),
@@ -172,7 +173,7 @@ export class Round implements RoundType {
 
   setPlayerBid(bid: BidAmount): void {
     if (!this.validBids().includes(bid)) throw new Error('That bid is not valid');
-    if (this.bids.find((bid) => bid.seat === this.activePlayer)) throw new Error('Player has already bid');
+    if (this.bids.find((bid) => bid.seat === this.activePlayer.seat)) throw new Error('Player has already bid');
     if (this.bids.length >= this.numPlayers) throw new Error('Bids have already been placed');
 
     const playerBid = {

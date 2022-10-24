@@ -4,7 +4,6 @@ import {
   GameType,
   GameVersion,
   PlayerId,
-  PlayerPosition,
   PlayerType,
   RoundPointTotals,
   RoundSummary,
@@ -20,7 +19,7 @@ export class Game implements GameType {
   players: PlayerType[];
   teams: TeamType[];
   scores: ScoreType[];
-  dealer: PlayerPosition | null = null;
+  dealer: PlayerId | null = null;
   // eventually round should be private
   numRound: number = 0;
   round: RoundType | null = null;
@@ -152,11 +151,18 @@ export class Game implements GameType {
     }
   }
 
-  findPlayerInSeat(seat: Seat): PlayerId {
+  findPlayerBySeat(seat: Seat): PlayerType {
     const player = this.players.find((player) => player.seat === seat);
     if (!player || player.playerId === null) throw new Error('No player found');
 
-    return player.playerId;
+    return player;
+  }
+
+  findPlayerById(id: PlayerId): PlayerType {
+    const player = this.players.find((player) => player.playerId === id);
+    if (!player || player.playerId === null) throw new Error('No player found');
+
+    return player;
   }
 
   getTeamSeats(teamIndex: number): number[] {
@@ -205,6 +211,8 @@ export class Game implements GameType {
     switchPlayer.name = copySwitchPlayer.name;
     switchPlayer.teamId = copyMovePlayer.teamId;
     switchPlayer.seat = copyMovePlayer.seat;
+
+    this.players.sort((playerA: PlayerType, playerB: PlayerType) => playerA.seat - playerB.seat);
   }
 
   // GAMEPLAY
@@ -230,14 +238,15 @@ export class Game implements GameType {
     this.round = round;
   }
 
-  setDealer(): PlayerPosition {
+  setDealer(): PlayerId {
     let dealer = this.dealer;
-    if (dealer === null) dealer = { seat: 0, playerId: this.findPlayerInSeat(0) };
-    else
-      dealer.seat !== this.players.length - 1
-        ? (dealer = { seat: dealer.seat++, playerId: this.findPlayerInSeat(dealer.seat++) })
-        : (dealer = { seat: 0, playerId: this.findPlayerInSeat(0) });
-
+    if (dealer === null) dealer = this.players[0].playerId!;
+    else {
+      const curDealerSeat = this.findPlayerById(this.dealer!).seat;
+      curDealerSeat !== this.players.length - 1
+        ? (dealer = this.players[curDealerSeat + 1].playerId!)
+        : (dealer = this.players[0].playerId!);
+    }
     this.dealer = dealer;
     return dealer;
   }

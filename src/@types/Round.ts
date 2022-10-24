@@ -1,5 +1,5 @@
 import { CardType, Suit } from './Cards';
-import { PlayerId, PlayerType, PlayerPosition, Seat } from './Game';
+import { PlayerId, PlayerType, Seat } from './Game';
 
 export type RoundState = {
   numRound: number;
@@ -7,11 +7,11 @@ export type RoundState = {
   hands: Hand[];
   bids: BidType[];
   numPlayers: number;
-  dealer: PlayerPosition;
+  dealer: PlayerId;
   minBid: BidAmount;
   winningBid: BidType;
   trump: Suit | null;
-  activePlayer: PlayerPosition;
+  activePlayer: PlayerId;
   playableCards: CardType[];
   trick: TrickType;
   tricksTeam0: EvaluatedTrick[];
