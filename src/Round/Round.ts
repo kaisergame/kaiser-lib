@@ -6,6 +6,7 @@ import {
   EvaluatedTrick,
   Hand,
   PlayerPointTotals,
+  PlayerPosition,
   PlayerRoundData,
   PlayerType,
   RoundPointTotals,
@@ -24,9 +25,9 @@ export class Round implements RoundType {
   playersRoundData: PlayerRoundData[];
   hands: Hand[];
   bids: BidType[] = [];
-  winningBid: BidType = { amount: -1, bidder: -1, isTrump: false };
+  winningBid: BidType = { amount: -1, bidder: '', seat: -1, isTrump: false };
   trump: Suit | null = null;
-  activePlayer: Seat = -1;
+  activePlayer: PlayerPosition = { seat: -1, playerId: null };
   playableCards: CardType[] = [];
   trick: TrickType = [];
   tricksTeam0: EvaluatedTrick[] = [];
@@ -37,10 +38,11 @@ export class Round implements RoundType {
   ];
 
   constructor(
+    public numRound: number,
     public numPlayers: number,
     public minBid: BidAmount,
     public players: PlayerType[],
-    public dealer: Seat,
+    public dealer: PlayerPosition,
     public endRound: (roundTotals: RoundTotals) => void
   ) {
     this.numPlayers = numPlayers;
@@ -54,7 +56,7 @@ export class Round implements RoundType {
         seat: player.seat,
         teamId: player.teamId,
         bid: null,
-        isDealer: dealer === player.seat,
+        isDealer: dealer.seat === player.seat,
       };
     });
     this.updateActivePlayer();
@@ -63,6 +65,7 @@ export class Round implements RoundType {
 
   toJSON(): RoundState {
     return {
+      numRound: this.numRound,
       playersRoundData: this.playersRoundData,
       numPlayers: this.numPlayers,
       dealer: this.dealer,
@@ -81,7 +84,7 @@ export class Round implements RoundType {
   }
 
   static fromJSON(state: RoundState, endRound: (roundTotals: RoundTotals) => void): Round {
-    const round = new Round(state.numPlayers, state.minBid, [], state.dealer, endRound);
+    const round = new Round(state.numRound, state.numPlayers, state.minBid, [], state.dealer, endRound);
     round.updateStateFromJSON(state);
 
     return round;
@@ -150,7 +153,8 @@ export class Round implements RoundType {
   validBids(): BidAmount[] {
     const curBids = this.bids.map((bid) => bid.amount);
     const curHighBid = Math.max(...curBids);
-    const noDealerPass = this.activePlayer === this.dealer && this.bids.filter((bid) => bid.amount !== 0).length === 0;
+    const noDealerPass =
+      this.activePlayer.seat === this.dealer.seat && this.bids.filter((bid) => bid.amount !== 0).length === 0;
 
     const validBids = [
       BidAmount.Pass,
@@ -168,7 +172,7 @@ export class Round implements RoundType {
 
   setPlayerBid(bid: BidAmount): void {
     if (!this.validBids().includes(bid)) throw new Error('That bid is not valid');
-    if (this.bids.find((bid) => bid.bidder === this.activePlayer)) throw new Error('Player has already bid');
+    if (this.bids.find((bid) => bid.seat === this.activePlayer)) throw new Error('Player has already bid');
     if (this.bids.length >= this.numPlayers) throw new Error('Bids have already been placed');
 
     const playerBid = {

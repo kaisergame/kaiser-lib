@@ -1,19 +1,23 @@
 import { Suit } from './Cards';
 import { BidAmount, RoundPointTotals, RoundState, RoundTotals, RoundType } from './Round';
 
-export interface GameType {
+export type GameState = {
   gameId: GameId;
   owner: { id: string; name: string };
   config: GameConfig;
   players: PlayerType[];
   teams: TeamType[];
   scores: ScoreType[];
-  dealer: Seat | null;
-  // it is challenging that round isn't a guaranteed property
-  round: RoundType | null;
+  dealer: PlayerPosition | null;
+  numRound: number;
+  round: RoundState | null;
   roundSummaries: RoundSummary[];
-  toJSON(): GameStateType;
-  updateStateFromJSON(state: GameStateType): void;
+  version: GameVersion;
+};
+
+export interface GameType extends GameState {
+  toJSON(): GameState;
+  updateStateFromJSON(state: GameState): void;
   addPlayer(id: string, name: string): PlayerType;
   removePlayer(id: string): void;
   canBid(playerId: string): boolean;
@@ -32,19 +36,6 @@ export interface GameType {
   // checkIsWinner(): string | null; // private
   // endGame(teamId: string): void; // private
 }
-
-export type GameStateType = {
-  gameId: GameId;
-  owner: { id: string; name: string };
-  config: GameConfig;
-  players: PlayerType[];
-  teams: TeamType[];
-  scores: ScoreType[];
-  dealer: Seat | null;
-  round: RoundState | null;
-  roundSummaries: RoundSummary[];
-  version: GameVersion;
-};
 
 export enum GameVersion {
   One = '1.0.0',
@@ -81,11 +72,14 @@ export type TeamType = {
 
 export type Seat = number;
 
-export type PlayerType = {
+export type PlayerPosition = {
   playerId: PlayerId | null;
+  seat: Seat;
+};
+
+export type PlayerType = PlayerPosition & {
   name: string | null;
   teamId: string;
-  seat: Seat;
 };
 
 export type PlayerId = string;

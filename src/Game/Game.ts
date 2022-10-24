@@ -1,9 +1,10 @@
 import {
   GameConfig,
-  GameStateType,
+  GameState,
   GameType,
   GameVersion,
   PlayerId,
+  PlayerPosition,
   PlayerType,
   RoundPointTotals,
   RoundSummary,
@@ -19,10 +20,12 @@ export class Game implements GameType {
   players: PlayerType[];
   teams: TeamType[];
   scores: ScoreType[];
-  dealer: Seat | null = null;
+  dealer: PlayerPosition | null = null;
   // eventually round should be private
+  numRound: number = 0;
   round: RoundType | null = null;
   roundSummaries: RoundSummary[] = [];
+  version: GameVersion = GameVersion.One;
 
   constructor(public owner: { id: string; name: string }, readonly gameId: string, readonly config: GameConfig) {
     this.gameId = gameId;
@@ -36,7 +39,7 @@ export class Game implements GameType {
     ];
   }
 
-  toJSON(): GameStateType {
+  toJSON(): GameState {
     return {
       gameId: this.gameId,
       config: this.config,
@@ -45,20 +48,21 @@ export class Game implements GameType {
       teams: this.teams,
       scores: this.scores,
       dealer: this.dealer,
+      numRound: this.numRound,
       round: this.round?.toJSON() || null,
       roundSummaries: this.roundSummaries,
       version: GameVersion.One,
     };
   }
 
-  static fromJSON(state: GameStateType): Game {
+  static fromJSON(state: GameState): Game {
     const game = new Game(state.owner, state.gameId, state.config);
     game.updateStateFromJSON(state);
 
     return game;
   }
 
-  updateStateFromJSON(state: GameStateType): void {
+  updateStateFromJSON(state: GameState): void {
     this.owner = state.owner;
     this.players = state.players;
     this.teams = state.teams;
@@ -148,6 +152,13 @@ export class Game implements GameType {
     }
   }
 
+  findPlayerInSeat(seat: Seat): PlayerId {
+    const player = this.players.find((player) => player.seat === seat);
+    if (!player || player.playerId === null) throw new Error('No player found');
+
+    return player.playerId;
+  }
+
   getTeamSeats(teamIndex: number): number[] {
     const seats = [];
     const { numPlayers } = this.config;
@@ -207,15 +218,25 @@ export class Game implements GameType {
 
   createRound(): void {
     const dealer = this.setDealer();
-    const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound.bind(this));
+    const round = new Round(
+      this.numRound,
+      this.config.numPlayers,
+      this.config.minBid,
+      this.players,
+      dealer,
+      this.endRound.bind(this)
+    );
 
     this.round = round;
   }
 
-  setDealer(): Seat {
+  setDealer(): PlayerPosition {
     let dealer = this.dealer;
-    if (dealer === null) dealer = 0;
-    else dealer !== this.players.length - 1 ? dealer++ : (dealer = 0);
+    if (dealer === null) dealer = { seat: 0, playerId: this.findPlayerInSeat(0) };
+    else
+      dealer.seat !== this.players.length - 1
+        ? (dealer = { seat: dealer.seat++, playerId: this.findPlayerInSeat(dealer.seat++) })
+        : (dealer = { seat: 0, playerId: this.findPlayerInSeat(0) });
 
     this.dealer = dealer;
     return dealer;
