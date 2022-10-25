@@ -8,7 +8,6 @@ export type GameState = {
   teams: TeamType[];
   scores: ScoreType[];
   dealerIndex: PlayerIndex | null;
-  roundNum: number;
   round: RoundState | null;
   roundSummaries: RoundSummary[];
   version: GameVersion;
@@ -17,12 +16,14 @@ export type GameState = {
 export interface GameType extends GameState {
   toJSON(): GameState;
   updateStateFromJSON(state: GameState): void;
-  addPlayer(id: string, name: string): PlayerType;
+  addPlayer(id: string, name: string): void;
   removePlayer(id: string): void;
-  // initializeTeams(): TeamType[]; // private
-  // initializePlayers(): PlayerType[]; // private
+  // initializeTeams(): void; // private
+  // initializePlayers(): void; // private
   // getTeamPlayerIndexs(teamIndex: number): number[]; // private
   switchPlayerPlayerIndex(movePlayer: PlayerId, moveToPlayerIndex?: PlayerIndex): void;
+  sortPlayers(): void;
+  canStartGame(): boolean;
   startGame(): void;
   // createRound(): void; // private
   // setDealer(): PlayerIndex; // private

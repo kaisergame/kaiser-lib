@@ -6,8 +6,9 @@ import {
   EvaluatedTrick,
   GameConfig,
   Hand,
+  NoSuit,
   PlayerType,
-  RoundTotals,
+  RoundSummary,
   Suit,
   TrickType,
 } from 'src/@types/index';
@@ -220,103 +221,165 @@ export const MOCK_HANDS_SORTED: Hand[] = [
 export const MOCK_VALID_BIDS = [
   BidAmount.Pass,
   BidAmount.Seven,
-  BidAmount.SevenNo,
   BidAmount.Eight,
-  BidAmount.EightNo,
   BidAmount.Nine,
-  BidAmount.NineNo,
   BidAmount.Ten,
-  BidAmount.TenNo,
   BidAmount.Eleven,
-  BidAmount.ElevenNo,
   BidAmount.Twelve,
-  BidAmount.TwelveNo,
-  BidAmount.Troika,
-  BidAmount.Kaiser,
 ];
 
 export const MOCK_BIDS: BidType[] = [
-  { amount: 7, bidder: 1, isTrump: true },
-  { amount: 7.5, bidder: 2, isTrump: false },
-  { amount: 10, bidder: 3, isTrump: true },
+  { amount: 7, bidder: 'mockUser1111', playerIndex: 1, isTrump: true },
+  { amount: 7.5, bidder: 'mockUser2222', playerIndex: 2, isTrump: false },
+  { amount: 10, bidder: 'mockUser3333', playerIndex: 3, isTrump: true },
 ];
 
 export const MOCK_BIDS_2: BidType[] = [
-  { amount: 7, bidder: 1, isTrump: true },
-  { amount: 7.5, bidder: 2, isTrump: false },
-  { amount: 10, bidder: 3, isTrump: true },
-  { amount: 0, bidder: 0, isTrump: false },
+  { amount: 7, bidder: 'mockUser1111', playerIndex: 1, isTrump: true },
+  { amount: 7.5, bidder: 'mockUser2222', playerIndex: 2, isTrump: false },
+  { amount: 10, bidder: 'mockUser3333', playerIndex: 3, isTrump: true },
+  { amount: 0, bidder: 'mockUser0000', playerIndex: 0, isTrump: false },
 ];
 
 export const MOCK_PASS_BIDS: BidType[] = [
-  { amount: 0, bidder: 1, isTrump: true },
-  { amount: 0, bidder: 2, isTrump: true },
-  { amount: 0, bidder: 3, isTrump: true },
+  { amount: 0, bidder: 'mockUser1111', playerIndex: 1, isTrump: true },
+  { amount: 0, bidder: 'mockUser2222', playerIndex: 2, isTrump: true },
+  { amount: 0, bidder: 'mockUser3333', playerIndex: 3, isTrump: true },
 ];
 
 // TRICKS
 export const MOCK_TRICK_0: TrickType = [
-  { cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 }, playedBy: 0 },
-  { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 1 },
-  { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
-  { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 3 },
+  {
+    cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 },
+    playedBy: 'mockUser0000',
+    playerIndex: 0,
+  },
+  {
+    cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 },
+    playedBy: 'mockUser1111',
+    playerIndex: 1,
+  },
+  {
+    cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 },
+    playedBy: 'mockUser2222',
+    playerIndex: 2,
+  },
+  {
+    cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    playedBy: 'mockUser3333',
+    playerIndex: 3,
+  },
 ];
 
 export const MOCK_TRICK_SPADE_LED: TrickType = [
-  { cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 1 },
-  { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
-  { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 3 },
-  { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 0 },
+  {
+    cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    playedBy: 'mockUser1111',
+    playerIndex: 1,
+  },
+  {
+    cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 },
+    playedBy: 'mockUser2222',
+    playerIndex: 2,
+  },
+  {
+    cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 },
+    playedBy: 'mockUser3333',
+    playerIndex: 3,
+  },
+  {
+    cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 },
+    playedBy: 'mockUser0000',
+    playerIndex: 0,
+  },
 ];
 
 export const TAKEN_TRICKS_NO_TRUMP: EvaluatedTrick[] = [
   {
     pointValue: 1,
     cardsPlayed: [
-      { cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 }, playedBy: 1 },
-      { cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 }, playedBy: 2 },
-      { cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 0 }, playedBy: 3 },
-      { cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 0 }, playedBy: 0 },
+      {
+        cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 },
+        playedBy: 'mockUser1111',
+        playerIndex: 1,
+      },
+      {
+        cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 },
+        playedBy: 'mockUser2222',
+        playerIndex: 2,
+      },
+      {
+        cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 0 },
+        playedBy: 'mockUser3333',
+        playerIndex: 3,
+      },
+      {
+        cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 0 },
+        playedBy: 'mockUser0000',
+        playerIndex: 0,
+      },
     ],
-    trickWonBy: 2,
+    trickWonBy: MOCK_PLAYERS[2],
   },
   {
     pointValue: 6,
     cardsPlayed: [
-      { cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 }, playedBy: 2 },
-      { cardPlayed: { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 0 }, playedBy: 3 },
-      { cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 }, playedBy: 0 },
-      { cardPlayed: { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 0 }, playedBy: 1 },
+      {
+        cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 },
+        playedBy: 'mockUser2222',
+        playerIndex: 2,
+      },
+      {
+        cardPlayed: { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 0 },
+        playedBy: 'mockUser3333',
+        playerIndex: 3,
+      },
+      {
+        cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 },
+        playedBy: 'mockUser0000',
+        playerIndex: 0,
+      },
+      {
+        cardPlayed: { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 0 },
+        playedBy: 'mockUser1111',
+        playerIndex: 1,
+      },
     ],
-    trickWonBy: 0,
+    trickWonBy: MOCK_PLAYERS[0],
   },
 ];
 
 // ROUND TOTALS
-export const MOCK_ROUND_TOTALS: RoundTotals = {
-  bid: { amount: 9, bidder: 2, isTrump: true, bidMade: false },
+export const MOCK_ROUND_TOTALS: RoundSummary = {
+  roundNum: 1,
+  winningBid: { amount: 9, bidder: 'mockUser2222', playerIndex: 2, isTrump: true },
+  isBidMade: false,
+  trump: Suit.Hearts,
   roundPoints: [
     { teamId: 'team0', points: -9 },
     { teamId: 'team1', points: 4 },
   ],
   playerPoints: [
-    { playerPlayerIndex: 0, points: 2 },
-    { playerPlayerIndex: 1, points: 3 },
-    { playerPlayerIndex: 2, points: 4 },
-    { playerPlayerIndex: 3, points: 1 },
+    { playerId: 'mockUser0000', playerIndex: 0, points: 2 },
+    { playerId: 'mockUser1111', playerIndex: 1, points: 3 },
+    { playerId: 'mockUser2222', playerIndex: 2, points: 4 },
+    { playerId: 'mockUser3333', playerIndex: 3, points: 1 },
   ],
 };
 
-export const MOCK_ROUND_TOTALS_2: RoundTotals = {
-  bid: { amount: 10, bidder: 3, isTrump: false, bidMade: true },
+export const MOCK_ROUND_TOTALS_2: RoundSummary = {
+  roundNum: 1,
+  winningBid: { amount: 10, bidder: 'mockUser3333', playerIndex: 3, isTrump: false },
+  isBidMade: true,
+  trump: NoSuit.NoTrump,
   roundPoints: [
     { teamId: 'team0', points: -1 },
     { teamId: 'team1', points: 22 },
   ],
   playerPoints: [
-    { playerPlayerIndex: 0, points: -2 },
-    { playerPlayerIndex: 1, points: 2 },
-    { playerPlayerIndex: 2, points: 1 },
-    { playerPlayerIndex: 3, points: 9 },
+    { playerId: 'mockUser0000', playerIndex: 0, points: -2 },
+    { playerId: 'mockUser1111', playerIndex: 1, points: 2 },
+    { playerId: 'mockUser2222', playerIndex: 2, points: 1 },
+    { playerId: 'mockUser3333', playerIndex: 3, points: 9 },
   ],
 };
