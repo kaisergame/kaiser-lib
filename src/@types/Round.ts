@@ -4,7 +4,7 @@ import { PlayerId, PlayerType, Seat } from './Game';
 export type RoundState = {
   numRound: number;
   players: PlayerType[];
-  hands: Hand[];
+  hands: PlayerHand[];
   bids: BidType[];
   numPlayers: number;
   dealer: PlayerType;
@@ -29,7 +29,7 @@ export interface RoundType extends RoundState {
   setWinningBid(): BidType; // private
   setTrump(trump: Suit): void; // private
   getTrump(): Suit | null; // public
-  updateActivePlayer(makeActivePlayer?: number): Seat; // private
+  updateActivePlayer(makeActivePlayer?: number): PlayerType; // private
   setPlayableCards(hand: Hand): CardType[]; // private
   playCard(cardPlayed: CardType): void;
   removeCardFromHand(cardPlayed: CardType): Hand; // private
@@ -40,7 +40,7 @@ export interface RoundType extends RoundState {
   // resetPlayableCards(): void; // private
   endTrick(): EvaluatedTrick; // private
   // getTrickValue(): number; // private
-  // getTrickWinner(): Seat; // private
+  // getTrickWinner(): { playedBy: PlayerId; seat: Seat } // private
   // updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void; // private
   // resetTrick(): void; // private
   evaluateRound(): RoundTotals; // private
@@ -54,6 +54,11 @@ export interface RoundType extends RoundState {
 }
 
 export type Hand = CardType[];
+
+export type PlayerHand = {
+  playerId: PlayerId;
+  hand: Hand;
+};
 
 export type BidType = {
   amount: BidAmount;
@@ -81,10 +86,10 @@ export enum BidAmount {
 export type EvaluatedTrick = {
   cardsPlayed: TrickType;
   pointValue: number;
-  trickWonBy: Seat;
+  trickWonBy: PlayerType;
 };
 
-export type TrickType = { cardPlayed: CardType; playedBy: Seat }[];
+export type TrickType = { cardPlayed: CardType; playedBy: PlayerId; seat: Seat }[];
 
 export type RoundTotals = {
   bid: EvaluatedBid;

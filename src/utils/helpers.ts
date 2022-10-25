@@ -24,3 +24,7 @@ export const findPlayerById = (players: PlayerType[], id: PlayerId): PlayerType 
 
   return player;
 };
+
+export const validateSeat = (numSeat: Seat | undefined, numPlayers: number = 4): boolean => {
+  return typeof numSeat === 'number' && numSeat < numPlayers && numSeat >= 0;
+};
