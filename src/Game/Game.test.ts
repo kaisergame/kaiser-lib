@@ -1,14 +1,14 @@
-import { BidAmount, CardName, Suit } from '../@types';
-import { HAND_SIZE } from '../constants/index';
-import * as mock from '../constants/mocks';
-import { Round } from '../Round/Round';
+// import { BidAmount, CardName, Suit } from '../@types';
+// import { HAND_SIZE } from '../constants/index';
+// import * as mock from '../constants/mocks';
+// import { Round } from '../Round/Round';
 import { Game } from './Game';
 
 describe('Game with 4 players', () => {
   let game: Game;
-  beforeAll(() => {
-    game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
-  });
+  // beforeAll(() => {
+  //   game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
+  // });
 
   //   describe('addPlayer method', () => {
   //     test('addPlayer should increase non-null Game players.playerId by 1', () => {
@@ -17,13 +17,13 @@ describe('Game with 4 players', () => {
   //       expect(game.players.filter((player) => player.playerId !== null).length).toBe(initialPlayerNum + 1);
   //     });
 
-  //     test('addPlayer should give expected values for userId, seat, and team', () => {
+  //     test('addPlayer should give expected values for userId, playerIndex, and team', () => {
   //       game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
   //       game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
 
   //       expect(game.players[1].playerId).toBe(mock.MOCK_USER_1.id);
   //       expect(game.players[1].teamId).toBe('team1');
-  //       expect(game.players[2].seat).toBe(2);
+  //       expect(game.players[2].playerIndex).toBe(2);
   //       expect(game.players[2].teamId).toBe('team0');
   //     });
   //   });
@@ -44,7 +44,7 @@ describe('Game with 4 players', () => {
   //     });
   //   });
 
-  //   describe('switchPlayerSeat method', () => {
+  //   describe('switchPlayerPlayerIndex method', () => {
   //     beforeEach(() => {
   //       game.teams = game.initializeTeams();
   //       game.players = game.initializePlayers();
@@ -54,56 +54,56 @@ describe('Game with 4 players', () => {
   //       game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
   //       game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
   //     });
-  //     test('a player passed to switchPlayerSeat will be moved 1 seat left', () => {
+  //     test('a player passed to switchPlayerPlayerIndex will be moved 1 playerIndex left', () => {
   //       console.log(game.teams);
 
-  //       game.switchPlayerSeat('mockUser0000');
+  //       game.switchPlayerPlayerIndex('mockUser0000');
   //       console.log(game.teams);
 
   //       expect(game.players[0]).toStrictEqual({
   //         playerId: 'mockUser0000',
   //         name: 'Ryan',
   //         teamId: 'team1',
-  //         seat: 1,
+  //         playerIndex: 1,
   //       });
   //       expect(game.players[1]).toStrictEqual({
   //         playerId: 'mockUser1111',
   //         name: 'Cody',
   //         teamId: 'team0',
-  //         seat: 0,
+  //         playerIndex: 0,
   //       });
 
   //       expect(game.teams[0].teamMembers).toStrictEqual(['mockUser2222', 'mockUser1111']);
   //       expect(game.teams[1].teamMembers).toStrictEqual(['mockUser3333', 'mockUser0000']);
   //     });
 
-  //     test('if called with seat, player switches to that seat, player in that seat goes to player position', () => {
-  //       game.switchPlayerSeat('mockUser0000', 2);
+  //     test('if called with playerIndex, player switches to that playerIndex, player in that playerIndex goes to player position', () => {
+  //       game.switchPlayerPlayerIndex('mockUser0000', 2);
   //       expect(game.players[0]).toStrictEqual({
   //         playerId: 'mockUser0000',
   //         name: 'Ryan',
   //         teamId: 'team0',
-  //         seat: 2,
+  //         playerIndex: 2,
   //       });
   //       expect(game.players[2]).toStrictEqual({
   //         playerId: 'mockUser2222',
   //         name: 'Stacey',
   //         teamId: 'team0',
-  //         seat: 0,
+  //         playerIndex: 0,
   //       });
 
-  //       game.switchPlayerSeat('mockUser2222', 3);
+  //       game.switchPlayerPlayerIndex('mockUser2222', 3);
   //       expect(game.players[2]).toStrictEqual({
   //         playerId: 'mockUser2222',
   //         name: 'Stacey',
   //         teamId: 'team1',
-  //         seat: 3,
+  //         playerIndex: 3,
   //       });
   //       expect(game.players[3]).toStrictEqual({
   //         playerId: 'mockUser3333',
   //         name: 'Paul',
   //         teamId: 'team0',
-  //         seat: 0,
+  //         playerIndex: 0,
   //       });
   //     });
   //   });
@@ -244,7 +244,7 @@ describe('Game with 4 players', () => {
 //     });
 
 //     describe('updateActivePlayer', () => {
-//       test('updateActivePlayer will initiate activePlayer to Seat 1', () => {
+//       test('updateActivePlayer will initiate activePlayer to PlayerIndex 1', () => {
 //         const spy = jest.spyOn(game.round!, 'updateActivePlayer');
 //         // expect(spy).toBeCalledTimes(1);
 //         expect(game.round?.dealer).toBe(0);
@@ -349,7 +349,7 @@ describe('Game with 4 players', () => {
 //         expect(game.round?.trick).toStrictEqual([mock.MOCK_TRICK_0[0]]);
 //       });
 
-//       test('turn will pass to player in seat 1 (to the "left")', () => {
+//       test('turn will pass to player in playerIndex 1 (to the "left")', () => {
 //         expect(game.round?.activePlayer).toBe(1);
 //       });
 
@@ -401,10 +401,10 @@ describe('Game with 4 players', () => {
 //             { teamId: 'team1', points: 1 },
 //           ],
 //           playerPoints: [
-//             { playerSeat: 0, points: 9 },
-//             { playerSeat: 1, points: 1 },
-//             { playerSeat: 2, points: 0 },
-//             { playerSeat: 3, points: 0 },
+//             { playerPlayerIndex: 0, points: 9 },
+//             { playerPlayerIndex: 1, points: 1 },
+//             { playerPlayerIndex: 2, points: 0 },
+//             { playerPlayerIndex: 3, points: 0 },
 //           ],
 //         });
 //         expect(spyCreateRound).toBeCalledTimes(1);
@@ -412,7 +412,7 @@ describe('Game with 4 players', () => {
 //       });
 //     });
 //     describe('new Round', () => {
-//       test('dealer will be moved left to seat 1', () => {
+//       test('dealer will be moved left to playerIndex 1', () => {
 //         expect(game.round?.dealer).toBe(1);
 //       });
 

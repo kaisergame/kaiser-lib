@@ -1,5 +1,4 @@
-import { Suit } from './Cards';
-import { BidAmount, RoundPointTotals, RoundState, RoundTotals, RoundType } from './Round';
+import { BidAmount, RoundState, RoundSummary } from './Round';
 
 export type GameState = {
   gameId: GameId;
@@ -8,8 +7,8 @@ export type GameState = {
   players: PlayerType[];
   teams: TeamType[];
   scores: ScoreType[];
-  dealer: PlayerType | null;
-  numRound: number;
+  dealerIndex: PlayerIndex | null;
+  roundNum: number;
   round: RoundState | null;
   roundSummaries: RoundSummary[];
   version: GameVersion;
@@ -20,18 +19,14 @@ export interface GameType extends GameState {
   updateStateFromJSON(state: GameState): void;
   addPlayer(id: string, name: string): PlayerType;
   removePlayer(id: string): void;
-  canBid(playerId: string): boolean;
-  getActivePlayer(): PlayerType | null;
-  isActivePlayer(playerId: string): boolean;
-  canSetTrump(playerId: string): boolean;
   // initializeTeams(): TeamType[]; // private
   // initializePlayers(): PlayerType[]; // private
-  // getTeamSeats(teamIndex: number): number[]; // private
-  switchPlayerSeat(movePlayer: PlayerId, moveToSeat?: Seat): void;
+  // getTeamPlayerIndexs(teamIndex: number): number[]; // private
+  switchPlayerPlayerIndex(movePlayer: PlayerId, moveToPlayerIndex?: PlayerIndex): void;
   startGame(): void;
   // createRound(): void; // private
-  // setDealer(): Seat; // private
-  endRound(roundTotals: RoundTotals): void;
+  // setDealer(): PlayerIndex; // private
+  endRound(roundSummary: RoundSummary): void;
   // updateScores(roundPoints: RoundPointTotals): void; // private
   // checkIsWinner(): string | null; // private
   // endGame(teamId: string): void; // private
@@ -42,14 +37,6 @@ export enum GameVersion {
 }
 
 export type GameId = string;
-
-export type RoundSummary = {
-  roundNum: number;
-  winningBid: number;
-  bidMade: boolean;
-  trump: Suit | null;
-  roundPoints: RoundPointTotals;
-};
 
 export type GameConfig = {
   numPlayers: number;
@@ -66,15 +53,15 @@ export type GameConfig = {
 
 export type TeamType = {
   teamId: string;
-  teamSeats: Seat[];
+  teamPlayerIndexs: PlayerIndex[];
   teamMembers: PlayerId[];
 };
 
-export type Seat = number;
+export type PlayerIndex = number;
 
 export type PlayerType = {
   playerId: PlayerId | null;
-  seat: Seat;
+  playerIndex: PlayerIndex;
   name: string | null;
   teamId: string;
 };

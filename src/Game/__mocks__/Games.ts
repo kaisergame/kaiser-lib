@@ -49,25 +49,25 @@ export const MOCK_PLAYERS: PlayerType[] = [
   {
     playerId: 'mockUser0000',
     name: 'Ryan',
-    seat: 0,
+    playerIndex: 0,
     teamId: 'team0',
   },
   {
     playerId: 'mockUser1111',
     name: 'Cody',
-    seat: 1,
+    playerIndex: 1,
     teamId: 'team1',
   },
   {
     playerId: 'mockUser2222',
     name: 'Stacey',
-    seat: 2,
+    playerIndex: 2,
     teamId: 'team0',
   },
   {
     playerId: 'mockUser3333',
     name: 'Paul',
-    seat: 3,
+    playerIndex: 3,
     teamId: 'team1',
   },
 ];
@@ -300,10 +300,10 @@ export const MOCK_ROUND_TOTALS: RoundTotals = {
     { teamId: 'team1', points: 4 },
   ],
   playerPoints: [
-    { playerSeat: 0, points: 2 },
-    { playerSeat: 1, points: 3 },
-    { playerSeat: 2, points: 4 },
-    { playerSeat: 3, points: 1 },
+    { playerPlayerIndex: 0, points: 2 },
+    { playerPlayerIndex: 1, points: 3 },
+    { playerPlayerIndex: 2, points: 4 },
+    { playerPlayerIndex: 3, points: 1 },
   ],
 };
 
@@ -314,9 +314,9 @@ export const MOCK_ROUND_TOTALS_2: RoundTotals = {
     { teamId: 'team1', points: 22 },
   ],
   playerPoints: [
-    { playerSeat: 0, points: -2 },
-    { playerSeat: 1, points: 2 },
-    { playerSeat: 2, points: 1 },
-    { playerSeat: 3, points: 9 },
+    { playerPlayerIndex: 0, points: -2 },
+    { playerPlayerIndex: 1, points: 2 },
+    { playerPlayerIndex: 2, points: 1 },
+    { playerPlayerIndex: 3, points: 9 },
   ],
 };

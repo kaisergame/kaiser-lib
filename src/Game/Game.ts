@@ -7,22 +7,21 @@ import {
   PlayerType,
   RoundPointTotals,
   RoundSummary,
-  RoundTotals,
   RoundType,
   ScoreType,
-  Seat,
+  PlayerIndex,
   TeamType,
 } from '../@types/index';
-import { findPlayerById, findPlayerBySeat, checkPlayerOrder } from 'src/utils/helpers';
+import { findPlayerById, findPlayerByPlayerIndex, checkPlayerOrder } from 'src/utils/helpers';
 import { Round } from '../Round/Round';
 
 export class Game implements GameType {
   players: PlayerType[];
   teams: TeamType[];
   scores: ScoreType[];
-  dealer: PlayerType | null = null;
+  dealerIndex: PlayerIndex | null = null;
   // eventually round should be private
-  numRound: number = 0;
+  roundNum: number = 0;
   round: RoundType | null = null;
   roundSummaries: RoundSummary[] = [];
   version: GameVersion = GameVersion.One;
@@ -47,8 +46,8 @@ export class Game implements GameType {
       players: this.players,
       teams: this.teams,
       scores: this.scores,
-      dealer: this.dealer,
-      numRound: this.numRound,
+      dealerIndex: this.dealerIndex,
+      roundNum: this.roundNum,
       round: this.round?.toJSON() || null,
       roundSummaries: this.roundSummaries,
       version: GameVersion.One,
@@ -67,7 +66,7 @@ export class Game implements GameType {
     this.players = state.players;
     this.teams = state.teams;
     this.scores = state.scores;
-    this.dealer = state.dealer;
+    this.dealerIndex = state.dealerIndex;
     if (state.round) {
       this.round = Round.fromJSON(state.round, this.endRound.bind(this));
     }
@@ -82,7 +81,7 @@ export class Game implements GameType {
     for (let i = 0; i < numTeams; i++) {
       const team: TeamType = {
         teamId: `team${i}`,
-        teamSeats: this.getTeamSeats(i),
+        teamPlayerIndexs: this.getTeamPlayerIndexs(i),
         teamMembers: [],
       };
       teams.push(team);
@@ -99,7 +98,7 @@ export class Game implements GameType {
         playerId: null,
         name: null,
         teamId: `team${i % 2}`,
-        seat: i,
+        playerIndex: i,
       };
       players.push(player);
     }
@@ -152,34 +151,37 @@ export class Game implements GameType {
     }
   }
 
-  getTeamSeats(teamIndex: number): number[] {
-    const seats = [];
+  getTeamPlayerIndexs(teamIndex: number): number[] {
+    const playerIndexs = [];
     const { numPlayers } = this.config;
 
     for (let i = teamIndex; i < numPlayers; i += numPlayers / 2) {
-      seats.push(i);
+      playerIndexs.push(i);
     }
 
-    return seats;
+    return playerIndexs;
   }
 
-  switchPlayerSeat(playerToMove: PlayerId, moveToSeat?: Seat): void {
-    if (this.round) throw new Error('Cannot change seats while game is in progress');
-    if (moveToSeat && (typeof moveToSeat !== 'number' || moveToSeat >= this.config.numPlayers || moveToSeat < 0))
-      throw new Error(`There is no seat ${moveToSeat}`);
+  switchPlayerPlayerIndex(playerToMove: PlayerId, moveToPlayerIndex?: PlayerIndex): void {
+    if (this.round) throw new Error('Cannot change playerIndexs while game is in progress');
+    if (
+      moveToPlayerIndex &&
+      (typeof moveToPlayerIndex !== 'number' || moveToPlayerIndex >= this.config.numPlayers || moveToPlayerIndex < 0)
+    )
+      throw new Error(`There is no playerIndex ${moveToPlayerIndex}`);
 
     const movePlayer = this.players.find((player) => player.playerId === playerToMove);
     if (movePlayer === undefined) throw new Error('Could not find player to move');
 
-    const seatLeft = movePlayer.seat < this.config.numPlayers - 1 ? movePlayer.seat + 1 : 0;
-    const switchSeat = moveToSeat || seatLeft;
-    const switchPlayer = this.players.find((player) => player.seat === switchSeat);
+    const playerIndexLeft = movePlayer.playerIndex < this.config.numPlayers - 1 ? movePlayer.playerIndex + 1 : 0;
+    const switchPlayerIndex = moveToPlayerIndex || playerIndexLeft;
+    const switchPlayer = this.players.find((player) => player.playerIndex === switchPlayerIndex);
     if (switchPlayer === undefined) throw new Error('Could not find player to switch');
 
     const copyMovePlayer: PlayerType = JSON.parse(JSON.stringify(movePlayer));
     const copySwitchPlayer: PlayerType = JSON.parse(JSON.stringify(switchPlayer));
     const moveTeam = this.teams.find((team) => team.teamId === movePlayer.teamId)!;
-    const switchTeam = this.teams.find((team) => team.teamSeats.includes(switchSeat))!;
+    const switchTeam = this.teams.find((team) => team.teamPlayerIndexs.includes(switchPlayerIndex))!;
 
     moveTeam.teamMembers.splice(moveTeam.teamMembers.indexOf(playerToMove), 1);
     switchTeam.teamMembers.push(playerToMove);
@@ -192,18 +194,18 @@ export class Game implements GameType {
     movePlayer.playerId = copyMovePlayer.playerId;
     movePlayer.name = copyMovePlayer.name;
     movePlayer.teamId = copySwitchPlayer.teamId;
-    movePlayer.seat = copySwitchPlayer.seat;
+    movePlayer.playerIndex = copySwitchPlayer.playerIndex;
 
     switchPlayer.playerId = copySwitchPlayer.playerId;
     switchPlayer.name = copySwitchPlayer.name;
     switchPlayer.teamId = copyMovePlayer.teamId;
-    switchPlayer.seat = copyMovePlayer.seat;
+    switchPlayer.playerIndex = copyMovePlayer.playerIndex;
 
     this.sortPlayers();
   }
 
   sortPlayers(): void {
-    this.players.sort((playerA: PlayerType, playerB: PlayerType) => playerA.seat - playerB.seat);
+    this.players.sort((playerA: PlayerType, playerB: PlayerType) => playerA.playerIndex - playerB.playerIndex);
   }
 
   // GAMEPLAY
@@ -219,7 +221,7 @@ export class Game implements GameType {
     if (!checkPlayerOrder(this.players)) this.sortPlayers;
     const dealer = this.setDealer();
     const round = new Round(
-      this.numRound,
+      this.roundNum,
       this.config.numPlayers,
       this.config.minBid,
       this.players,
@@ -230,22 +232,20 @@ export class Game implements GameType {
     this.round = round;
   }
 
-  setDealer(): PlayerType {
-    let nextDealer = this.dealer;
-    if (nextDealer === null) nextDealer = this.players[0];
-    else {
-      if (!checkPlayerOrder(this.players)) this.sortPlayers;
-      const curDealerSeat = this.dealer!.seat;
-      curDealerSeat !== this.players.length - 1
-        ? (nextDealer = this.players[curDealerSeat + 1])
-        : (nextDealer = this.players[0]);
-    }
-    this.dealer = nextDealer;
-    return nextDealer;
+  setDealer(): PlayerIndex {
+    let dealer = this.dealerIndex;
+
+    if (dealer === null) dealer = 0;
+    else dealer !== this.players.length - 1 ? dealer++ : (dealer = 0);
+
+    this.dealerIndex = dealer;
+    return dealer;
   }
 
-  endRound(roundTotals: RoundTotals): void {
-    this.updateScores(roundTotals.roundPoints);
+  endRound(roundSummary: RoundSummary): void {
+    this.updateScores(roundSummary.roundPoints);
+    this.roundSummaries.push(roundSummary);
+
     const winner = this.checkIsWinner();
 
     if (winner) this.endGame(winner);
@@ -271,22 +271,6 @@ export class Game implements GameType {
     );
 
     return isWinner.teamId;
-  }
-
-  canBid(playerId: string): boolean {
-    return Boolean(this.round?.canBid(playerId));
-  }
-
-  canSetTrump(playerId: string): boolean {
-    return Boolean(this.round?.canSetTrump(playerId));
-  }
-
-  isActivePlayer(playerId: string): boolean {
-    return Boolean(this.round && this.round.isActivePlayer(playerId));
-  }
-
-  getActivePlayer(): PlayerType | null {
-    return this.round?.getActivePlayer() || null;
   }
 
   endGame(teamId: string): void {

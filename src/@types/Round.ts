@@ -1,17 +1,17 @@
 import { CardType, Suit } from './Cards';
-import { PlayerId, PlayerType, Seat } from './Game';
+import { PlayerId, PlayerType, PlayerIndex } from './Game';
 
 export type RoundState = {
-  numRound: number;
+  roundNum: number;
   players: PlayerType[];
   hands: PlayerHand[];
   bids: BidType[];
   numPlayers: number;
-  dealer: PlayerType;
+  dealerIndex: PlayerIndex;
   minBid: BidAmount;
   winningBid: BidType;
-  trump: Suit | null;
-  activePlayer: PlayerType;
+  trump: Trump | null;
+  activePlayerIndex: PlayerIndex;
   playableCards: CardType[];
   trick: TrickType;
   tricksTeam0: EvaluatedTrick[];
@@ -25,32 +25,29 @@ export interface RoundType extends RoundState {
   // dealHands(): Hand[]; // private
   sortHands(lowToHigh?: 'lowToHigh'): void;
   validBids(): BidAmount[];
-  setPlayerBid(bid: BidAmount, isTrump: boolean): void;
+  canBid(playerId: string): boolean;
+  setPlayerBid(playerId: PlayerId, bid: BidAmount, isTrump: boolean): void;
   setWinningBid(): BidType; // private
-  setTrump(trump: Suit): void; // private
-  getTrump(): Suit | null; // public
-  updateActivePlayer(makeActivePlayer?: number): PlayerType; // private
-  setPlayableCards(hand: Hand): CardType[]; // private
-  playCard(cardPlayed: CardType): void;
-  removeCardFromHand(cardPlayed: CardType): Hand; // private
+  canSetTrump(playerId: string): boolean;
+  setTrump(playerId: PlayerId, trump: Suit): void; // private
+  updateActivePlayer(makeActivePlayer?: number): void; // private
+  getPlayer(playerIndex: PlayerIndex): PlayerType;
+  isActivePlayer(playerId: string): boolean;
+  setPlayableCards(): CardType[]; // private
+  playCard(playerId: PlayerId, cardPlayed: CardType): void;
+  removeCardFromHand(cardPlayed: CardType): boolean; // private
   updateCardsPlayed(cardPlayed: CardType): TrickType; // private
   endPlayerTurn(): void; // private
-  biddingOpen(): boolean;
-  findPlayerBid(playerId: PlayerId): BidType | null;
   // resetPlayableCards(): void; // private
   endTrick(): EvaluatedTrick; // private
   // getTrickValue(): number; // private
-  // getTrickWinner(): { playedBy: PlayerId; seat: Seat } // private
+  // getTrickWinner(): { playedBy: PlayerId; playerIndex: PlayerIndex } // private
   // updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void; // private
   // resetTrick(): void; // private
-  evaluateRound(): RoundTotals; // private
+  evaluateRound(): RoundSummary; // private
   // isBidMade(): EvaluatedBid; // private
   // playerTrickTotals(): PlayerPointTotals; // private
-  endRound: (roundTotals: RoundTotals) => void;
-  canBid(playerId: string): boolean;
-  getActivePlayer(): PlayerType | null;
-  isActivePlayer(playerId: string): boolean;
-  canSetTrump(playerId: string): boolean;
+  endRound: (roundSummary: RoundSummary) => void;
 }
 
 export type Hand = CardType[];
@@ -63,12 +60,8 @@ export type PlayerHand = {
 export type BidType = {
   amount: BidAmount;
   bidder: PlayerId;
-  seat: Seat;
+  playerIndex: PlayerIndex;
   isTrump: boolean;
-};
-
-export type EvaluatedBid = BidType & {
-  bidMade: boolean;
 };
 
 export enum BidAmount {
@@ -83,20 +76,29 @@ export enum BidAmount {
   Twelve = 12,
 }
 
+export enum NoSuit {
+  NoTrump = 'NO_TRUMP',
+}
+
+export type Trump = Suit | NoSuit;
+
+export type TrickType = { cardPlayed: CardType; playedBy: PlayerId; playerIndex: PlayerIndex }[];
+
 export type EvaluatedTrick = {
   cardsPlayed: TrickType;
   pointValue: number;
   trickWonBy: PlayerType;
 };
 
-export type TrickType = { cardPlayed: CardType; playedBy: PlayerId; seat: Seat }[];
+export type RoundPointTotals = { teamId: string; points: number }[];
 
-export type RoundTotals = {
-  bid: EvaluatedBid;
+export type PlayerPointTotals = { playerId: PlayerId; playerIndex: PlayerIndex; points: number }[];
+
+export type RoundSummary = {
+  roundNum: number;
+  winningBid: BidType;
+  isBidMade: boolean;
+  trump: Trump;
   roundPoints: RoundPointTotals;
   playerPoints: PlayerPointTotals;
 };
-
-export type RoundPointTotals = { teamId: string; points: number }[];
-
-export type PlayerPointTotals = { playerSeat: Seat; points: number }[];
