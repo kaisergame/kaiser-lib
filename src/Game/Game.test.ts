@@ -1,6 +1,5 @@
 // import { BidAmount, CardName, Suit } from '../@types';
 // import { HAND_SIZE } from '../constants/index';
-// import * as mock from '../constants/mocks';
 // import { Round } from '../Round/Round';
 import { Game } from './Game';
 
