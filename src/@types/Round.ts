@@ -24,12 +24,13 @@ export interface RoundType extends RoundState {
   updateStateFromJSON(state: RoundState): void;
   // dealHands(): Hand[]; // private
   sortHands(lowToHigh?: 'lowToHigh'): void;
-  validBids(): BidAmount[];
+  getValidBidValues(): BidValue[];
   canBid(playerId: string): boolean;
-  setPlayerBid(playerId: PlayerId, bid: BidAmount, isTrump: boolean): void;
+  setPlayerBid(id: PlayerId, bidValue: BidValue): void;
   setWinningBid(): BidType; // private
   canSetTrump(playerId: string): boolean;
   setTrump(playerId: PlayerId, trump: Suit): void; // private
+  getTrump(): Trump | null;
   updateActivePlayer(makeActivePlayer?: number): void; // private
   getPlayer(playerIndex: PlayerIndex): PlayerType;
   isActivePlayer(playerId: string): boolean;
@@ -58,10 +59,12 @@ export type PlayerHand = {
 };
 
 export type BidType = {
-  amount: BidAmount;
-  bidder: PlayerId;
-  playerIndex: PlayerIndex;
+  bidAmount: BidAmount;
+  bidValue: BidValue;
+  bidder: { playerId: PlayerId; playerIndex: PlayerIndex };
   isTrump: boolean;
+  // isTroika: boolean;
+  // isKaiser: boolean;
 };
 
 export enum BidAmount {
@@ -76,11 +79,29 @@ export enum BidAmount {
   Twelve = 12,
 }
 
-export enum NoSuit {
-  NoTrump = 'NO_TRUMP',
+export enum BidValue {
+  Pass = 0,
+  Five = 50,
+  FiveNo = 55,
+  Six = 60,
+  SixNo = 65,
+  Seven = 70,
+  SevenNo = 75,
+  Eight = 80,
+  EightNo = 85,
+  Nine = 90,
+  NineNo = 95,
+  Ten = 100,
+  TenNo = 105,
+  Eleven = 110,
+  ElevenNo = 115,
+  Twelve = 120,
+  TwelveNo = 125,
+  Troika = 127,
+  Kaiser = 129,
 }
 
-export type Trump = Suit | NoSuit;
+export type Trump = Suit | 'NO_TRUMP';
 
 export type TrickType = { cardPlayed: CardType; playedBy: PlayerId; playerIndex: PlayerIndex }[];
 

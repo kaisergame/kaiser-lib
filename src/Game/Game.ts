@@ -103,17 +103,25 @@ export class Game implements GameType {
   }
 
   addPlayer(id: string, name: string): void {
-    const openPlayerIndex = this.players.findIndex((player) => player.playerId === null);
+    let openPlayer = [];
+    let duplicatePlayerId = false;
 
-    if (!openPlayerIndex) return;
-    if (this.players.find((player) => player.playerId === id)) return;
+    for (const player of this.players) {
+      if (player.playerId === id) duplicatePlayerId = true;
+      if (player.playerId === null) openPlayer.push(player);
+    }
+    console.log(duplicatePlayerId);
 
-    const player = { ...this.players[openPlayerIndex], playerId: id, name: name };
+    if (this.players.length > this.config.numPlayers) return;
+    if (!openPlayer.length) return;
+    if (duplicatePlayerId) return;
+
+    const player = { ...openPlayer[0], playerId: id, name: name };
     const playerTeam = this.teams.find((team) => team.teamId === player.teamId);
 
     if (!playerTeam) return;
 
-    this.players[openPlayerIndex] = player;
+    this.players[player.playerIndex] = player;
     playerTeam.teamMembers.push(player.playerId!);
 
     if (this.round) {

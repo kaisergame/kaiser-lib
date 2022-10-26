@@ -1,6 +1,7 @@
-import { findPlayerById, findPlayerByPlayerIndex } from 'src/utils/helpers';
+import { findPlayerById } from 'src/utils/helpers';
 import {
   BidAmount,
+  BidValue,
   BidType,
   CardType,
   EvaluatedTrick,
@@ -16,7 +17,6 @@ import {
   Suit,
   TrickType,
   Trump,
-  NoSuit,
 } from '../@types/index';
 import { Cards } from '../Cards/Cards';
 import { TRUMP_VALUE } from '../constants/game';
@@ -26,7 +26,7 @@ import { validatePlayerIndex } from 'src/utils/helpers';
 export class Round implements RoundType {
   hands: PlayerHand[] = [];
   bids: BidType[] = [];
-  winningBid: BidType = { amount: -1, bidder: '', playerIndex: -1, isTrump: false };
+  winningBid: BidType = { bidAmount: -1, bidValue: -1, bidder: { playerId: '', playerIndex: -1 }, isTrump: false };
   trump: Trump | null = null;
   activePlayerIndex: PlayerIndex = -1;
   playableCards: CardType[] = [];
@@ -144,84 +144,109 @@ export class Round implements RoundType {
   }
 
   // BIDDING
-  validBids(): BidAmount[] {
-    const curBids = this.bids.map((bid) => bid.amount);
+  getValidBidValues(): BidValue[] {
+    const curBids = this.bids.map((bid) => bid.bidValue);
     const curHighBid = Math.max(...curBids);
+    // const curHighBid = this.bids.reduce(
+    //   (highBid, bid): { bidAmount: BidAmount; bidValue: BidValue; isTrump: boolean } => {
+    //     if (bid.bidAmount > highBid.bidAmount) return { bidAmount: bid.bidAmount, isTrump: bid.isTrump };
+    //     if (bid.bidAmount === highBid.bidAmount && !bid.isTrump && highBid.isTrump)
+    //       return { bidAmount: bid.bidAmount, isTrump: bid.isTrump };
+    //     return highBid;
+    //   },
+    //   { bidAmount: -1, bidValue: -1, isTrump: false }
+    // );
 
     const isDealer = this.getPlayer().playerId === this.getPlayer(this.dealerIndex).playerId;
-    const noDealerPass = isDealer && this.bids.filter((bid) => bid.amount !== 0).length === 0;
-
-    const validBids = [
-      BidAmount.Pass,
-      // FIXME: Object.values is adding a string type union
-      ...Object.values(BidAmount).filter((bid) =>
+    const noDealerPass = isDealer && this.bids.filter((bid) => bid.bidValue !== 0).length === 0;
+    const BidValues = Object.values(BidValue) as BidValue[];
+    const validBidValues = [
+      BidValue.Pass,
+      ...BidValues.filter((bid) =>
         isDealer ? bid >= this.minBid && bid >= curHighBid : bid >= this.minBid && bid > curHighBid
       ),
     ];
-    noDealerPass && validBids.shift();
+    // const validBids = [
+    //   { amount: BidValue.Pass, isTrump: false },
+    //   ...Object.values(BidValue).flatMap((amount) => {
+    //     if (amount < curHighBid.amount) return;
+    //     if (amount === curHighBid.amount && !curHighBid.isTrump) return { amount, isTrump: false };
+    //     else
+    //       return [
+    //         { amount, isTrump: true },
+    //         { amount, isTrump: false },
+    //       ];
+    //   }),
+    // ];
 
-    return validBids as BidAmount[];
+    noDealerPass && validBidValues.shift();
+
+    return validBidValues;
   }
 
-  setPlayerBid(playerId: PlayerId, bid: BidAmount, isTrump: boolean): void {
+  setPlayerBid(playerId: PlayerId, bidValue: BidValue): void {
     if (!this.canBid(playerId)) return;
-    if (!this.validBids().includes(bid)) return;
+    if (!this.getValidBidValues().includes(bidValue)) return;
 
-    const player = this.getPlayer();
+    const { playerId: id, playerIndex } = this.getPlayer();
     const playerBid = {
-      amount: bid,
-      bidder: player.playerId!,
-      playerIndex: player.playerIndex,
-      isTrump,
+      bidAmount: bidValue > 0 ? Math.floor(bidValue / 10) : 0,
+      bidValue: bidValue,
+      bidder: { playerId: id!, playerIndex },
+      isTrump: bidValue % 10 > 0,
     };
-
     this.bids.push(playerBid);
-    if (this.bids.length === this.numPlayers) {
-      this.setWinningBid();
-    } else {
-      this.updateActivePlayer();
-    }
+
+    if (this.bids.length === this.numPlayers) this.setWinningBid();
+    else this.updateActivePlayer();
   }
 
   canBid(playerId: string): boolean {
-    if (this.bids.find((bid) => bid.playerIndex === this.activePlayerIndex)) return false;
-    if (this.bids.length >= this.numPlayers) return false;
     if (this.bids.length >= this.numPlayers) return false;
     if (this.winningBid.bidder) return false;
     if (!this.isActivePlayer(playerId)) return false;
-    if (this.bids.findIndex((bid) => bid.bidder === playerId) < 0) return false;
+    if (
+      this.bids.findIndex(
+        (bid) => bid.bidder.playerIndex === this.activePlayerIndex || bid.bidder.playerId === playerId
+      ) > 0
+    )
+      return false;
 
     return true;
   }
 
   setWinningBid(): BidType {
-    const winningBid = this.bids.reduce(
-      (highBid, bid): { bidder: PlayerId; amount: BidAmount; playerIndex: PlayerIndex; isTrump: boolean } => {
-        return bid.amount >= highBid.amount ? bid : highBid;
-      },
-      { bidder: '', amount: -1, playerIndex: -1, isTrump: false }
-    );
+    const winningBid = this.bids.reduce((highBid, bid): BidType => (bid.bidValue >= highBid.bidValue ? bid : highBid), {
+      bidder: { playerId: '', playerIndex: -1 },
+      bidAmount: -1,
+      bidValue: -1,
+      isTrump: false,
+    });
 
     this.winningBid = winningBid;
-    !winningBid.isTrump && this.setTrump(NoSuit.NoTrump);
-    this.updateActivePlayer(winningBid.playerIndex);
+    !winningBid.isTrump && this.setTrump('NO_TRUMP');
+    this.updateActivePlayer(winningBid.bidder.playerIndex);
 
     return winningBid;
   }
 
   canSetTrump(playerId: string): boolean {
-    if (!this.winningBid.isTrump) return false;
-    if (this.winningBid.bidder !== this.getPlayer().playerId) return false;
-    if (this.winningBid.playerIndex !== this.activePlayerIndex) return false;
-    if (!this.isActivePlayer(playerId)) return false;
     if (this.trump) return false;
-    if (this.winningBid.bidder !== playerId) return false;
+    if (!this.winningBid.isTrump) return false;
+    if (this.winningBid.bidder.playerIndex !== this.activePlayerIndex) return false;
+    if (this.winningBid.bidder.playerId !== playerId) return false;
+    if (this.winningBid.bidder.playerId !== this.getPlayer().playerId) return false;
+    if (!this.isActivePlayer(playerId)) return false;
 
     return true;
   }
 
   setTrump(trump: Trump): void {
     this.trump = trump;
+  }
+
+  getTrump(): Trump | null {
+    return this.trump;
   }
 
   // CARD PLAY
@@ -404,14 +429,14 @@ export class Round implements RoundType {
   }
 
   private isBidMade(): boolean {
-    const bidTeam = this.players.find((player) => player.playerId === this.winningBid.bidder)!.teamId;
+    const bidTeam = this.players.find((player) => player.playerId === this.winningBid.bidder.playerId)!.teamId;
     let pointsMade = this.roundPoints.find((points) => points.teamId === bidTeam)!.points;
 
     const noBidMultiplier = this.winningBid.isTrump ? 1 : 2;
     const bidTeamPoints =
-      pointsMade - this.winningBid.amount >= 0
+      pointsMade - this.winningBid.bidAmount >= 0
         ? pointsMade * noBidMultiplier
-        : this.winningBid.amount * noBidMultiplier * -1;
+        : this.winningBid.bidAmount * noBidMultiplier * -1;
 
     pointsMade = bidTeamPoints;
     return bidTeamPoints > 0;
@@ -436,8 +461,4 @@ export class Round implements RoundType {
 
     return totals;
   }
-
-  // todo test this
-
-  // todo test this
 }
