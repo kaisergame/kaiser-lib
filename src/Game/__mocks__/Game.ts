@@ -1,6 +1,7 @@
 import {
   BidAmount,
   BidType,
+  BidValue,
   CardName,
   Deck,
   EvaluatedTrick,
@@ -243,13 +244,19 @@ export const MOCK_HANDS_SORTED: PlayerHand[] = [
 
 // BIDS
 export const MOCK_VALID_BIDS = [
-  BidAmount.Pass,
-  BidAmount.Seven,
-  BidAmount.Eight,
-  BidAmount.Nine,
-  BidAmount.Ten,
-  BidAmount.Eleven,
-  BidAmount.Twelve,
+  BidValue.Pass,
+  BidValue.Seven,
+  BidValue.SevenNo,
+  BidValue.Eight,
+  BidValue.EightNo,
+  BidValue.Nine,
+  BidValue.NineNo,
+  BidValue.Ten,
+  BidValue.TenNo,
+  BidValue.Eleven,
+  BidValue.ElevenNo,
+  BidValue.Twelve,
+  BidValue.TwelveNo,
 ];
 
 export const MOCK_BIDS: BidType[] = [
@@ -321,7 +328,7 @@ export const MOCK_TRICK_SPADE_LED: TrickType = [
 export const TAKEN_TRICKS_NO_TRUMP: EvaluatedTrick[] = [
   {
     pointValue: 1,
-    cardsPlayed: [
+    trick: [
       {
         cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 },
         playedBy: 'mockUser1',
@@ -347,7 +354,7 @@ export const TAKEN_TRICKS_NO_TRUMP: EvaluatedTrick[] = [
   },
   {
     pointValue: 6,
-    cardsPlayed: [
+    trick: [
       {
         cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 },
         playedBy: 'mockUser2',
@@ -375,12 +382,11 @@ export const TAKEN_TRICKS_NO_TRUMP: EvaluatedTrick[] = [
 
 // ROUND TOTALS
 export const MOCK_ROUND_TOTALS: RoundSummary = {
-  roundNum: 1,
+  roundIndex: 1,
   winningBid: { bidAmount: 9, bidValue: 90, bidder: { playerId: 'mockUser2', playerIndex: 2 }, isTrump: true },
-
   isBidMade: false,
   trump: Suit.Hearts,
-  roundPoints: [
+  teamPoints: [
     { teamId: 'team0', points: -9 },
     { teamId: 'team1', points: 4 },
   ],
@@ -393,11 +399,11 @@ export const MOCK_ROUND_TOTALS: RoundSummary = {
 };
 
 export const MOCK_ROUND_TOTALS_2: RoundSummary = {
-  roundNum: 1,
+  roundIndex: 1,
   winningBid: { bidAmount: 10, bidValue: 105, bidder: { playerId: 'mockUser3', playerIndex: 3 }, isTrump: false },
   isBidMade: true,
   trump: 'NO_TRUMP',
-  roundPoints: [
+  teamPoints: [
     { teamId: 'team0', points: -1 },
     { teamId: 'team1', points: 22 },
   ],

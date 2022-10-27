@@ -2,7 +2,7 @@ import { CardType, Suit } from './Cards';
 import { PlayerId, PlayerType, PlayerIndex } from './Game';
 
 export type RoundState = {
-  roundNum: number;
+  roundIndex: number;
   players: PlayerType[];
   hands: PlayerHand[];
   bids: BidType[];
@@ -13,10 +13,9 @@ export type RoundState = {
   trump: Trump | null;
   activePlayerIndex: PlayerIndex;
   playableCards: CardType[];
+  trickIndex: number;
   trick: TrickType;
-  tricksTeam0: EvaluatedTrick[];
-  tricksTeam1: EvaluatedTrick[];
-  roundPoints: RoundPointTotals;
+  teamTotals: TeamTotals;
 };
 
 export interface RoundType extends RoundState {
@@ -43,7 +42,8 @@ export interface RoundType extends RoundState {
   endTrick(): EvaluatedTrick; // private
   // getTrickValue(): number; // private
   // getTrickWinner(): { playedBy: PlayerId; playerIndex: PlayerIndex } // private
-  // updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void; // private
+  evaluateTrick(trickPointValue: number, trickWinner: PlayerType): EvaluatedTrick;
+  // updateTeamPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void; // private
   // resetTrick(): void; // private
   evaluateRound(): RoundSummary; // private
   // isBidMade(): EvaluatedBid; // private
@@ -106,20 +106,22 @@ export type Trump = Suit | 'NO_TRUMP';
 export type TrickType = { cardPlayed: CardType; playedBy: PlayerId; playerIndex: PlayerIndex }[];
 
 export type EvaluatedTrick = {
-  cardsPlayed: TrickType;
+  trick: TrickType;
   pointValue: number;
   trickWonBy: PlayerType;
 };
 
-export type RoundPointTotals = { teamId: string; points: number }[];
+export type TeamTotals = { teamId: string; points: number; tricks: EvaluatedTrick[] }[];
 
-export type PlayerPointTotals = { playerId: PlayerId; playerIndex: PlayerIndex; points: number }[];
+export type TeamPoints = { teamId: string; points: number }[];
+
+export type PlayerPoints = { playerId: PlayerId; playerIndex: PlayerIndex; points: number }[];
 
 export type RoundSummary = {
-  roundNum: number;
+  roundIndex: number;
   winningBid: BidType;
   isBidMade: boolean;
   trump: Trump;
-  roundPoints: RoundPointTotals;
-  playerPoints: PlayerPointTotals;
+  teamPoints: TeamPoints;
+  playerPoints: PlayerPoints;
 };

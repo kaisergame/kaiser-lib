@@ -5,7 +5,7 @@ import {
   GameVersion,
   PlayerId,
   PlayerType,
-  RoundPointTotals,
+  TeamPoints,
   RoundSummary,
   RoundType,
   ScoreType,
@@ -240,7 +240,7 @@ export class Game implements GameType {
   }
 
   endRound(roundSummary: RoundSummary): void {
-    this.updateScores(roundSummary.roundPoints);
+    this.updateScores(roundSummary.teamPoints);
     this.roundSummaries.push(roundSummary);
 
     const winner = this.checkIsWinner();
@@ -249,8 +249,8 @@ export class Game implements GameType {
     if (!winner) this.createRound();
   }
 
-  updateScores(roundPoints: RoundPointTotals): void {
-    for (const pointData of roundPoints) {
+  updateScores(teamPoints: TeamPoints): void {
+    for (const pointData of teamPoints) {
       for (const score of this.scores) {
         if (pointData.teamId === score.teamId) score.teamScore += pointData.points;
       }

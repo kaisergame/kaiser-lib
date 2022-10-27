@@ -387,7 +387,7 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('after trick, activePlayer is set to trick winner', () => {
-        expect(game.round?.tricksTeam0[0].trickWonBy).toBe(0);
+        expect(game.round?.teamTotals[0].tricks[0].trickWonBy).toBe(0);
         expect(game.round?.activePlayerIndex).toBe(0);
       });
 

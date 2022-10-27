@@ -28,7 +28,7 @@ export interface GameType extends GameState {
   // createRound(): void; // private
   // setDealer(): PlayerIndex; // private
   endRound(roundSummary: RoundSummary): void;
-  // updateScores(roundPoints: RoundPointTotals): void; // private
+  // updateScores(roundPoints: TeamPointTotals): void; // private
   // checkIsWinner(): string | null; // private
   // endGame(teamId: string): void; // private
 }
@@ -52,8 +52,10 @@ export type GameConfig = {
   //inviteOnly: boolean;
 };
 
+export type TeamId = string;
+
 export type TeamType = {
-  teamId: string;
+  teamId: TeamId;
   teamPlayerIndexs: PlayerIndex[];
   teamMembers: PlayerId[];
 };
