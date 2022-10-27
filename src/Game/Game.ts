@@ -166,14 +166,14 @@ export class Game implements GameType {
     if (movePlayer === undefined) return;
 
     const playerIndexLeft = movePlayer.playerIndex < this.config.numPlayers - 1 ? movePlayer.playerIndex + 1 : 0;
-    const switchPlayerIndex = moveToPlayerIndex || playerIndexLeft;
-    const switchPlayer = this.players.find((player) => player.playerIndex === switchPlayerIndex);
+    const switchIndex = moveToPlayerIndex || playerIndexLeft;
+    const switchPlayer = this.players.find((player) => player.playerIndex === switchIndex);
     if (switchPlayer === undefined) return;
 
     const copyMovePlayer: PlayerType = JSON.parse(JSON.stringify(movePlayer));
     const copySwitchPlayer: PlayerType = JSON.parse(JSON.stringify(switchPlayer));
     const moveTeam = this.teams.find((team) => team.teamId === movePlayer.teamId)!;
-    const switchTeam = this.teams.find((team) => team.teamPlayerIndexs.includes(switchPlayerIndex))!;
+    const switchTeam = this.teams.find((team) => team.teamPlayerIndexs.includes(switchIndex))!;
 
     moveTeam.teamMembers.splice(moveTeam.teamMembers.indexOf(playerToMove), 1);
     switchTeam.teamMembers.push(playerToMove);
