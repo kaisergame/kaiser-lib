@@ -1,5 +1,5 @@
 import { CardType, Suit } from './Cards';
-import { PlayerId, PlayerType, PlayerIndex } from './Game';
+import { PlayerId, PlayerType, PlayerIndex, TeamId } from './Game';
 
 export type RoundState = {
   roundIndex: number;
@@ -15,39 +15,39 @@ export type RoundState = {
   playableCards: CardType[];
   trickIndex: number;
   trick: TrickType;
-  teamTotals: TeamTotals;
+  teamTotals: TeamTotals[];
 };
 
 export interface RoundType extends RoundState {
   toJSON(): RoundState;
   updateStateFromJSON(state: RoundState): void;
-  // dealHands(): Hand[]; // private
+  dealHands(): void;
   sortHands(lowToHigh?: 'lowToHigh'): void;
   getValidBidValues(): BidValue[];
   canBid(playerId: string): boolean;
   setPlayerBid(id: PlayerId, bidValue: BidValue): void;
-  setWinningBid(): BidType; // private
+  setWinningBid(): BidType;
   canSetTrump(playerId: string): boolean;
-  setTrump(playerId: PlayerId, trump: Suit): void; // private
+  setTrump(playerId: PlayerId, trump: Suit): void;
   getTrump(): Trump | null;
-  updateActivePlayer(makeActivePlayer?: number): void; // private
+  updateActivePlayer(makeActivePlayer?: number): void;
   getPlayer(playerIndex: PlayerIndex): PlayerType;
   isActivePlayer(playerId: string): boolean;
-  setPlayableCards(): CardType[]; // private
+  setPlayableCards(): CardType[];
   playCard(playerId: PlayerId, cardPlayed: CardType): void;
-  removeCardFromHand(cardPlayed: CardType): boolean; // private
-  updateCardsPlayed(cardPlayed: CardType): TrickType; // private
-  endPlayerTurn(): void; // private
-  // resetPlayableCards(): void; // private
-  endTrick(): EvaluatedTrick; // private
-  // getTrickValue(): number; // private
-  // getTrickWinner(): { playedBy: PlayerId; playerIndex: PlayerIndex } // private
+  removeCardFromHand(cardPlayed: CardType): boolean;
+  updateCardsPlayed(cardPlayed: CardType): TrickType;
+  endPlayerTurn(): void;
+  resetPlayableCards(): void;
+  endTrick(): EvaluatedTrick;
+  getTrickWinner(): PlayerType;
   evaluateTrick(trickPointValue: number, trickWinner: PlayerType): EvaluatedTrick;
-  // updateTeamPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void; // private
-  // resetTrick(): void; // private
-  evaluateRound(): RoundSummary; // private
-  // isBidMade(): EvaluatedBid; // private
-  // playerTrickTotals(): PlayerPointTotals; // private
+  getTeamTotals(teamId: TeamId): TeamTotals;
+  updateTeamPoints(teamId: TeamId, trickValue: number): void;
+  resetTrick(): void;
+  evaluateRound(): RoundSummary;
+  isBidMade(bidTeamId: TeamId): { isBidMade: boolean; tricksValue: number };
+  playerPointTotals(): PlayerPoints;
   endRound: (roundSummary: RoundSummary) => void;
 }
 
@@ -111,7 +111,7 @@ export type EvaluatedTrick = {
   trickWonBy: PlayerType;
 };
 
-export type TeamTotals = { teamId: string; points: number; tricks: EvaluatedTrick[] }[];
+export type TeamTotals = { teamId: string; points: number; tricks: EvaluatedTrick[] };
 
 export type TeamPoints = { teamId: string; points: number }[];
 

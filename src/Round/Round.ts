@@ -32,7 +32,7 @@ export class Round implements RoundType {
   playableCards: CardType[] = [];
   trickIndex: number = 1;
   trick: TrickType = [];
-  teamTotals: TeamTotals = [
+  teamTotals: TeamTotals[] = [
     { teamId: 'team0', points: 0, tricks: [] },
     { teamId: 'team1', points: 0, tricks: [] },
   ];
@@ -98,7 +98,7 @@ export class Round implements RoundType {
   }
 
   // CARDS
-  private dealHands(): void {
+  dealHands(): void {
     const cards = new Cards(this.numPlayers);
     const deck = cards.shuffleDeck(cards.createDeck());
     const hands: PlayerHand[] = [];
@@ -309,7 +309,7 @@ export class Round implements RoundType {
     this.trick.length === this.numPlayers ? this.endTrick() : this.updateActivePlayer();
   }
 
-  private resetPlayableCards(): void {
+  resetPlayableCards(): void {
     this.playableCards = [];
   }
 
@@ -328,7 +328,7 @@ export class Round implements RoundType {
     return evaluatedTrick;
   }
 
-  private getTrickValue(): number {
+  getTrickValue(): number {
     let value = 1;
 
     const cardsPlayed = this.trick.map((play) => play.cardPlayed);
@@ -340,7 +340,7 @@ export class Round implements RoundType {
     return value;
   }
 
-  private getTrickWinner(): PlayerType {
+  getTrickWinner(): PlayerType {
     const ledSuit = this.trick[0].cardPlayed.suit;
 
     const winner = this.trick.reduce(
@@ -377,11 +377,11 @@ export class Round implements RoundType {
     };
   }
 
-  getTeamTotals(teamId: TeamId) {
+  getTeamTotals(teamId: TeamId): TeamTotals {
     return this.teamTotals.find((team) => team.teamId === teamId)!;
   }
 
-  private updateTeamPoints(teamId: TeamId, trickValue: number): void {
+  updateTeamPoints(teamId: TeamId, trickValue: number): void {
     const teamTotals = this.getTeamTotals(teamId);
     teamTotals.points = teamTotals.points + trickValue;
   }
@@ -391,7 +391,7 @@ export class Round implements RoundType {
     teamTotals.tricks.push(takenTrick);
   }
 
-  private resetTrick(): void {
+  resetTrick(): void {
     this.trick = [];
   }
 
@@ -401,7 +401,7 @@ export class Round implements RoundType {
 
   evaluateRound(): RoundSummary {
     const { isBidMade } = this.evaluateBid();
-    const playerPoints = this.playerTrickTotals();
+    const playerPoints = this.playerPointTotals();
     const teamPoints = this.teamTotals.map((team) => ({ teamId: team.teamId, points: team.points }));
     const totals = {
       roundIndex: this.roundIndex,
@@ -436,14 +436,14 @@ export class Round implements RoundType {
     return isBidMade ? tricksValue * noBidMultiplier : this.winningBid.bidAmount * noBidMultiplier * MISSED_BID;
   }
 
-  private isBidMade(bidTeamId: TeamId): { isBidMade: boolean; tricksValue: number } {
+  isBidMade(bidTeamId: TeamId): { isBidMade: boolean; tricksValue: number } {
     const tricksValue = this.teamTotals.find((points) => points.teamId === bidTeamId)!.points;
     const isBidMade = tricksValue - this.winningBid.bidAmount >= 0;
 
     return { isBidMade, tricksValue };
   }
 
-  private playerTrickTotals(): PlayerPoints {
+  playerPointTotals(): PlayerPoints {
     const tricks = this.teamTotals.flatMap((team) => team.tricks);
     const initialPoints: PlayerPoints = [];
 

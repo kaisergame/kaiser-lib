@@ -12,7 +12,7 @@ import {
   PlayerIndex,
   TeamType,
 } from '../@types/index';
-import { findPlayerById, findPlayerByPlayerIndex, checkPlayerOrder } from 'src/utils/helpers';
+import { checkPlayerOrder } from 'src/utils/helpers';
 import { Round } from '../Round/Round';
 
 export class Game implements GameType {
