@@ -217,7 +217,7 @@ export class Game implements GameType {
     if (!checkPlayerOrder(this.players)) this.sortPlayers;
     const dealer = this.setDealer();
     const round = new Round(
-      this.roundSummaries.length,
+      this.roundSummaries.length + 1,
       this.config.numPlayers,
       this.config.minBid,
       this.players,
@@ -239,13 +239,17 @@ export class Game implements GameType {
   }
 
   endRound(roundSummary: RoundSummary): void {
+    this.updateRoundSummaries(roundSummary);
     this.updateScores(roundSummary.teamPoints);
-    this.roundSummaries.push(roundSummary);
 
     const winner = this.checkIsWinner();
 
     if (winner) this.endGame(winner);
     if (!winner) this.createRound();
+  }
+
+  updateRoundSummaries(roundSummary: RoundSummary): void {
+    this.roundSummaries.push(roundSummary);
   }
 
   updateScores(teamPoints: TeamPoints): void {

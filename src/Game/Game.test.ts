@@ -197,6 +197,7 @@ import { Game } from './Game';
 describe('4 Player Game playthrough', () => {
   let game: Game;
   beforeAll(() => {
+    // config { numPlayers: 4, minBid: 7, scoreToWin: 52 }
     game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
   });
   afterEach(() => {
@@ -254,8 +255,6 @@ describe('4 Player Game playthrough', () => {
 
     describe('updateActivePlayer', () => {
       test('updateActivePlayer will initiate activePlayer to PlayerIndex 1', () => {
-        const spy = jest.spyOn(game.round!, 'updateActivePlayer');
-        // expect(spy).toBeCalledTimes(1);
         expect(game.round?.dealerIndex).toBe(0);
         expect(game.round?.activePlayerIndex).toBe(1);
       });
@@ -284,7 +283,7 @@ describe('4 Player Game playthrough', () => {
         expect(game.round?.bids.length).toBe(1);
       });
 
-      test('updateActivePlayer will move turn one position "left"', () => {
+      test('updateActivePlayer will move turn one position "left" on valid setPlayerBid', () => {
         const spyUpdateActive = jest.spyOn(game.round!, 'updateActivePlayer');
         expect(game.round?.activePlayerIndex).toBe(2);
         game.round?.setPlayerBid('mockUser2', BidValue.SevenNo);
@@ -309,13 +308,20 @@ describe('4 Player Game playthrough', () => {
         expect(spyActive).toBeCalledTimes(1);
         expect(game.round?.winningBid.bidder.playerIndex !== -1).toBe(true);
         expect(spyPlay).toBeCalledTimes(1);
-        expect(game.round?.winningBid).toStrictEqual({ amount: 8, bidder: 0, isTrump: true });
+        expect(game.round?.winningBid).toStrictEqual(mock.MOCK_WINNING_BID);
         expect(game.round?.activePlayerIndex).toBe(0);
       });
 
       test('setPlayerBid will not record bid if 4 bids have already been made', () => {
-        game.round?.setPlayerBid('mockUser0', BidValue.Eight);
-        expect(game.round?.bids.length).toBe(0);
+        game.round?.setPlayerBid('mockUser5', BidValue.Eight);
+        game.round?.setPlayerBid('mockUser0', BidValue.TenNo);
+        expect(game.round?.bids.length).toBe(4);
+        expect(game.round?.activePlayerIndex).toBe(0);
+      });
+
+      test('setTrump can only be called by bid winner', () => {
+        game.round?.setTrump('mockUser2', Suit.Spades);
+        expect(game.round?.trump).toBeNull();
       });
 
       test('setTrump asigns passed suit to round trump', () => {
@@ -325,17 +331,17 @@ describe('4 Player Game playthrough', () => {
     });
 
     describe('card play', () => {
+      test('activePlayer will be bid winner', () => {
+        expect(game.round?.activePlayerIndex).toBe(game.round?.winningBid.bidder.playerIndex);
+        expect(game.round?.activePlayerIndex).toBe(0);
+      });
+
       test('sortHands will sort hands H,S,D,C', () => {
         expect(game.round?.hands).toStrictEqual(mock.MOCK_HANDS_SORTED);
       });
 
-      test('activePlayer will be bid winner', () => {
-        expect(game.round?.activePlayerIndex).toBe(game.round?.winningBid.bidder);
-        expect(game.round?.activePlayerIndex).toBe(0);
-      });
-
       test('playable cards are set from active players hand', () => {
-        expect(game.round?.playableCards).toStrictEqual(mock.MOCK_HANDS_SORTED[0]);
+        expect(game.round?.playableCards).toStrictEqual(mock.MOCK_HANDS_SORTED[0].hand);
       });
 
       test('playCard will remove card from activePlayer hand', () => {
@@ -387,7 +393,7 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('after trick, activePlayer is set to trick winner', () => {
-        expect(game.round?.teamTotals[0].tricks[0].trickWonBy).toBe(0);
+        expect(game.round?.teamTotals[0].tricks[0].trickWonBy).toStrictEqual(mock.MOCK_PLAYERS[0]);
         expect(game.round?.activePlayerIndex).toBe(0);
       });
 
@@ -406,23 +412,23 @@ describe('4 Player Game playthrough', () => {
         }
         expect(spyEval).toBeCalledTimes(1);
         expect(spyEndRound).toBeCalledTimes(1);
-        expect(spyEndRound).toBeCalledWith({
-          bid: { amount: 8, bidder: 0, isTrump: true, bidMade: true },
-          roundPoints: [
-            { teamId: 'team0', points: 9 },
-            { teamId: 'team1', points: 1 },
-          ],
-          playerPoints: [
-            { playerPlayerIndex: 0, points: 9 },
-            { playerPlayerIndex: 1, points: 1 },
-            { playerPlayerIndex: 2, points: 0 },
-            { playerPlayerIndex: 3, points: 0 },
-          ],
-        });
+        expect(spyEndRound).toBeCalledWith(mock.MOCK_ROUND_TOTALS_3);
         expect(spyCreateRound).toBeCalledTimes(1);
         expect(spyEndGame).not.toBeCalled();
       });
     });
+
+    describe('endRound', () => {
+      test('endRound adds round totals to roundSummaries', () => {
+        expect(game.roundSummaries.length).toBe(1);
+        expect(game.roundSummaries[0]).toStrictEqual(mock.MOCK_ROUND_TOTALS_3);
+      });
+
+      test('endRound updates game score', () => {
+        expect(game.scores).toStrictEqual(mock.MOCK_GAME_SCORE);
+      });
+    });
+
     describe('new Round', () => {
       test('dealer will be moved left to playerIndex 1', () => {
         expect(game.round?.dealerIndex).toBe(1);

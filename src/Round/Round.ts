@@ -161,35 +161,31 @@ export class Round implements RoundType {
     return validBidValues;
   }
 
+  canBid(playerId: string): boolean {
+    if (this.bids.length >= this.numPlayers) return false;
+    if (this.winningBid.bidder.playerId.length) return false;
+    if (!this.isActivePlayer(playerId)) return false;
+    if (this.bids.find((bid) => bid.bidder.playerIndex === this.activePlayerIndex || bid.bidder.playerId === playerId))
+      return false;
+
+    return true;
+  }
+
   setPlayerBid(playerId: PlayerId, bidValue: BidValue): void {
     if (!this.canBid(playerId)) return;
     if (!this.getValidBidValues().includes(bidValue)) return;
 
     const { playerId: id, playerIndex } = this.getPlayer();
     const playerBid = {
-      bidAmount: bidValue > 0 ? Math.floor(bidValue / 10) : 0,
-      bidValue: bidValue,
       bidder: { playerId: id!, playerIndex },
-      isTrump: bidValue % 10 > 0,
+      bidAmount: bidValue > 0 ? Math.floor(bidValue / TRANSLATE_BID) : 0,
+      bidValue: bidValue,
+      isTrump: bidValue % TRANSLATE_BID === 0,
     };
     this.bids.push(playerBid);
 
     if (this.bids.length === this.numPlayers) this.setWinningBid();
     else this.updateActivePlayer();
-  }
-
-  canBid(playerId: string): boolean {
-    if (this.bids.length >= this.numPlayers) return false;
-    if (this.winningBid.bidder) return false;
-    if (!this.isActivePlayer(playerId)) return false;
-    if (
-      this.bids.findIndex(
-        (bid) => bid.bidder.playerIndex === this.activePlayerIndex || bid.bidder.playerId === playerId
-      ) > 0
-    )
-      return false;
-
-    return true;
   }
 
   setWinningBid(): BidType {
@@ -201,8 +197,8 @@ export class Round implements RoundType {
     });
 
     this.winningBid = winningBid;
-    !winningBid.isTrump && this.setTrump('NO_TRUMP');
     this.updateActivePlayer(winningBid.bidder.playerIndex);
+    !winningBid.isTrump && this.setTrump(winningBid.bidder.playerId, 'NO_TRUMP');
 
     return winningBid;
   }
@@ -210,15 +206,16 @@ export class Round implements RoundType {
   canSetTrump(playerId: string): boolean {
     if (this.trump) return false;
     if (!this.winningBid.isTrump) return false;
-    if (this.winningBid.bidder.playerIndex !== this.activePlayerIndex) return false;
     if (this.winningBid.bidder.playerId !== playerId) return false;
+    if (this.winningBid.bidder.playerIndex !== this.activePlayerIndex) return false;
     if (this.winningBid.bidder.playerId !== this.getPlayer().playerId) return false;
     if (!this.isActivePlayer(playerId)) return false;
-
     return true;
   }
 
-  setTrump(trump: Trump): void {
+  setTrump(playerId: PlayerId, trump: Trump): void {
+    if (!this.canSetTrump(playerId)) return;
+
     this.trump = trump;
   }
 
@@ -239,7 +236,7 @@ export class Round implements RoundType {
     // specific player to play (bid or trick is won)
     if (validatePlayerIndex(makeActivePlayer)) this.activePlayerIndex = makeActivePlayer!;
 
-    this.setPlayableCards();
+    this.winningBid.bidder.playerId.length && this.setPlayableCards();
   }
 
   getPlayer(playerData?: PlayerIndex | PlayerId): PlayerType {
@@ -309,9 +306,7 @@ export class Round implements RoundType {
 
   endPlayerTurn(): void {
     this.resetPlayableCards();
-
-    if (this.trick.length < this.numPlayers) this.updateActivePlayer();
-    if (this.trick.length === this.numPlayers) this.endTrick();
+    this.trick.length === this.numPlayers ? this.endTrick() : this.updateActivePlayer();
   }
 
   private resetPlayableCards(): void {
@@ -326,9 +321,9 @@ export class Round implements RoundType {
     this.updateTeamPoints(evaluatedTrick.trickWonBy.teamId, evaluatedTrick.pointValue);
     this.updateTeamTricks(evaluatedTrick.trickWonBy.teamId, evaluatedTrick);
     this.resetTrick();
-    this.incrementTrickIndex();
 
     this.trickIndex === HAND_SIZE ? this.evaluateRound() : this.updateActivePlayer(trickWinner.playerIndex);
+    this.trickIndex < HAND_SIZE && this.incrementTrickIndex();
 
     return evaluatedTrick;
   }
@@ -426,7 +421,8 @@ export class Round implements RoundType {
     const { isBidMade, tricksValue } = this.isBidMade(bidTeamId);
     const bidTeamPoints = this.getTeamPoints(isBidMade, tricksValue);
 
-    this.updateTeamPoints(bidTeamId, bidTeamPoints);
+    const bidTeam = this.teamTotals.find((team) => team.teamId === bidTeamId)!;
+    bidTeam.points = bidTeamPoints;
     return { isBidMade, bidTeamPoints };
   }
 

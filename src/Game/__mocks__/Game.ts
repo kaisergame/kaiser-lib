@@ -10,6 +10,7 @@ import {
   PlayerHand,
   PlayerType,
   RoundSummary,
+  ScoreType,
   Suit,
   TrickType,
 } from 'src/@types/index';
@@ -280,6 +281,16 @@ export const MOCK_PASS_BIDS: BidType[] = [
   { bidAmount: 0, bidValue: 0, bidder: { playerId: 'mockUser3', playerIndex: 3 }, isTrump: true },
 ];
 
+export const MOCK_WINNING_BID = {
+  bidAmount: 8,
+  bidValue: 80,
+  bidder: {
+    playerId: 'mockUser0',
+    playerIndex: 0,
+  },
+  isTrump: true,
+};
+
 // TRICKS
 export const MOCK_TRICK_0: TrickType = [
   {
@@ -416,3 +427,25 @@ export const MOCK_ROUND_TOTALS_2: RoundSummary = {
     { playerId: 'mockUser3', playerIndex: 3, points: 9 },
   ],
 };
+
+export const MOCK_ROUND_TOTALS_3: RoundSummary = {
+  roundIndex: 1,
+  winningBid: { bidAmount: 8, bidValue: 80, bidder: { playerId: 'mockUser0', playerIndex: 0 }, isTrump: true },
+  isBidMade: true,
+  trump: Suit.Hearts,
+  teamPoints: [
+    { teamId: 'team0', points: 9 },
+    { teamId: 'team1', points: 1 },
+  ],
+  playerPoints: [
+    { playerId: 'mockUser0', playerIndex: 0, points: 9 },
+    { playerId: 'mockUser1', playerIndex: 1, points: 1 },
+    { playerId: 'mockUser2', playerIndex: 2, points: 0 },
+    { playerId: 'mockUser3', playerIndex: 3, points: 0 },
+  ],
+};
+
+export const MOCK_GAME_SCORE: ScoreType[] = [
+  { teamId: 'team0', teamScore: 9 },
+  { teamId: 'team1', teamScore: 1 },
+];
