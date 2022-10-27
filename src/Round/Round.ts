@@ -17,11 +17,10 @@ import {
   TrickType,
   Trump,
   TeamId,
-  TeamPoints,
   TeamTotals,
 } from 'src/@types/index';
 import { Cards } from 'src/Cards/Cards';
-import { TRUMP_VALUE, TROIKA_POINTS, KAISER_POINTS, MISSED_BID, HAND_SIZE } from 'src/constants/game';
+import { TRUMP_VALUE, TROIKA_POINTS, KAISER_POINTS, MISSED_BID, HAND_SIZE, TRANSLATE_BID } from 'src/constants/game';
 import { validatePlayerIndex } from 'src/utils/helpers';
 
 export class Round implements RoundType {
@@ -33,8 +32,6 @@ export class Round implements RoundType {
   playableCards: CardType[] = [];
   trickIndex: number = 1;
   trick: TrickType = [];
-  // tricksTeam0: EvaluatedTrick[] = [];
-  // tricksTeam1: EvaluatedTrick[] = [];
   teamTotals: TeamTotals = [
     { teamId: 'team0', points: 0, tricks: [] },
     { teamId: 'team1', points: 0, tricks: [] },
@@ -146,15 +143,6 @@ export class Round implements RoundType {
   getValidBidValues(): BidValue[] {
     const curBids = this.bids.map((bid) => bid.bidValue);
     const curHighBid = Math.max(...curBids);
-    // const curHighBid = this.bids.reduce(
-    //   (highBid, bid): { bidAmount: BidAmount; bidValue: BidValue; isTrump: boolean } => {
-    //     if (bid.bidAmount > highBid.bidAmount) return { bidAmount: bid.bidAmount, isTrump: bid.isTrump };
-    //     if (bid.bidAmount === highBid.bidAmount && !bid.isTrump && highBid.isTrump)
-    //       return { bidAmount: bid.bidAmount, isTrump: bid.isTrump };
-    //     return highBid;
-    //   },
-    //   { bidAmount: -1, bidValue: -1, isTrump: false }
-    // );
 
     const isDealer = this.getPlayer().playerId === this.getPlayer(this.dealerIndex).playerId;
     const noDealerPass = isDealer && this.bids.filter((bid) => bid.bidValue !== 0).length === 0;
@@ -162,21 +150,11 @@ export class Round implements RoundType {
     const validBidValues = [
       BidValue.Pass,
       ...BidValues.filter((bid) =>
-        isDealer ? bid >= this.minBid && bid >= curHighBid : bid >= this.minBid && bid > curHighBid
+        isDealer
+          ? bid >= this.minBid * TRANSLATE_BID && bid >= curHighBid
+          : bid >= this.minBid * TRANSLATE_BID && bid > curHighBid
       ),
     ];
-    // const validBids = [
-    //   { amount: BidValue.Pass, isTrump: false },
-    //   ...Object.values(BidValue).flatMap((amount) => {
-    //     if (amount < curHighBid.amount) return;
-    //     if (amount === curHighBid.amount && !curHighBid.isTrump) return { amount, isTrump: false };
-    //     else
-    //       return [
-    //         { amount, isTrump: true },
-    //         { amount, isTrump: false },
-    //       ];
-    //   }),
-    // ];
 
     noDealerPass && validBidValues.shift();
 

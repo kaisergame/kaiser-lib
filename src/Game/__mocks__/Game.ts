@@ -257,6 +257,8 @@ export const MOCK_VALID_BIDS = [
   BidValue.ElevenNo,
   BidValue.Twelve,
   BidValue.TwelveNo,
+  BidValue.Troika,
+  BidValue.Kaiser,
 ];
 
 export const MOCK_BIDS: BidType[] = [
