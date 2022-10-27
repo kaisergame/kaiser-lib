@@ -63,8 +63,6 @@ export type BidType = {
   bidValue: BidValue;
   bidder: { playerId: PlayerId; playerIndex: PlayerIndex };
   isTrump: boolean;
-  // isTroika: boolean;
-  // isKaiser: boolean;
 };
 
 export enum BidAmount {

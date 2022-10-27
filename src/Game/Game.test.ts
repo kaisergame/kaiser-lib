@@ -1,4 +1,4 @@
-import { BidAmount, BidValue, CardName, Suit } from '../@types';
+import { BidValue, CardName, Suit } from '../@types';
 import { HAND_SIZE } from '../constants/index';
 import { Round } from '../Round/Round';
 import * as mock from './__mocks__/Game';
