@@ -154,7 +154,7 @@ export class Game implements GameType {
     return playerIndexs;
   }
 
-  switchPlayerPlayerIndex(playerToMove: PlayerId, moveToPlayerIndex?: PlayerIndex): void {
+  switchPlayerIndex(playerToMove: PlayerId, moveToPlayerIndex?: PlayerIndex): void {
     if (this.round) return;
     if (
       moveToPlayerIndex &&

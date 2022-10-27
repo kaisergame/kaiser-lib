@@ -21,7 +21,7 @@ export interface GameType extends GameState {
   // initializeTeams(): void; // private
   // initializePlayers(): void; // private
   // getTeamPlayerIndexs(teamIndex: number): number[]; // private
-  switchPlayerPlayerIndex(movePlayer: PlayerId, moveToPlayerIndex?: PlayerIndex): void;
+  switchPlayerIndex(movePlayer: PlayerId, moveToPlayerIndex?: PlayerIndex): void;
   sortPlayers(): void;
   canStartGame(): boolean;
   startGame(): void;
