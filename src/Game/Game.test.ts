@@ -5,7 +5,26 @@ import * as mock from './__mocks__/Game';
 import { Game } from './Game';
 
 // GAME START AND ROUND PLAYTHROUGH
-describe('4 Player Game playthrough', () => {
+describe('managing game state with toJSON and fromJSON', () => {
+  let game: Game;
+  beforeEach(() => {
+    game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('toJSON creates a JSON object of game', () => {
+    expect(game.toJSON()).toStrictEqual(mock.MOCK_INIT_GAME_JSON);
+  });
+
+  test('fromJSON instantiates Game from JSON state', () => {
+    const fromJSONGame = Game.fromJSON(mock.MOCK_INIT_GAME_JSON);
+    expect(fromJSONGame).toStrictEqual(game);
+  });
+});
+
+describe('4 player Game playthrough', () => {
   let game: Game;
   beforeAll(() => {
     // config { numPlayers: 4, minBid: 7, scoreToWin: 52 }
@@ -40,10 +59,13 @@ describe('4 Player Game playthrough', () => {
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(4);
       expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
     });
-  });
 
-  describe('gameStateToJson', () => {
-    test.todo('test gameStateToJson()');
+    test('switchPlayerIndex exchanges playerIndex / teamId for 2 players and re-sorts players', () => {
+      game.switchPlayerIndex('mockUser0', 3);
+      expect(game.players).toStrictEqual(mock.MOCK_SWITCH_PLAYERS);
+      game.switchPlayerIndex('mockUser3', 3);
+      expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
+    });
   });
 
   describe('create Round', () => {

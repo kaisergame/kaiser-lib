@@ -31,6 +31,7 @@ export class Game implements GameType {
     this.initializeTeams();
     this.initializePlayers();
     this.addPlayer(owner.id, owner.name);
+    console.log(this.toJSON());
   }
 
   toJSON(): BaseGameType {
@@ -161,25 +162,19 @@ export class Game implements GameType {
 
     const movePlayer = findPlayerById(this.players, playerIdToMove)!;
     const copyMovePlayer: PlayerType = JSON.parse(JSON.stringify(movePlayer));
-    const moveTeam = findTeamById(this.teams, movePlayer.teamId)!;
+    let { teamMembers: moveTeamMembers } = findTeamById(this.teams, movePlayer.teamId)!;
 
     const switchPlayer = findPlayerByIndex(this.players, moveToIndex);
     const copySwitchPlayer: PlayerType = JSON.parse(JSON.stringify(switchPlayer));
-    const switchTeam = findTeamById(this.teams, switchPlayer.teamId)!;
+    let { teamMembers: switchTeamMembers } = findTeamById(this.teams, switchPlayer.teamId)!;
 
-    moveTeam.teamMembers.filter((playerId) => playerId !== movePlayer.playerId);
-    switchPlayer.playerId && moveTeam.teamMembers.push(switchPlayer.playerId);
-    switchTeam.teamMembers.filter((playerId) => playerId !== switchPlayer.playerId);
-    switchTeam.teamMembers.push(playerIdToMove);
-
-    if (switchPlayer.playerId) {
-      switchTeam.teamMembers.splice(switchTeam.teamMembers.indexOf(switchPlayer.playerId), 1);
-      moveTeam.teamMembers.push(switchPlayer.playerId);
-    }
+    moveTeamMembers = moveTeamMembers.filter((playerId) => playerId !== copyMovePlayer.playerId);
+    copySwitchPlayer.playerId && moveTeamMembers.push(copySwitchPlayer.playerId);
+    switchTeamMembers = switchTeamMembers.filter((playerId) => playerId !== copySwitchPlayer.playerId);
+    copyMovePlayer.playerId && switchTeamMembers.push(copyMovePlayer.playerId);
 
     movePlayer.teamId = copySwitchPlayer.teamId;
     movePlayer.playerIndex = copySwitchPlayer.playerIndex;
-
     switchPlayer.teamId = copyMovePlayer.teamId;
     switchPlayer.playerIndex = copyMovePlayer.playerIndex;
 

@@ -74,6 +74,33 @@ export const MOCK_PLAYERS: PlayerType[] = [
   },
 ];
 
+export const MOCK_SWITCH_PLAYERS: PlayerType[] = [
+  {
+    playerId: 'mockUser3',
+    name: 'Paul',
+    playerIndex: 0,
+    teamId: 'team0',
+  },
+  {
+    playerId: 'mockUser1',
+    name: 'Cody',
+    playerIndex: 1,
+    teamId: 'team1',
+  },
+  {
+    playerId: 'mockUser2',
+    name: 'Stacey',
+    playerIndex: 2,
+    teamId: 'team0',
+  },
+  {
+    playerId: 'mockUser0',
+    name: 'Ryan',
+    playerIndex: 3,
+    teamId: 'team1',
+  },
+];
+
 // CARDS
 export const MOCK_SHUFFLED_DECK: Deck = [
   { suit: Suit.Spades, name: CardName.Nine, faceValue: 9, playValue: 9 },
@@ -377,3 +404,30 @@ export const MOCK_TEAM_SCORES: TeamType[] = [
   { teamId: 'team0', teamMembers: ['mockUser0', 'mockUser2'], teamScore: 9 },
   { teamId: 'team1', teamMembers: ['mockUser1', 'mockUser3'], teamScore: 1 },
 ];
+
+// JSON
+
+export const MOCK_INIT_GAME_JSON = {
+  gameId: 'gameId12345',
+  config: { numPlayers: 4, minBid: 7, scoreToWin: 52 },
+  owner: { id: 'mockUser0', name: 'Ryan' },
+  players: [
+    {
+      playerId: 'mockUser0',
+      name: 'Ryan',
+      teamId: 'team0',
+      playerIndex: 0,
+    },
+    { playerId: null, name: null, teamId: 'team1', playerIndex: 1 },
+    { playerId: null, name: null, teamId: 'team0', playerIndex: 2 },
+    { playerId: null, name: null, teamId: 'team1', playerIndex: 3 },
+  ],
+  teams: [
+    { teamId: 'team0', teamMembers: ['mockUser0'], teamScore: 0 },
+    { teamId: 'team1', teamMembers: [], teamScore: 0 },
+  ],
+  dealerIndex: null,
+  round: null,
+  roundSummaries: [],
+  version: '1.0.0',
+};
