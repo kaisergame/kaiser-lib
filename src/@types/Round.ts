@@ -1,7 +1,7 @@
 import { CardType, Suit } from './Cards';
 import { PlayerId, PlayerType, PlayerIndex, TeamId } from './Game';
 
-export type RoundJSONType = {
+export type BaseRoundType = {
   roundIndex: number;
   players: PlayerType[];
   hands: PlayerHand[];
@@ -18,9 +18,9 @@ export type RoundJSONType = {
   teamTotals: TeamTotals[];
 };
 
-export interface RoundType extends RoundJSONType {
-  toJSON(): RoundJSONType;
-  updateStateFromJSON(state: RoundJSONType): void;
+export interface RoundType extends BaseRoundType {
+  toJSON(): BaseRoundType;
+  updateStateFromJSON(state: BaseRoundType): void;
   dealHands(): void;
   sortHands(lowToHigh?: 'lowToHigh'): void;
   getValidBids(): { bidAmount: BidAmount; isTrump: boolean | null }[];

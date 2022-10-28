@@ -1,7 +1,7 @@
 import {
   GameConfig,
   GameType,
-  GameJSONType,
+  BaseGameType,
   GameVersion,
   PlayerId,
   PlayerType,
@@ -12,13 +12,7 @@ import {
   TeamType,
   TeamId,
 } from '../@types/index';
-import {
-  findPlayerById,
-  findPlayerByIndex,
-  findTeamById,
-  isPlayersSorted,
-  validatePlayerIndex,
-} from 'src/utils/helpers';
+import { findPlayerById, findPlayerByIndex, findTeamById, validatePlayerIndex } from 'src/utils/helpers';
 import { Round } from '../Round/Round';
 
 export class Game implements GameType {
@@ -39,7 +33,7 @@ export class Game implements GameType {
     this.addPlayer(owner.id, owner.name);
   }
 
-  toJSON(): GameJSONType {
+  toJSON(): BaseGameType {
     return {
       gameId: this.gameId,
       config: this.config,
@@ -53,14 +47,14 @@ export class Game implements GameType {
     };
   }
 
-  static fromJSON(state: GameJSONType): Game {
+  static fromJSON(state: BaseGameType): Game {
     const game = new Game(state.owner, state.gameId, state.config);
     game.updateStateFromJSON(state);
 
     return game;
   }
 
-  updateStateFromJSON(state: GameJSONType): void {
+  updateStateFromJSON(state: BaseGameType): void {
     this.owner = state.owner;
     this.players = state.players;
     this.teams = state.teams;

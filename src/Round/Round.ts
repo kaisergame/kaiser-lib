@@ -8,7 +8,7 @@ import {
   PlayerId,
   PlayerStats,
   PlayerType,
-  RoundJSONType,
+  BaseRoundType,
   RoundSummary,
   RoundType,
   PlayerIndex,
@@ -58,7 +58,7 @@ export class Round implements RoundType {
     this.updateActivePlayer();
   }
 
-  toJSON(): RoundJSONType {
+  toJSON(): BaseRoundType {
     return {
       roundIndex: this.roundIndex,
       players: this.players,
@@ -77,14 +77,14 @@ export class Round implements RoundType {
     };
   }
 
-  static fromJSON(state: RoundJSONType, endRound: (roundSummary: RoundSummary) => void): Round {
+  static fromJSON(state: BaseRoundType, endRound: (roundSummary: RoundSummary) => void): Round {
     const round = new Round(state.roundIndex, state.numPlayers, state.minBid, [], state.dealerIndex, endRound);
     round.updateStateFromJSON(state);
 
     return round;
   }
 
-  updateStateFromJSON(state: RoundJSONType): void {
+  updateStateFromJSON(state: BaseRoundType): void {
     this.players = state.players;
     this.numPlayers = state.numPlayers;
     this.dealerIndex = state.dealerIndex;
