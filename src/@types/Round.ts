@@ -1,7 +1,7 @@
 import { CardType, Suit } from './Cards';
 import { PlayerId, PlayerType, PlayerIndex, TeamId } from './Game';
 
-export type RoundState = {
+export type RoundJSONType = {
   roundIndex: number;
   players: PlayerType[];
   hands: PlayerHand[];
@@ -18,12 +18,12 @@ export type RoundState = {
   teamTotals: TeamTotals[];
 };
 
-export interface RoundType extends RoundState {
-  toJSON(): RoundState;
-  updateStateFromJSON(state: RoundState): void;
+export interface RoundType extends RoundJSONType {
+  toJSON(): RoundJSONType;
+  updateStateFromJSON(state: RoundJSONType): void;
   dealHands(): void;
   sortHands(lowToHigh?: 'lowToHigh'): void;
-  getValidBidValues(): { bidAmount: BidAmount; isTrump: boolean | null }[];
+  getValidBids(): { bidAmount: BidAmount; isTrump: boolean | null }[];
   canBid(playerId: string): boolean;
   setPlayerBid(id: PlayerId, bidValue: BidAmount, isTrump: boolean | null): void;
   setWinningBid(): BidType;
@@ -82,6 +82,7 @@ export type Trump = Suit | 'NO_TRUMP';
 export type TrickType = { cardPlayed: CardType; playedBy: PlayerId; playerIndex: PlayerIndex }[];
 
 export type EvaluatedTrick = {
+  trickIndex: number;
   trick: TrickType;
   pointValue: number;
   takenBy: PlayerType;

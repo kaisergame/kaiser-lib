@@ -1,20 +1,20 @@
-import { BidAmount, RoundState, RoundSummary } from './Round';
+import { BidAmount, RoundJSONType, RoundSummary } from './Round';
 
-export type GameState = {
+export type GameJSONType = {
   gameId: GameId;
   owner: { id: string; name: string };
   config: GameConfig;
   players: PlayerType[];
   teams: TeamType[];
   dealerIndex: PlayerIndex | null;
-  round: RoundState | null;
+  round: RoundJSONType | null;
   roundSummaries: RoundSummary[];
   version: GameVersion;
 };
 
-export interface GameType extends GameState {
-  toJSON(): GameState;
-  updateStateFromJSON(state: GameState): void;
+export interface GameType extends GameJSONType {
+  toJSON(): GameJSONType;
+  updateStateFromJSON(state: GameJSONType): void;
   addPlayer(id: string, name: string): void;
   removePlayer(id: string): void;
   // initializeTeams(): void; // private
