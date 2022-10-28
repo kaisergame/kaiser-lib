@@ -6,7 +6,6 @@ export type GameState = {
   config: GameConfig;
   players: PlayerType[];
   teams: TeamType[];
-  scores: ScoreType[];
   dealerIndex: PlayerIndex | null;
   round: RoundState | null;
   roundSummaries: RoundSummary[];
@@ -56,8 +55,8 @@ export type TeamId = string;
 
 export type TeamType = {
   teamId: TeamId;
-  teamPlayerIndexs: PlayerIndex[];
   teamMembers: PlayerId[];
+  teamScore: number;
 };
 
 export type PlayerIndex = number;
@@ -70,8 +69,3 @@ export type PlayerType = {
 };
 
 export type PlayerId = string;
-
-export type ScoreType = {
-  teamId: string;
-  teamScore: number;
-};

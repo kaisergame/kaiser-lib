@@ -23,9 +23,9 @@ export interface RoundType extends RoundState {
   updateStateFromJSON(state: RoundState): void;
   dealHands(): void;
   sortHands(lowToHigh?: 'lowToHigh'): void;
-  getValidBidValues(): BidValue[];
+  getValidBidValues(): { bidAmount: BidAmount; isTrump: boolean | null }[];
   canBid(playerId: string): boolean;
-  setPlayerBid(id: PlayerId, bidValue: BidValue): void;
+  setPlayerBid(id: PlayerId, bidValue: BidAmount, isTrump: boolean | null): void;
   setWinningBid(): BidType;
   canSetTrump(playerId: string): boolean;
   setTrump(playerId: PlayerId, trump: Suit): void;
@@ -46,8 +46,7 @@ export interface RoundType extends RoundState {
   updateTeamPoints(teamId: TeamId, trickValue: number): void;
   resetTrick(): void;
   evaluateRound(): RoundSummary;
-  isBidMade(bidTeamId: TeamId): { isBidMade: boolean; tricksValue: number };
-  playerPointTotals(): PlayerPoints;
+  isBidMade(bidTeamPoints: number): boolean;
   endRound: (roundSummary: RoundSummary) => void;
 }
 
@@ -60,9 +59,8 @@ export type PlayerHand = {
 
 export type BidType = {
   bidAmount: BidAmount;
-  bidValue: BidValue;
   bidder: { playerId: PlayerId; playerIndex: PlayerIndex };
-  isTrump: boolean;
+  isTrump: boolean | null;
 };
 
 export enum BidAmount {
@@ -75,28 +73,8 @@ export enum BidAmount {
   Ten = 10,
   Eleven = 11,
   Twelve = 12,
-}
-
-export enum BidValue {
-  Pass = 0,
-  Five = 50,
-  FiveNo = 55,
-  Six = 60,
-  SixNo = 65,
-  Seven = 70,
-  SevenNo = 75,
-  Eight = 80,
-  EightNo = 85,
-  Nine = 90,
-  NineNo = 95,
-  Ten = 100,
-  TenNo = 105,
-  Eleven = 110,
-  ElevenNo = 115,
-  Twelve = 120,
-  TwelveNo = 125,
-  Troika = 127,
-  Kaiser = 129,
+  Troika = 13,
+  Kaiser = 14,
 }
 
 export type Trump = Suit | 'NO_TRUMP';
@@ -106,14 +84,33 @@ export type TrickType = { cardPlayed: CardType; playedBy: PlayerId; playerIndex:
 export type EvaluatedTrick = {
   trick: TrickType;
   pointValue: number;
-  trickWonBy: PlayerType;
+  takenBy: PlayerType;
 };
 
 export type TeamTotals = { teamId: string; points: number; tricks: EvaluatedTrick[] };
 
 export type TeamPoints = { teamId: string; points: number }[];
 
-export type PlayerPoints = { playerId: PlayerId; playerIndex: PlayerIndex; points: number }[];
+export type BidStats = {
+  bidAmount: BidAmount;
+  isTrump: boolean | null;
+  winningBidder: boolean;
+  biddingTeam: boolean;
+  wonRound: boolean; // made bid or defended other team bid
+};
+
+export type TrickStats = {
+  points: number;
+  tricksTaken: number;
+  fiveTaken: boolean;
+  threeTaken: boolean;
+};
+
+export type PlayerStats = {
+  playerId: PlayerId;
+  bidStats: BidStats;
+  trickStats: TrickStats;
+}[];
 
 export type RoundSummary = {
   roundIndex: number;
@@ -121,5 +118,5 @@ export type RoundSummary = {
   isBidMade: boolean;
   trump: Trump;
   teamPoints: TeamPoints;
-  playerPoints: PlayerPoints;
+  playerStats: PlayerStats;
 };
