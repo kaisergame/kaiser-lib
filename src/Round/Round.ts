@@ -177,11 +177,6 @@ export class Round implements RoundType {
     const bidAmounts = Object.values(BidAmount).filter(
       (value) => typeof value === 'number' && value >= this.minBid && value >= curHighBid.bidAmount
     ) as BidAmount[];
-    console.log(bidAmounts);
-
-    // const bidAmounts = Object.values(BidAmount).filter(
-    //   (amount) => amount >= this.minBid && amount >= curHighBid.bidAmount
-    // ) as BidAmount[];
 
     const validBids = [
       { bidAmount: BidAmount.Pass, isTrump: null },
@@ -218,7 +213,6 @@ export class Round implements RoundType {
       bidder: { playerId: '', playerIndex: -1 },
       isTrump: null,
     });
-    console.log(highBid);
 
     return highBid;
   }
@@ -464,8 +458,8 @@ export class Round implements RoundType {
   }
 
   getRoundEndPoints(isBidMade: boolean, tricksValue: number): number {
-    const isTroika = (this.winningBid.bidAmount = 13);
-    const isKaiser = (this.winningBid.bidAmount = 14);
+    const isTroika = this.winningBid.bidAmount === 13;
+    const isKaiser = this.winningBid.bidAmount === 14;
     const noBidMultiplier = this.winningBid.isTrump ? 1 : 2;
     const missedBidMultiplier = -1;
 

@@ -309,14 +309,14 @@ export const MOCK_ROUND_SUMMARY: RoundSummary = {
     {
       playerId: 'mockUser0',
       bidStats: {
-        bidAmount: BidAmount.Seven,
+        bidAmount: BidAmount.Eight,
         isTrump: true,
-        winningBidder: false,
-        biddingTeam: false,
-        wonRound: false,
+        winningBidder: true,
+        biddingTeam: true,
+        wonRound: true,
       },
       trickStats: {
-        points: 0,
+        points: 9,
         tricksTaken: 0,
         fiveTaken: false,
         threeTaken: false,
@@ -324,6 +324,22 @@ export const MOCK_ROUND_SUMMARY: RoundSummary = {
     },
     {
       playerId: 'mockUser1',
+      bidStats: {
+        bidAmount: BidAmount.Seven,
+        isTrump: true,
+        winningBidder: false,
+        biddingTeam: false,
+        wonRound: false,
+      },
+      trickStats: {
+        points: 1,
+        tricksTaken: 0,
+        fiveTaken: false,
+        threeTaken: false,
+      },
+    },
+    {
+      playerId: 'mockUser2',
       bidStats: {
         bidAmount: BidAmount.Seven,
         isTrump: false,
@@ -339,29 +355,13 @@ export const MOCK_ROUND_SUMMARY: RoundSummary = {
       },
     },
     {
-      playerId: 'mockUser2',
+      playerId: 'mockUser3',
       bidStats: {
         bidAmount: BidAmount.Eight,
         isTrump: true,
         winningBidder: false,
         biddingTeam: false,
         wonRound: false,
-      },
-      trickStats: {
-        points: 0,
-        tricksTaken: 0,
-        fiveTaken: false,
-        threeTaken: false,
-      },
-    },
-    {
-      playerId: 'mockUser3',
-      bidStats: {
-        bidAmount: BidAmount.Eight,
-        isTrump: true,
-        winningBidder: true,
-        biddingTeam: true,
-        wonRound: true,
       },
       trickStats: {
         points: 0,
