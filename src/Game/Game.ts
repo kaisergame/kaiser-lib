@@ -146,14 +146,14 @@ export class Game implements GameType {
   }
 
   getTeamPlayerIndex(teamIndex: number): number[] {
-    const playerIndexs = [];
+    const playerIndices = [];
     const { numPlayers } = this.config;
 
     for (let i = teamIndex; i < numPlayers; i += numPlayers / 2) {
-      playerIndexs.push(i);
+      playerIndices.push(i);
     }
 
-    return playerIndexs;
+    return playerIndices;
   }
 
   switchPlayerIndex(playerIdToMove: PlayerId, moveToIndex: PlayerIndex): void {
