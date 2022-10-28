@@ -5,11 +5,11 @@ export type BaseRoundType = {
   roundIndex: number;
   players: PlayerType[];
   hands: PlayerHand[];
-  bids: BidType[];
+  bids: PlayerBid[];
   numPlayers: number;
   dealerIndex: PlayerIndex;
   minBid: BidAmount;
-  winningBid: BidType;
+  winningBid: PlayerBid;
   trump: Trump | null;
   activePlayerIndex: PlayerIndex;
   playableCards: CardType[];
@@ -23,10 +23,10 @@ export interface RoundType extends BaseRoundType {
   updateStateFromJSON(state: BaseRoundType): void;
   dealHands(): void;
   sortHands(lowToHigh?: 'lowToHigh'): void;
-  getValidBids(): { bidAmount: BidAmount; isTrump: boolean | null }[];
+  getValidBids(): Bid[];
   canBid(playerId: string): boolean;
   setPlayerBid(id: PlayerId, bidValue: BidAmount, isTrump: boolean | null): void;
-  setWinningBid(): BidType;
+  setWinningBid(): PlayerBid;
   canSetTrump(playerId: string): boolean;
   setTrump(playerId: PlayerId, trump: Suit): void;
   getTrump(): Trump | null;
@@ -57,11 +57,14 @@ export type PlayerHand = {
   hand: Hand;
 };
 
-export type BidType = {
+export type Bid = {
   bidAmount: BidAmount;
-  bidder: { playerId: PlayerId; playerIndex: PlayerIndex };
   isTrump: boolean | null;
 };
+
+export interface PlayerBid extends Bid {
+  bidder: { playerId: PlayerId; playerIndex: PlayerIndex };
+}
 
 export enum BidAmount {
   Pass = 0,
@@ -115,7 +118,7 @@ export type PlayerStats = {
 
 export type RoundSummary = {
   roundIndex: number;
-  winningBid: BidType;
+  winningBid: PlayerBid;
   isBidMade: boolean;
   trump: Trump;
   teamPoints: TeamPoints;

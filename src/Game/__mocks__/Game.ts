@@ -1,6 +1,6 @@
 import {
   BidAmount,
-  BidType,
+  PlayerBid,
   CardName,
   Deck,
   EvaluatedTrick,
@@ -261,7 +261,7 @@ export const MOCK_VALID_BIDS = [
   { bidAmount: BidAmount.Kaiser, isTrump: false },
 ];
 
-export const MOCK_WINNING_BID: BidType = {
+export const MOCK_WINNING_BID: PlayerBid = {
   bidAmount: 8,
   bidder: {
     playerId: 'mockUser0',

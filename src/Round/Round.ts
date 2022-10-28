@@ -1,7 +1,8 @@
 import { findPlayerById, findPlayerByIndex } from 'src/utils/helpers';
 import {
+  Bid,
   BidAmount,
-  BidType,
+  PlayerBid,
   CardType,
   EvaluatedTrick,
   PlayerHand,
@@ -27,8 +28,8 @@ import { validatePlayerIndex } from 'src/utils/helpers';
 
 export class Round implements RoundType {
   hands: PlayerHand[] = [];
-  bids: BidType[] = [];
-  winningBid: BidType = { bidAmount: -1, bidder: { playerId: '', playerIndex: -1 }, isTrump: null };
+  bids: PlayerBid[] = [];
+  winningBid: PlayerBid = { bidAmount: -1, bidder: { playerId: '', playerIndex: -1 }, isTrump: null };
   trump: Trump | null = null;
   activePlayerIndex: PlayerIndex = -1;
   playableCards: CardType[] = [];
@@ -169,7 +170,7 @@ export class Round implements RoundType {
     else this.updateActivePlayer();
   }
 
-  getValidBids(): { bidAmount: BidAmount; isTrump: boolean | null }[] {
+  getValidBids(): Bid[] {
     const isDealer = this.getPlayer().playerId === this.getPlayer(this.dealerIndex).playerId;
     const noDealerPass = isDealer && this.bids.filter((bid) => bid.bidAmount !== 0).length === 0;
 
@@ -190,7 +191,7 @@ export class Round implements RoundType {
           ),
         ];
         return valid;
-      }, [] as { bidAmount: BidAmount; isTrump: boolean | null }[]),
+      }, [] as Bid[]),
     ];
 
     noDealerPass && validBids.shift();
@@ -198,8 +199,7 @@ export class Round implements RoundType {
     return validBids;
   }
 
-  //prettier-ignore
-  compareBids<T extends { bidAmount: BidAmount; isTrump: boolean | null }, U extends { bidAmount: BidAmount; isTrump: boolean | null }>(bidA: T, bidB: U): -1 | 0 | 1 {
+  compareBids<T extends Bid, U extends Bid>(bidA: T, bidB: U): -1 | 0 | 1 {
     if (bidA.bidAmount > bidB.bidAmount) return 1;
     if (bidA.bidAmount < bidB.bidAmount) return -1;
     if (bidA.bidAmount === bidB.bidAmount && !bidA.isTrump && bidB.isTrump) return 1;
@@ -207,8 +207,8 @@ export class Round implements RoundType {
     return 0;
   }
 
-  calcHighBid(bids: BidType[]): BidType {
-    const highBid = bids.reduce<BidType>((highBid, bid) => (this.compareBids(highBid, bid) > 0 ? highBid : bid), {
+  calcHighBid(bids: PlayerBid[]): PlayerBid {
+    const highBid = bids.reduce<PlayerBid>((highBid, bid) => (this.compareBids(highBid, bid) > 0 ? highBid : bid), {
       bidAmount: -1,
       bidder: { playerId: '', playerIndex: -1 },
       isTrump: null,
@@ -217,7 +217,7 @@ export class Round implements RoundType {
     return highBid;
   }
 
-  setWinningBid(): BidType {
+  setWinningBid(): PlayerBid {
     const winningBid = this.calcHighBid(this.bids);
 
     this.winningBid = winningBid;
