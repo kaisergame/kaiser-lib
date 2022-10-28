@@ -8,7 +8,7 @@ import {
   PlayerId,
   PlayerStats,
   PlayerType,
-  RoundState,
+  RoundJSONType,
   RoundSummary,
   RoundType,
   PlayerIndex,
@@ -58,7 +58,7 @@ export class Round implements RoundType {
     this.updateActivePlayer();
   }
 
-  toJSON(): RoundState {
+  toJSON(): RoundJSONType {
     return {
       roundIndex: this.roundIndex,
       players: this.players,
@@ -77,14 +77,14 @@ export class Round implements RoundType {
     };
   }
 
-  static fromJSON(state: RoundState, endRound: (roundSummary: RoundSummary) => void): Round {
+  static fromJSON(state: RoundJSONType, endRound: (roundSummary: RoundSummary) => void): Round {
     const round = new Round(state.roundIndex, state.numPlayers, state.minBid, [], state.dealerIndex, endRound);
     round.updateStateFromJSON(state);
 
     return round;
   }
 
-  updateStateFromJSON(state: RoundState): void {
+  updateStateFromJSON(state: RoundJSONType): void {
     this.players = state.players;
     this.numPlayers = state.numPlayers;
     this.dealerIndex = state.dealerIndex;
@@ -153,8 +153,9 @@ export class Round implements RoundType {
   }
 
   setPlayerBid(playerId: PlayerId, bidAmount: BidAmount, isTrump: boolean | null): void {
-    if (!this.canBid(playerId)) return;
-    if (!this.getValidBidValues().some((bid) => bid.bidAmount === bidAmount && bid.isTrump === isTrump)) return;
+    if (!this.canBid(playerId)) throw new Error('Player is not allow to bid');
+    if (!this.getValidBids().some((bid) => bid.bidAmount === bidAmount && bid.isTrump === isTrump))
+      throw new Error('Bid is invalid');
 
     const { playerId: id, playerIndex } = this.getPlayer();
     const playerBid = {
@@ -168,26 +169,32 @@ export class Round implements RoundType {
     else this.updateActivePlayer();
   }
 
-  getValidBidValues(): { bidAmount: BidAmount; isTrump: boolean | null }[] {
+  getValidBids(): { bidAmount: BidAmount; isTrump: boolean | null }[] {
     const isDealer = this.getPlayer().playerId === this.getPlayer(this.dealerIndex).playerId;
     const noDealerPass = isDealer && this.bids.filter((bid) => bid.bidAmount !== 0).length === 0;
 
     const curHighBid = this.calcHighBid(this.bids);
     const bidAmounts = Object.values(BidAmount).filter(
-      (amount) => amount > this.minBid && amount > curHighBid.bidAmount
+      (value) => typeof value === 'number' && value >= this.minBid && value >= curHighBid.bidAmount
     ) as BidAmount[];
+    console.log(bidAmounts);
+
+    // const bidAmounts = Object.values(BidAmount).filter(
+    //   (amount) => amount >= this.minBid && amount >= curHighBid.bidAmount
+    // ) as BidAmount[];
 
     const validBids = [
       { bidAmount: BidAmount.Pass, isTrump: null },
       ...bidAmounts.reduce((validBids, bidAmount) => {
         // prettier-ignore
-        const bids = bidAmount <= 12 ? [{ bidAmount, isTrump: true }, { bidAmount, isTrump: false }] : [{ bidAmount, isTrump: true }]
-        return [
+        const bids = bidAmount <= 12 ? [ { bidAmount, isTrump: true }, { bidAmount, isTrump: false } ] : [{ bidAmount, isTrump: false }];
+        const valid = [
           ...validBids,
           ...bids.filter((bid) =>
-            isDealer ? this.compareBids(curHighBid, bid) >= 0 : this.compareBids(curHighBid, bid) > 0
+            isDealer ? this.compareBids(bid, curHighBid) >= 0 : this.compareBids(bid, curHighBid) > 0
           ),
         ];
+        return valid;
       }, [] as { bidAmount: BidAmount; isTrump: boolean | null }[]),
     ];
 
@@ -206,9 +213,12 @@ export class Round implements RoundType {
   }
 
   calcHighBid(bids: BidType[]): BidType {
-    const highBid = bids.reduce((highBid, bid) => {
-      return this.compareBids(highBid, bid) > 0 ? bid : highBid;
-    }, {} as BidType);
+    const highBid = bids.reduce<BidType>((highBid, bid) => (this.compareBids(highBid, bid) > 0 ? highBid : bid), {
+      bidAmount: -1,
+      bidder: { playerId: '', playerIndex: -1 },
+      isTrump: null,
+    });
+    console.log(highBid);
 
     return highBid;
   }
@@ -391,6 +401,7 @@ export class Round implements RoundType {
 
   evaluateTrick(trickPointValue: number, trickWinner: PlayerType): EvaluatedTrick {
     return {
+      trickIndex: this.trickIndex,
       trick: this.trick,
       pointValue: trickPointValue,
       takenBy: trickWinner,

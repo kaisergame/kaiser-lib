@@ -1,7 +1,7 @@
 import {
   GameConfig,
-  GameState,
   GameType,
+  GameJSONType,
   GameVersion,
   PlayerId,
   PlayerType,
@@ -39,7 +39,7 @@ export class Game implements GameType {
     this.addPlayer(owner.id, owner.name);
   }
 
-  toJSON(): GameState {
+  toJSON(): GameJSONType {
     return {
       gameId: this.gameId,
       config: this.config,
@@ -53,14 +53,14 @@ export class Game implements GameType {
     };
   }
 
-  static fromJSON(state: GameState): Game {
+  static fromJSON(state: GameJSONType): Game {
     const game = new Game(state.owner, state.gameId, state.config);
     game.updateStateFromJSON(state);
 
     return game;
   }
 
-  updateStateFromJSON(state: GameState): void {
+  updateStateFromJSON(state: GameJSONType): void {
     this.owner = state.owner;
     this.players = state.players;
     this.teams = state.teams;
@@ -236,7 +236,7 @@ export class Game implements GameType {
   endRound(roundSummary: RoundSummary): void {
     this.updateRoundSummaries(roundSummary);
     this.updateScores(roundSummary.teamPoints);
-
+    // TODO: add Kaiser check
     const winner = this.checkIsWinner();
 
     if (winner) this.endGame(winner);

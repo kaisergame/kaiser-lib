@@ -1,4 +1,4 @@
-import { CardName, Suit } from '../@types';
+import { BidAmount, CardName, Suit } from '../@types';
 import { HAND_SIZE } from '../constants/index';
 import { Round } from '../Round/Round';
 import * as mock from './__mocks__/Game';
@@ -29,13 +29,13 @@ describe('4 Player Game playthrough', () => {
     });
 
     test('cannot add the same player twice', () => {
-      game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
+      expect(() => game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name)).toThrow();
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(3);
     });
 
     test('cannot add more players than game is configured for', () => {
       game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
-      game.addPlayer(mock.MOCK_USER_4.id, mock.MOCK_USER_4.name);
+      expect(() => game.addPlayer(mock.MOCK_USER_4.id, mock.MOCK_USER_4.name)).toThrow();
       expect(game.players.length).toBe(4);
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(4);
       expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
@@ -78,26 +78,26 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('validBids will return all valid bids to player', () => {
-        expect(game.round?.getValidBidValues()).toStrictEqual(mock.MOCK_VALID_BIDS);
+        expect(game.round?.getValidBids()).toStrictEqual(mock.MOCK_VALID_BIDS);
       });
 
       test('if setPlayerBid is passed an invalid bid it is not recorded', () => {
         const spyUpdateActive = jest.spyOn(game.round!, 'updateActivePlayer');
-        game.round?.setPlayerBid('mockUser1', BidValue.Five); // bid too low for config
+        expect(() => game.round?.setPlayerBid('mockUser1', BidAmount.Five, true)).toThrow();
         expect(spyUpdateActive).not.toBeCalled();
         expect(game.round?.bids.length).toBe(0);
       });
 
       test('if setPlayerBid is passed a valid bid it is added to end of bids array', () => {
         expect(game.round?.activePlayerIndex).toBe(1);
-        game.round?.setPlayerBid('mockUser1', BidValue.Seven);
+        game.round?.setPlayerBid('mockUser1', BidAmount.Seven, true);
         expect(game.round?.bids.length).toBe(1);
       });
 
       test('updateActivePlayer will move turn one position "left" on valid setPlayerBid', () => {
         const spyUpdateActive = jest.spyOn(game.round!, 'updateActivePlayer');
         expect(game.round?.activePlayerIndex).toBe(2);
-        game.round?.setPlayerBid('mockUser2', BidValue.SevenNo);
+        game.round?.setPlayerBid('mockUser2', BidAmount.Seven, false);
         expect(game.round?.bids.length).toBe(2);
         expect(spyUpdateActive).toBeCalledTimes(1);
         expect(game.round?.activePlayerIndex).toBe(3);
@@ -105,16 +105,14 @@ describe('4 Player Game playthrough', () => {
 
       test('dealer can take bid for current high bid; setWinningBid is called after 4 bids', () => {
         expect(game.round?.activePlayerIndex).toBe(3);
-
-        game.round?.setPlayerBid('mockUser3', BidValue.Eight);
-
+        game.round?.setPlayerBid('mockUser3', BidAmount.Eight, true);
         expect(game.round?.activePlayerIndex).toBe(game.round?.dealerIndex);
 
         const spyWin = jest.spyOn(game.round!, 'setWinningBid');
         const spyActive = jest.spyOn(game.round!, 'updateActivePlayer');
         const spyPlay = jest.spyOn(game.round!, 'setPlayableCards');
 
-        game.round?.setPlayerBid('mockUser0', BidValue.Eight);
+        game.round?.setPlayerBid('mockUser0', BidAmount.Eight, true);
         expect(spyWin).toBeCalledTimes(1);
         expect(spyActive).toBeCalledTimes(1);
         expect(game.round?.winningBid.bidder.playerIndex !== -1).toBe(true);
@@ -124,8 +122,9 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('setPlayerBid will not record bid if 4 bids have already been made', () => {
-        game.round?.setPlayerBid('mockUser5', BidValue.Eight);
-        game.round?.setPlayerBid('mockUser0', BidValue.TenNo);
+        expect(() => game.round?.setPlayerBid('mockUser5', BidAmount.Eight, true)).toThrow();
+        expect(() => game.round?.setPlayerBid('mockUser0', BidAmount.Ten, false)).toThrow();
+
         expect(game.round?.bids.length).toBe(4);
         expect(game.round?.activePlayerIndex).toBe(0);
       });
@@ -236,11 +235,17 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('endRound updates game score', () => {
-        expect(game.scores).toStrictEqual(mock.MOCK_GAME_SCORE);
+        expect(game.teams).toStrictEqual(mock.MOCK_TEAM_SCORES);
       });
     });
 
     describe('new Round', () => {
+      test('a new round is instantiated', () => {
+        expect(game.round?.trickIndex).toBe(1);
+        expect(game.round?.teamTotals[0].tricks.length).toBe(0);
+        expect(game.round?.teamTotals[1].tricks.length).toBe(0);
+      });
+
       test('dealer will be moved left to playerIndex 1', () => {
         expect(game.round?.dealerIndex).toBe(1);
       });

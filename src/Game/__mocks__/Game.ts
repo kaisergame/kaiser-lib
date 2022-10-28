@@ -244,21 +244,21 @@ export const MOCK_HANDS_SORTED: PlayerHand[] = [
 
 // BIDS
 export const MOCK_VALID_BIDS = [
-  BidAmount.Pass,
-  BidAmount.Seven,
-  // BidAmount.SevenNo,
-  BidAmount.Eight,
-  // BidAmount.EightNo,
-  BidAmount.Nine,
-  // BidAmount.NineNo,
-  BidAmount.Ten,
-  // BidAmount.TenNo,
-  BidAmount.Eleven,
-  // BidAmount.ElevenNo,
-  BidAmount.Twelve,
-  // BidAmount.TwelveNo,
-  BidAmount.Troika,
-  BidAmount.Kaiser,
+  { bidAmount: BidAmount.Pass, isTrump: null },
+  { bidAmount: BidAmount.Seven, isTrump: true },
+  { bidAmount: BidAmount.Seven, isTrump: false },
+  { bidAmount: BidAmount.Eight, isTrump: true },
+  { bidAmount: BidAmount.Eight, isTrump: false },
+  { bidAmount: BidAmount.Nine, isTrump: true },
+  { bidAmount: BidAmount.Nine, isTrump: false },
+  { bidAmount: BidAmount.Ten, isTrump: true },
+  { bidAmount: BidAmount.Ten, isTrump: false },
+  { bidAmount: BidAmount.Eleven, isTrump: true },
+  { bidAmount: BidAmount.Eleven, isTrump: false },
+  { bidAmount: BidAmount.Twelve, isTrump: true },
+  { bidAmount: BidAmount.Twelve, isTrump: false },
+  { bidAmount: BidAmount.Troika, isTrump: false },
+  { bidAmount: BidAmount.Kaiser, isTrump: false },
 ];
 
 export const MOCK_WINNING_BID: BidType = {
@@ -373,7 +373,7 @@ export const MOCK_ROUND_SUMMARY: RoundSummary = {
   ],
 };
 
-export const MOCK_GAME_SCORE: TeamType[] = [
+export const MOCK_TEAM_SCORES: TeamType[] = [
   { teamId: 'team0', teamMembers: ['mockUser0', 'mockUser2'], teamScore: 9 },
   { teamId: 'team1', teamMembers: ['mockUser1', 'mockUser3'], teamScore: 1 },
 ];
