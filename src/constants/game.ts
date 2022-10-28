@@ -11,11 +11,3 @@ export const CARDS_PER_SUIT = 13;
 export const TRUMP_VALUE = 14;
 
 export const TOTAL_TRICK_POINTS = HAND_SIZE + 5 - 3;
-
-export const MISSED_BID = -1;
-
-export const TRANSLATE_BID = 10;
-
-export const TROIKA_POINTS = 52;
-
-export const KAISER_POINTS = 1000000;

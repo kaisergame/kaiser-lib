@@ -1,6 +1,6 @@
-import { PlayerType, PlayerId, PlayerIndex } from 'src/@types';
+import { PlayerType, PlayerId, PlayerIndex, TeamId, TeamType } from 'src/@types';
 
-export const checkPlayerOrder = (players: PlayerType[]): boolean => {
+export const isPlayersSorted = (players: PlayerType[]): boolean => {
   let inOrder = true;
   for (let i = 0; i < players.length; i++) {
     if (players[i].playerIndex !== i) {
@@ -11,18 +11,26 @@ export const checkPlayerOrder = (players: PlayerType[]): boolean => {
   return inOrder;
 };
 
-export const findPlayerByPlayerIndex = (players: PlayerType[], playerIndex: PlayerIndex): PlayerType => {
+export const findPlayerByIndex = (players: PlayerType[], playerIndex: PlayerIndex): PlayerType => {
+  if (!validatePlayerIndex(playerIndex)) throw new Error('Invalid index');
   const player = players.find((player) => player.playerIndex === playerIndex);
-  if (!player || player.playerId === null) throw new Error('No player found');
+  if (!player) throw new Error('No player found');
 
   return player;
 };
 
-export const findPlayerById = (players: PlayerType[], id: PlayerId): PlayerType => {
+export const findPlayerById = (players: PlayerType[], id: PlayerId | null): PlayerType => {
   const player = players.find((player) => player.playerId === id);
-  if (!player || player.playerId === null) throw new Error('No player found');
+  if (!player) throw new Error('No player found');
 
   return player;
+};
+
+export const findTeamById = (teams: TeamType[], id: TeamId): TeamType => {
+  const team = teams.find((team) => team.teamId === id);
+  if (!team) throw new Error('No team found');
+
+  return team;
 };
 
 export const validatePlayerIndex = (playerIndex: PlayerIndex | undefined, numPlayers: number = 4): boolean => {
