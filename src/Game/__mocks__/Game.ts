@@ -1,7 +1,6 @@
 import {
   BidAmount,
   BidType,
-  BidValue,
   CardName,
   Deck,
   EvaluatedTrick,
@@ -10,8 +9,8 @@ import {
   PlayerHand,
   PlayerType,
   RoundSummary,
-  ScoreType,
   Suit,
+  TeamType,
   TrickType,
 } from 'src/@types/index';
 
@@ -245,45 +244,25 @@ export const MOCK_HANDS_SORTED: PlayerHand[] = [
 
 // BIDS
 export const MOCK_VALID_BIDS = [
-  BidValue.Pass,
-  BidValue.Seven,
-  BidValue.SevenNo,
-  BidValue.Eight,
-  BidValue.EightNo,
-  BidValue.Nine,
-  BidValue.NineNo,
-  BidValue.Ten,
-  BidValue.TenNo,
-  BidValue.Eleven,
-  BidValue.ElevenNo,
-  BidValue.Twelve,
-  BidValue.TwelveNo,
-  BidValue.Troika,
-  BidValue.Kaiser,
+  BidAmount.Pass,
+  BidAmount.Seven,
+  // BidAmount.SevenNo,
+  BidAmount.Eight,
+  // BidAmount.EightNo,
+  BidAmount.Nine,
+  // BidAmount.NineNo,
+  BidAmount.Ten,
+  // BidAmount.TenNo,
+  BidAmount.Eleven,
+  // BidAmount.ElevenNo,
+  BidAmount.Twelve,
+  // BidAmount.TwelveNo,
+  BidAmount.Troika,
+  BidAmount.Kaiser,
 ];
 
-export const MOCK_BIDS: BidType[] = [
-  { bidAmount: 7, bidValue: 70, bidder: { playerId: 'mockUser1', playerIndex: 1 }, isTrump: true },
-  { bidAmount: 7, bidValue: 750, bidder: { playerId: 'mockUser2', playerIndex: 2 }, isTrump: false },
-  { bidAmount: 10, bidValue: 100, bidder: { playerId: 'mockUser3', playerIndex: 3 }, isTrump: true },
-];
-
-export const MOCK_BIDS_2: BidType[] = [
-  { bidAmount: 7, bidValue: 70, bidder: { playerId: 'mockUser1', playerIndex: 1 }, isTrump: true },
-  { bidAmount: 7, bidValue: 750, bidder: { playerId: 'mockUser2', playerIndex: 2 }, isTrump: false },
-  { bidAmount: 10, bidValue: 100, bidder: { playerId: 'mockUser3', playerIndex: 3 }, isTrump: true },
-  { bidAmount: 0, bidValue: 0, bidder: { playerId: 'mockUser0', playerIndex: 0 }, isTrump: false },
-];
-
-export const MOCK_PASS_BIDS: BidType[] = [
-  { bidAmount: 0, bidValue: 0, bidder: { playerId: 'mockUser1', playerIndex: 1 }, isTrump: true },
-  { bidAmount: 0, bidValue: 0, bidder: { playerId: 'mockUser2', playerIndex: 2 }, isTrump: true },
-  { bidAmount: 0, bidValue: 0, bidder: { playerId: 'mockUser3', playerIndex: 3 }, isTrump: true },
-];
-
-export const MOCK_WINNING_BID = {
+export const MOCK_WINNING_BID: BidType = {
   bidAmount: 8,
-  bidValue: 80,
   bidder: {
     playerId: 'mockUser0',
     playerIndex: 0,
@@ -315,137 +294,86 @@ export const MOCK_TRICK_0: TrickType = [
   },
 ];
 
-export const MOCK_TRICK_SPADE_LED: TrickType = [
-  {
-    cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 },
-    playedBy: 'mockUser1',
-    playerIndex: 1,
-  },
-  {
-    cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 },
-    playedBy: 'mockUser2',
-    playerIndex: 2,
-  },
-  {
-    cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 13 },
-    playedBy: 'mockUser3',
-    playerIndex: 3,
-  },
-  {
-    cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 8 },
-    playedBy: 'mockUser0',
-    playerIndex: 0,
-  },
-];
+// ROUND SUMMARIES
 
-export const TAKEN_TRICKS_NO_TRUMP: EvaluatedTrick[] = [
-  {
-    pointValue: 1,
-    trick: [
-      {
-        cardPlayed: { suit: Suit.Spades, name: CardName.Eight, faceValue: 8, playValue: 8 },
-        playedBy: 'mockUser1',
-        playerIndex: 1,
-      },
-      {
-        cardPlayed: { suit: Suit.Spades, name: CardName.King, faceValue: 13, playValue: 13 },
-        playedBy: 'mockUser2',
-        playerIndex: 2,
-      },
-      {
-        cardPlayed: { suit: Suit.Hearts, name: CardName.King, faceValue: 13, playValue: 0 },
-        playedBy: 'mockUser3',
-        playerIndex: 3,
-      },
-      {
-        cardPlayed: { suit: Suit.Diamonds, name: CardName.Eight, faceValue: 8, playValue: 0 },
-        playedBy: 'mockUser0',
-        playerIndex: 0,
-      },
-    ],
-    trickWonBy: MOCK_PLAYERS[2],
-  },
-  {
-    pointValue: 6,
-    trick: [
-      {
-        cardPlayed: { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 },
-        playedBy: 'mockUser2',
-        playerIndex: 2,
-      },
-      {
-        cardPlayed: { suit: Suit.Spades, name: CardName.Three, faceValue: 3, playValue: 0 },
-        playedBy: 'mockUser3',
-        playerIndex: 3,
-      },
-      {
-        cardPlayed: { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 },
-        playedBy: 'mockUser0',
-        playerIndex: 0,
-      },
-      {
-        cardPlayed: { suit: Suit.Clubs, name: CardName.King, faceValue: 13, playValue: 0 },
-        playedBy: 'mockUser1',
-        playerIndex: 1,
-      },
-    ],
-    trickWonBy: MOCK_PLAYERS[0],
-  },
-];
-
-// ROUND TOTALS
-export const MOCK_ROUND_TOTALS: RoundSummary = {
+export const MOCK_ROUND_SUMMARY: RoundSummary = {
   roundIndex: 1,
-  winningBid: { bidAmount: 9, bidValue: 90, bidder: { playerId: 'mockUser2', playerIndex: 2 }, isTrump: true },
-  isBidMade: false,
-  trump: Suit.Hearts,
-  teamPoints: [
-    { teamId: 'team0', points: -9 },
-    { teamId: 'team1', points: 4 },
-  ],
-  playerPoints: [
-    { playerId: 'mockUser0', playerIndex: 0, points: 2 },
-    { playerId: 'mockUser1', playerIndex: 1, points: 3 },
-    { playerId: 'mockUser2', playerIndex: 2, points: 4 },
-    { playerId: 'mockUser3', playerIndex: 3, points: 1 },
-  ],
-};
-
-export const MOCK_ROUND_TOTALS_2: RoundSummary = {
-  roundIndex: 1,
-  winningBid: { bidAmount: 10, bidValue: 105, bidder: { playerId: 'mockUser3', playerIndex: 3 }, isTrump: false },
-  isBidMade: true,
-  trump: 'NO_TRUMP',
-  teamPoints: [
-    { teamId: 'team0', points: -1 },
-    { teamId: 'team1', points: 22 },
-  ],
-  playerPoints: [
-    { playerId: 'mockUser0', playerIndex: 0, points: -2 },
-    { playerId: 'mockUser1', playerIndex: 1, points: 2 },
-    { playerId: 'mockUser2', playerIndex: 2, points: 1 },
-    { playerId: 'mockUser3', playerIndex: 3, points: 9 },
-  ],
-};
-
-export const MOCK_ROUND_TOTALS_3: RoundSummary = {
-  roundIndex: 1,
-  winningBid: { bidAmount: 8, bidValue: 80, bidder: { playerId: 'mockUser0', playerIndex: 0 }, isTrump: true },
+  winningBid: { bidAmount: 8, bidder: { playerId: 'mockUser0', playerIndex: 0 }, isTrump: true },
   isBidMade: true,
   trump: Suit.Hearts,
   teamPoints: [
     { teamId: 'team0', points: 9 },
     { teamId: 'team1', points: 1 },
   ],
-  playerPoints: [
-    { playerId: 'mockUser0', playerIndex: 0, points: 9 },
-    { playerId: 'mockUser1', playerIndex: 1, points: 1 },
-    { playerId: 'mockUser2', playerIndex: 2, points: 0 },
-    { playerId: 'mockUser3', playerIndex: 3, points: 0 },
+  playerStats: [
+    {
+      playerId: 'mockUser0',
+      bidStats: {
+        bidAmount: BidAmount.Seven,
+        isTrump: true,
+        winningBidder: false,
+        biddingTeam: false,
+        wonRound: false,
+      },
+      trickStats: {
+        points: 0,
+        tricksTaken: 0,
+        fiveTaken: false,
+        threeTaken: false,
+      },
+    },
+    {
+      playerId: 'mockUser1',
+      bidStats: {
+        bidAmount: BidAmount.Seven,
+        isTrump: false,
+        winningBidder: false,
+        biddingTeam: true,
+        wonRound: true,
+      },
+      trickStats: {
+        points: 0,
+        tricksTaken: 0,
+        fiveTaken: false,
+        threeTaken: false,
+      },
+    },
+    {
+      playerId: 'mockUser2',
+      bidStats: {
+        bidAmount: BidAmount.Eight,
+        isTrump: true,
+        winningBidder: false,
+        biddingTeam: false,
+        wonRound: false,
+      },
+      trickStats: {
+        points: 0,
+        tricksTaken: 0,
+        fiveTaken: false,
+        threeTaken: false,
+      },
+    },
+    {
+      playerId: 'mockUser3',
+      bidStats: {
+        bidAmount: BidAmount.Eight,
+        isTrump: true,
+        winningBidder: true,
+        biddingTeam: true,
+        wonRound: true,
+      },
+      trickStats: {
+        points: 0,
+        tricksTaken: 0,
+        fiveTaken: false,
+        threeTaken: false,
+      },
+    },
   ],
 };
 
-export const MOCK_GAME_SCORE: ScoreType[] = [
-  { teamId: 'team0', teamScore: 9 },
-  { teamId: 'team1', teamScore: 1 },
+export const MOCK_GAME_SCORE: TeamType[] = [
+  { teamId: 'team0', teamMembers: ['mockUser0', 'mockUser2'], teamScore: 9 },
+  { teamId: 'team1', teamMembers: ['mockUser1', 'mockUser3'], teamScore: 1 },
 ];

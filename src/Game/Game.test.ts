@@ -1,4 +1,4 @@
-import { BidValue, CardName, Suit } from '../@types';
+import { CardName, Suit } from '../@types';
 import { HAND_SIZE } from '../constants/index';
 import { Round } from '../Round/Round';
 import * as mock from './__mocks__/Game';
@@ -204,7 +204,7 @@ describe('4 Player Game playthrough', () => {
       });
 
       test('after trick, activePlayer is set to trick winner', () => {
-        expect(game.round?.teamTotals[0].tricks[0].trickWonBy).toStrictEqual(mock.MOCK_PLAYERS[0]);
+        expect(game.round?.teamTotals[0].tricks[0].takenBy).toStrictEqual(mock.MOCK_PLAYERS[0]);
         expect(game.round?.activePlayerIndex).toBe(0);
       });
 
@@ -223,7 +223,7 @@ describe('4 Player Game playthrough', () => {
         }
         expect(spyEval).toBeCalledTimes(1);
         expect(spyEndRound).toBeCalledTimes(1);
-        expect(spyEndRound).toBeCalledWith(mock.MOCK_ROUND_TOTALS_3);
+        expect(spyEndRound).toBeCalledWith(mock.MOCK_ROUND_SUMMARY);
         expect(spyCreateRound).toBeCalledTimes(1);
         expect(spyEndGame).not.toBeCalled();
       });
@@ -232,7 +232,7 @@ describe('4 Player Game playthrough', () => {
     describe('endRound', () => {
       test('endRound adds round totals to roundSummaries', () => {
         expect(game.roundSummaries.length).toBe(1);
-        expect(game.roundSummaries[0]).toStrictEqual(mock.MOCK_ROUND_TOTALS_3);
+        expect(game.roundSummaries[0]).toStrictEqual(mock.MOCK_ROUND_SUMMARY);
       });
 
       test('endRound updates game score', () => {
