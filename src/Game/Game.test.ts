@@ -22,7 +22,8 @@ describe('managing game state with toJSON and fromJSON', () => {
     const fromJSONGame = Game.fromJSON(mock.MOCK_INIT_GAME_JSON);
     expect(fromJSONGame).toStrictEqual(game);
   });
-  test('fromJSON instantiates Game and Round from JSON state', () => {
+
+  test('fromJSON / toJSON test with Round active', () => {
     jest.mock('./Game.ts');
     game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
     game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
@@ -40,9 +41,12 @@ describe('managing game state with toJSON and fromJSON', () => {
     game.round?.playCard('mockUser1', game.round!.hands[1].hand[0]);
     game.round?.playCard('mockUser2', game.round!.hands[2].hand[0]);
     game.round?.playCard('mockUser3', game.round!.hands[3].hand[0]);
-    expect(game.toJSON()).toStrictEqual(mock.MOCK_TRICK_1_JSON);
+    const jsonGameState = game.toJSON();
+    expect(jsonGameState).toStrictEqual(mock.MOCK_TRICK_1_JSON);
+
     // const fromJSONGame = Game.fromJSON(mock.MOCK_TRICK_1_JSON);
-    // expect(fromJSONGame).toStrictEqual(game);
+    const fromJSONGame = Game.fromJSON(jsonGameState);
+    expect(fromJSONGame).toStrictEqual(game);
   });
 });
 
