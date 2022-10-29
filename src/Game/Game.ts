@@ -31,7 +31,6 @@ export class Game implements GameType {
     this.initializeTeams();
     this.initializePlayers();
     this.addPlayer(owner.id, owner.name);
-    console.log(this.toJSON());
   }
 
   toJSON(): BaseGameType {

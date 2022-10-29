@@ -443,7 +443,7 @@ export const MOCK_TEAM_SCORES: TeamType[] = [
 
 // JSON
 
-export const MOCK_INIT_GAME_JSON = {
+export const MOCK_INIT_GAME_STATE_JSON = {
   gameId: 'gameId12345',
   config: { numPlayers: 4, minBid: 7, scoreToWin: 52 },
   owner: { id: 'mockUser0', name: 'Ryan' },
@@ -468,7 +468,7 @@ export const MOCK_INIT_GAME_JSON = {
   version: '1.0.0' as GameVersion,
 };
 
-export const MOCK_TRICK_1_JSON = {
+export const MOCK_ROUND_GAME_STATE_JSON = {
   gameId: 'gameId12345',
   config: { numPlayers: 4, minBid: 7, scoreToWin: 52 },
   owner: { id: 'mockUser0', name: 'Ryan' },
