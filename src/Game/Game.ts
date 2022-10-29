@@ -145,17 +145,6 @@ export class Game implements GameType {
     playerTeam.teamMembers.filter((teamMemberId) => teamMemberId !== playerId);
   }
 
-  getTeamPlayerIndex(teamIndex: number): number[] {
-    const playerIndices = [];
-    const { numPlayers } = this.config;
-
-    for (let i = teamIndex; i < numPlayers; i += numPlayers / 2) {
-      playerIndices.push(i);
-    }
-
-    return playerIndices;
-  }
-
   switchPlayerIndex(playerIdToMove: PlayerId, moveToIndex: PlayerIndex): void {
     if (this.round) return;
     if (!validatePlayerIndex(moveToIndex)) throw new Error('Cannot move there');

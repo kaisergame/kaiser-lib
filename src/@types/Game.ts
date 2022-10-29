@@ -9,7 +9,7 @@ export type BaseGameType = {
   dealerIndex: PlayerIndex | null;
   round: BaseRoundType | null;
   roundSummaries: RoundSummary[];
-  version: GameVersion | string;
+  version: GameVersion;
 };
 
 export interface GameType extends BaseGameType {

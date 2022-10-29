@@ -22,6 +22,27 @@ describe('managing game state with toJSON and fromJSON', () => {
     const fromJSONGame = Game.fromJSON(mock.MOCK_INIT_GAME_JSON);
     expect(fromJSONGame).toStrictEqual(game);
   });
+  test('fromJSON instantiates Game and Round from JSON state', () => {
+    game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
+    game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
+    game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
+    game.startGame();
+    game.round!.hands = mock.MOCK_HANDS_SORTED;
+    expect(game.round?.activePlayerIndex).toBe(1);
+    game.round?.setPlayerBid('mockUser1', BidAmount.Seven, true);
+    game.round?.setPlayerBid('mockUser2', BidAmount.Seven, false);
+    game.round?.setPlayerBid('mockUser3', BidAmount.Eight, true);
+    game.round?.setPlayerBid('mockUser0', BidAmount.Eight, true);
+    game.round?.setTrump('mockUser0', Suit.Hearts);
+    expect(game.round?.activePlayerIndex).toBe(0);
+    game.round?.playCard('mockUser0', { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 });
+    game.round?.playCard('mockUser0', { suit: Suit.Hearts, name: CardName.Queen, faceValue: 12, playValue: 12 });
+    game.round?.playCard('mockUser0', { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 });
+    game.round?.playCard('mockUser0', { suit: Suit.Hearts, name: CardName.Nine, faceValue: 9, playValue: 9 });
+    expect(game.toJSON()).toStrictEqual(mock.MOCK_TRICK_1_JSON);
+    // const fromJSONGame = Game.fromJSON(mock.MOCK_TRICK_1_JSON);
+    // expect(fromJSONGame).toStrictEqual(game);
+  });
 });
 
 describe('4 player Game playthrough', () => {
@@ -60,11 +81,12 @@ describe('4 player Game playthrough', () => {
       expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
     });
 
-    test('switchPlayerIndex exchanges playerIndex / teamId for 2 players and re-sorts players', () => {
+    test('switchPlayerIndex exchanges playerIndex / teamId for 2 players then re-sorts players', () => {
       game.switchPlayerIndex('mockUser0', 3);
       expect(game.players).toStrictEqual(mock.MOCK_SWITCH_PLAYERS);
       game.switchPlayerIndex('mockUser3', 3);
       expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
+      expect(() => game.switchPlayerIndex('mockUser0', 4)).toThrow();
     });
   });
 
