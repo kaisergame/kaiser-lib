@@ -1,64 +1,42 @@
-import { Suit } from './Cards';
-import { BidAmount, RoundPointTotals, RoundState, RoundTotals, RoundType } from './Round';
+import { BidAmount, BaseRoundType, RoundSummary } from './Round';
 
-export interface GameType {
+export type BaseGameType = {
   gameId: GameId;
   owner: { id: string; name: string };
   config: GameConfig;
   players: PlayerType[];
   teams: TeamType[];
-  scores: ScoreType[];
-  dealer: Seat | null;
-  // it is challenging that round isn't a guaranteed property
-  round: RoundType | null;
-  roundSummaries: RoundSummary[];
-  toJSON(): GameStateType;
-  updateStateFromJSON(state: GameStateType): void;
-  addPlayer(id: string, name: string): PlayerType;
-  removePlayer(id: string): void;
-  canBid(playerId: string): boolean;
-  getActivePlayer(): PlayerType | null;
-  isActivePlayer(playerId: string): boolean;
-  canSetTrump(playerId: string): boolean;
-  // initializeTeams(): TeamType[]; // private
-  // initializePlayers(): PlayerType[]; // private
-  // getTeamSeats(teamIndex: number): number[]; // private
-  switchPlayerSeat(movePlayer: PlayerId, moveToSeat?: Seat): void;
-  startGame(): void;
-  // createRound(): void; // private
-  // setDealer(): Seat; // private
-  endRound(roundTotals: RoundTotals): void;
-  // updateScores(roundPoints: RoundPointTotals): void; // private
-  // checkIsWinner(): string | null; // private
-  // endGame(teamId: string): void; // private
-}
-
-export type GameStateType = {
-  gameId: GameId;
-  owner: { id: string; name: string };
-  config: GameConfig;
-  players: PlayerType[];
-  teams: TeamType[];
-  scores: ScoreType[];
-  dealer: Seat | null;
-  round: RoundState | null;
+  dealerIndex: PlayerIndex | null;
+  round: BaseRoundType | null;
   roundSummaries: RoundSummary[];
   version: GameVersion;
 };
+
+export interface GameType extends BaseGameType {
+  toJSON(): BaseGameType;
+  updateStateFromJSON(state: BaseGameType): void;
+  addPlayer(id: string, name: string): void;
+  removePlayer(id: string): void;
+  // initializeTeams(): void; // private
+  // initializePlayers(): void; // private
+  // getTeamPlayerIndexs(teamIndex: number): number[]; // private
+  switchPlayerIndex(movePlayer: PlayerId, moveToPlayerIndex?: PlayerIndex): void;
+  sortPlayers(): void;
+  canStartGame(): boolean;
+  startGame(): void;
+  // createRound(): void; // private
+  // setDealer(): PlayerIndex; // private
+  endRound(roundSummary: RoundSummary): void;
+  // updateScores(roundPoints: TeamPointTotals): void; // private
+  // checkIsWinner(): string | null; // private
+  // endGame(teamId: string): void; // private
+}
 
 export enum GameVersion {
   One = '1.0.0',
 }
 
 export type GameId = string;
-
-export type RoundSummary = {
-  roundNum: number;
-  winningBid: number;
-  bidMade: boolean;
-  trump: Suit | null;
-  roundPoints: RoundPointTotals;
-};
 
 export type GameConfig = {
   numPlayers: number;
@@ -73,24 +51,21 @@ export type GameConfig = {
   //inviteOnly: boolean;
 };
 
+export type TeamId = string;
+
 export type TeamType = {
-  teamId: string;
-  teamSeats: Seat[];
+  teamId: TeamId;
   teamMembers: PlayerId[];
+  teamScore: number;
 };
 
-export type Seat = number;
+export type PlayerIndex = number;
 
 export type PlayerType = {
   playerId: PlayerId | null;
+  playerIndex: PlayerIndex;
   name: string | null;
   teamId: string;
-  seat: Seat;
 };
 
 export type PlayerId = string;
-
-export type ScoreType = {
-  teamId: string;
-  teamScore: number;
-};

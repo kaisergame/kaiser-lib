@@ -1,130 +1,126 @@
+import { findPlayerById, findPlayerByIndex } from 'src/utils/helpers';
 import {
+  Bid,
   BidAmount,
-  BidType,
+  PlayerBid,
   CardType,
-  EvaluatedBid,
   EvaluatedTrick,
-  Hand,
-  PlayerPointTotals,
-  PlayerRoundData,
+  PlayerHand,
+  PlayerId,
+  PlayerStats,
   PlayerType,
-  RoundPointTotals,
-  RoundState,
-  RoundTotals,
+  BaseRoundType,
+  RoundSummary,
   RoundType,
-  Seat,
+  PlayerIndex,
   Suit,
   TrickType,
-} from '../@types/index';
-import { Cards } from '../Cards/Cards';
-import { TRUMP_VALUE } from '../constants/game';
-import { HAND_SIZE } from '../constants/game';
+  Trump,
+  TeamId,
+  TeamTotals,
+  CardName,
+  BidStats,
+  TrickStats,
+} from 'src/@types/index';
+import { Cards } from 'src/Cards/Cards';
+import { TRUMP_VALUE, HAND_SIZE } from 'src/constants/game';
+import { validatePlayerIndex } from 'src/utils/helpers';
 
 export class Round implements RoundType {
-  playersRoundData: PlayerRoundData[];
-  hands: Hand[];
-  bids: BidType[] = [];
-  winningBid: BidType = { amount: -1, bidder: -1, isTrump: false };
-  trump: Suit | null = null;
-  activePlayer: Seat = -1;
+  hands: PlayerHand[] = [];
+  bids: PlayerBid[] = [];
+  winningBid: PlayerBid = { bidAmount: -1, bidder: { playerId: '', playerIndex: -1 }, isTrump: null };
+  trump: Trump | null = null;
+  activePlayerIndex: PlayerIndex = -1;
   playableCards: CardType[] = [];
+  trickIndex: number = 1;
   trick: TrickType = [];
-  tricksTeam0: EvaluatedTrick[] = [];
-  tricksTeam1: EvaluatedTrick[] = [];
-  roundPoints: RoundPointTotals = [
-    { teamId: 'team0', points: 0 },
-    { teamId: 'team1', points: 0 },
+  teamTotals: TeamTotals[] = [
+    { teamId: 'team0', points: 0, tricks: [] },
+    { teamId: 'team1', points: 0, tricks: [] },
   ];
 
   constructor(
+    public roundIndex: number,
     public numPlayers: number,
     public minBid: BidAmount,
     public players: PlayerType[],
-    public dealer: Seat,
-    public endRound: (roundTotals: RoundTotals) => void
+    public dealerIndex: PlayerIndex,
+    public endRound: (roundSummary: RoundSummary) => void
   ) {
+    this.roundIndex = roundIndex;
     this.numPlayers = numPlayers;
     this.minBid = minBid;
-    this.dealer = dealer;
-    this.hands = this.dealHands();
-    this.playersRoundData = players.map((player) => {
-      return {
-        playerId: player.playerId!,
-        name: player.name!,
-        seat: player.seat,
-        teamId: player.teamId,
-        bid: null,
-        isDealer: dealer === player.seat,
-      };
-    });
-    this.updateActivePlayer();
+    this.dealerIndex = dealerIndex;
+    this.players = players;
     this.endRound = endRound;
+
+    this.dealHands();
+    this.updateActivePlayer();
   }
 
-  toJSON(): RoundState {
+  toJSON(): BaseRoundType {
     return {
-      playersRoundData: this.playersRoundData,
+      roundIndex: this.roundIndex,
+      players: this.players,
       numPlayers: this.numPlayers,
-      dealer: this.dealer,
+      dealerIndex: this.dealerIndex,
       hands: this.hands,
       minBid: this.minBid,
       bids: this.bids,
       winningBid: this.winningBid,
       trump: this.trump,
-      activePlayer: this.activePlayer,
+      activePlayerIndex: this.activePlayerIndex,
       playableCards: this.playableCards,
+      trickIndex: this.trickIndex,
       trick: this.trick,
-      tricksTeam0: this.tricksTeam0,
-      tricksTeam1: this.tricksTeam1,
-      roundPoints: this.roundPoints,
+      teamTotals: this.teamTotals,
     };
   }
 
-  static fromJSON(state: RoundState, endRound: (roundTotals: RoundTotals) => void): Round {
-    const round = new Round(state.numPlayers, state.minBid, [], state.dealer, endRound);
+  static fromJSON(state: BaseRoundType, endRound: (roundSummary: RoundSummary) => void): Round {
+    const round = new Round(state.roundIndex, state.numPlayers, state.minBid, [], state.dealerIndex, endRound);
     round.updateStateFromJSON(state);
 
     return round;
   }
 
-  updateStateFromJSON(state: RoundState): void {
-    this.playersRoundData = state.playersRoundData;
+  updateStateFromJSON(state: BaseRoundType): void {
+    this.players = state.players;
     this.numPlayers = state.numPlayers;
-    this.dealer = state.dealer;
+    this.dealerIndex = state.dealerIndex;
     this.hands = state.hands;
     this.minBid = state.minBid;
     this.bids = state.bids;
     this.winningBid = state.winningBid;
     this.trump = state.trump;
-    this.activePlayer = state.activePlayer;
+    this.activePlayerIndex = state.activePlayerIndex;
     this.playableCards = state.playableCards;
     this.trick = state.trick;
-    this.tricksTeam0 = state.tricksTeam0;
-    this.tricksTeam1 = state.tricksTeam1;
-    this.roundPoints = state.roundPoints;
+    this.teamTotals = state.teamTotals;
   }
 
   // CARDS
-  private dealHands(): Hand[] {
+  dealHands(): void {
     const cards = new Cards(this.numPlayers);
     const deck = cards.shuffleDeck(cards.createDeck());
-    const hands: Hand[] = [];
-    let dealToSeat = 0;
+    const hands: PlayerHand[] = [];
+    let dealToPlayerIndex = 0;
 
     for (let i = 0; i < this.numPlayers; i++) {
-      hands.push([]);
+      hands.push({ playerId: this.players[i].playerId!, hand: [] });
     }
     for (const card of deck) {
-      hands[dealToSeat].push(card);
-      dealToSeat !== this.numPlayers - 1 ? dealToSeat++ : (dealToSeat = 0);
+      hands[dealToPlayerIndex].hand.push(card);
+      dealToPlayerIndex !== this.numPlayers - 1 ? dealToPlayerIndex++ : (dealToPlayerIndex = 0);
     }
 
-    return hands;
+    this.hands = hands;
   }
 
   sortHands(lowToHigh?: 'lowToHigh'): void {
-    for (const hand of this.hands) {
-      hand.sort(cardSort);
+    for (const playerHand of this.hands) {
+      playerHand.hand.sort(cardSort);
     }
 
     function cardSort(a: CardType, b: CardType) {
@@ -147,114 +143,139 @@ export class Round implements RoundType {
   }
 
   // BIDDING
-  validBids(): BidAmount[] {
-    const curBids = this.bids.map((bid) => bid.amount);
-    const curHighBid = Math.max(...curBids);
-    const noDealerPass = this.activePlayer === this.dealer && this.bids.filter((bid) => bid.amount !== 0).length === 0;
-
-    const validBids = [
-      BidAmount.Pass,
-      // FIXME: Object.values is adding a string type union
-      ...Object.values(BidAmount).filter((bid) =>
-        this.playersRoundData[this.activePlayer].isDealer
-          ? bid >= this.minBid && bid >= curHighBid
-          : bid >= this.minBid && bid > curHighBid
-      ),
-    ];
-    noDealerPass && validBids.shift();
-
-    return validBids as BidAmount[];
-  }
-
-  setPlayerBid(bid: BidAmount): void {
-    if (!this.validBids().includes(bid)) throw new Error('That bid is not valid');
-    if (this.bids.find((bid) => bid.bidder === this.activePlayer)) throw new Error('Player has already bid');
-    if (this.bids.length >= this.numPlayers) throw new Error('Bids have already been placed');
-
-    const playerBid = {
-      amount: bid,
-      bidder: this.activePlayer,
-      isTrump: bid % 1 === 0,
-    };
-
-    this.bids.push(playerBid);
-    this.playersRoundData[this.activePlayer].bid = playerBid.amount;
-    if (this.bids.length === this.numPlayers) {
-      this.setWinningBid();
-    } else {
-      this.updateActivePlayer();
-    }
-  }
-
-  biddingOpen(): boolean {
-    console.log('checking bidding open');
+  canBid(playerId: string): boolean {
     if (this.bids.length >= this.numPlayers) return false;
-    console.log('bid length is good', this.winningBid.bidder);
-    if (this.winningBid.bidder >= 0) return false;
-    console.log('no winning bidder');
+    if (this.winningBid.isTrump !== null) return false;
+    if (!this.isActivePlayer(playerId)) return false;
+    if (this.bids.find((bid) => bid.bidder.playerIndex === this.activePlayerIndex || bid.bidder.playerId === playerId))
+      return false;
+
     return true;
   }
 
-  findBidForPlayer(player: number): BidType | null {
-    const bid = this.bids.find((bid) => bid.bidder === player);
+  setPlayerBid(playerId: PlayerId, bidAmount: BidAmount, isTrump: boolean | null): void {
+    if (!this.canBid(playerId)) throw new Error('Player is not allow to bid');
+    if (!this.getValidBids().some((bid) => bid.bidAmount === bidAmount && bid.isTrump === isTrump))
+      throw new Error('Bid is invalid');
 
-    return bid || null;
+    const { playerId: id, playerIndex } = this.getPlayer();
+    const playerBid = {
+      bidder: { playerId: id!, playerIndex },
+      bidAmount,
+      isTrump,
+    };
+    this.bids.push(playerBid);
+
+    if (this.bids.length === this.numPlayers) this.setWinningBid();
+    else this.updateActivePlayer();
   }
 
-  setWinningBid(): BidType {
-    const winningBid = this.bids.reduce(
-      (highBid, bid): { bidder: number; amount: BidAmount; isTrump: boolean } => {
-        return bid.amount >= highBid.amount
-          ? { bidder: bid.bidder, amount: bid.amount, isTrump: bid.amount % 1 === 0 }
-          : highBid;
-      },
-      { bidder: -1, amount: -1, isTrump: false }
-    );
+  getValidBids(): Bid[] {
+    const isDealer = this.getPlayer().playerId === this.getPlayer(this.dealerIndex).playerId;
+    const noDealerPass = isDealer && this.bids.filter((bid) => bid.bidAmount !== 0).length === 0;
+
+    const curHighBid = this.calcHighBid(this.bids);
+    const bidAmounts = Object.values(BidAmount).filter(
+      (value) => typeof value === 'number' && value >= this.minBid && value >= curHighBid.bidAmount
+    ) as BidAmount[];
+
+    const validBids = [
+      { bidAmount: BidAmount.Pass, isTrump: null },
+      ...bidAmounts.reduce((validBids, bidAmount) => {
+        // prettier-ignore
+        const bids = bidAmount <= 12 ? [ { bidAmount, isTrump: true }, { bidAmount, isTrump: false } ] : [{ bidAmount, isTrump: false }];
+        const valid = [
+          ...validBids,
+          ...bids.filter((bid) =>
+            isDealer ? this.compareBids(bid, curHighBid) >= 0 : this.compareBids(bid, curHighBid) > 0
+          ),
+        ];
+        return valid;
+      }, [] as Bid[]),
+    ];
+
+    noDealerPass && validBids.shift();
+
+    return validBids;
+  }
+
+  compareBids<T extends Bid, U extends Bid>(bidA: T, bidB: U): -1 | 0 | 1 {
+    if (bidA.bidAmount > bidB.bidAmount) return 1;
+    if (bidA.bidAmount < bidB.bidAmount) return -1;
+    if (bidA.bidAmount === bidB.bidAmount && !bidA.isTrump && bidB.isTrump) return 1;
+    if (bidA.bidAmount === bidB.bidAmount && bidA.isTrump && !bidB.isTrump) return -1;
+    return 0;
+  }
+
+  calcHighBid(bids: PlayerBid[]): PlayerBid {
+    const highBid = bids.reduce<PlayerBid>((highBid, bid) => (this.compareBids(highBid, bid) > 0 ? highBid : bid), {
+      bidAmount: -1,
+      bidder: { playerId: '', playerIndex: -1 },
+      isTrump: null,
+    });
+
+    return highBid;
+  }
+
+  setWinningBid(): PlayerBid {
+    const winningBid = this.calcHighBid(this.bids);
 
     this.winningBid = winningBid;
-    this.updateActivePlayer(winningBid.bidder);
+    this.updateActivePlayer(winningBid.bidder.playerIndex);
+    !winningBid.isTrump && this.setTrump(winningBid.bidder.playerId, 'NO_TRUMP');
 
     return winningBid;
   }
 
-  setTrump(trump: Suit): void {
-    if (!this.winningBid.isTrump) throw new Error('Trump cannot be called on a no trump bid');
+  canSetTrump(playerId: string): boolean {
+    if (this.trump) return false;
+    if (!this.winningBid.isTrump) return false;
+    if (this.winningBid.bidder.playerId !== playerId) return false;
+    if (this.winningBid.bidder.playerIndex !== this.activePlayerIndex) return false;
+    if (this.winningBid.bidder.playerId !== this.getPlayer().playerId) return false;
+    if (!this.isActivePlayer(playerId)) return false;
+    return true;
+  }
+
+  setTrump(playerId: PlayerId, trump: Trump): void {
+    if (!this.canSetTrump(playerId)) return;
+
     this.trump = trump;
   }
 
-  getTrump(): Suit | null {
+  getTrump(): Trump | null {
     return this.trump;
   }
 
   // CARD PLAY
-  updateActivePlayer(makeActivePlayer?: Seat): Seat {
-    let nextActivePlayer = -1;
+  updateActivePlayer(makeActivePlayer?: PlayerIndex): void {
+    // init bidding
+    if (typeof makeActivePlayer === 'undefined' && this.activePlayerIndex === -1 && this.bids.length === 0)
+      this.activePlayerIndex = this.dealerIndex + 1 < this.numPlayers ? this.dealerIndex + 1 : 0;
 
-    if (typeof makeActivePlayer === 'undefined') {
-      // init bidding
-      if (this.activePlayer === -1 && this.bids.length === 0)
-        nextActivePlayer = this.dealer + 1 < this.numPlayers ? this.dealer + 1 : 0;
-
-      // advance play around table
-      if (nextActivePlayer === -1)
-        nextActivePlayer = this.validateSeat(this.activePlayer + 1) ? this.activePlayer + 1 : 0;
-    }
+    // advance play around table
+    if (typeof makeActivePlayer === 'undefined' && this.bids.length !== 0)
+      this.activePlayerIndex = validatePlayerIndex(this.activePlayerIndex + 1) ? this.activePlayerIndex + 1 : 0;
 
     // specific player to play (bid or trick is won)
-    if (this.validateSeat(makeActivePlayer)) nextActivePlayer = makeActivePlayer!;
-    if (!this.validateSeat(nextActivePlayer)) throw new Error(`There is no player asigned to seat ${nextActivePlayer}`);
+    if (validatePlayerIndex(makeActivePlayer)) this.activePlayerIndex = makeActivePlayer!;
 
-    this.activePlayer = nextActivePlayer;
-    this.setPlayableCards(this.hands[nextActivePlayer]);
-
-    return nextActivePlayer;
+    this.winningBid.bidder.playerId.length && this.setPlayableCards();
   }
 
-  private validateSeat(numSeat: Seat | undefined): boolean {
-    return typeof numSeat === 'number' && numSeat < this.numPlayers && numSeat >= 0;
+  getPlayer(playerData?: PlayerIndex | PlayerId): PlayerType {
+    if (typeof playerData === 'number') return this.players[playerData];
+    if (typeof playerData === 'string') return this.players.find((player) => player.playerId === playerData)!;
+    return this.players[this.activePlayerIndex];
   }
 
-  setPlayableCards(hand: Hand): Hand {
+  isActivePlayer(playerId: string): boolean {
+    const activePlayer = this.getPlayer();
+    return activePlayer.playerId === playerId;
+  }
+
+  setPlayableCards(): CardType[] {
+    const hand = this.hands[this.activePlayerIndex].hand;
     const ledSuit = this.trick[0]?.cardPlayed.suit;
     const followSuit = hand.filter((card) => card.suit === ledSuit);
     const playable = followSuit.length > 0 ? followSuit : hand;
@@ -263,37 +284,42 @@ export class Round implements RoundType {
     return playable;
   }
 
-  playCard(cardPlayed: CardType): void {
-    if (this.bids.length !== this.numPlayers) throw new Error('Game requires 4 players for play');
-    if (this.activePlayer === -1) throw new Error(`There is no player in seat ${this.activePlayer}`);
-    if (!this.playableCards.includes(cardPlayed))
-      throw new Error(`${cardPlayed} cannot be played by ${this.activePlayer}; they must play ${this.playableCards}`);
-    if (this.trick.find((card) => card.playedBy === this.activePlayer))
-      throw new Error(`Player ${this.activePlayer} has already played a card in this trick`);
-    if (this.winningBid.isTrump && !this.trump) throw new Error('Trump must be set before card play');
+  canPlayCard(id: PlayerId, cardPlayed: CardType): boolean {
+    if (!this.trump) return false;
+    if (this.trick.length > this.numPlayers) return false;
+    if (this.bids.length !== this.numPlayers) return false;
+    if (!validatePlayerIndex(this.activePlayerIndex)) return false;
+    if (!this.isActivePlayer(id)) return false;
+    if (!this.playableCards.includes(cardPlayed)) return false;
+    if (this.trick.find((card) => card.playedBy === this.getPlayer().playerId)) return false;
+    if (this.hands[this.activePlayerIndex].hand.indexOf(cardPlayed) === -1) return false;
+
+    return true;
+  }
+
+  playCard(playerId: PlayerId, cardPlayed: CardType): void {
+    if (!this.canPlayCard(playerId, cardPlayed)) return;
 
     this.removeCardFromHand(cardPlayed);
     this.updateCardsPlayed(cardPlayed);
     this.endPlayerTurn();
   }
 
-  removeCardFromHand(cardPlayed: CardType): Hand {
-    const hand = [...this.hands[this.activePlayer]];
-    const cardIndex = this.hands[this.activePlayer].indexOf(cardPlayed);
+  removeCardFromHand(cardPlayed: CardType): boolean {
+    const hand = this.hands[this.activePlayerIndex].hand;
+    const cardIndex = hand.indexOf(cardPlayed);
 
-    if (cardIndex !== -1) {
-      hand.splice(cardIndex, 1);
-      this.hands[this.activePlayer] = hand;
-    } else throw new Error('Card not in hand');
+    if (cardIndex !== -1) hand.splice(cardIndex, 1);
 
-    this.hands[this.activePlayer] = hand;
-    return hand;
+    return cardIndex > 0;
   }
 
   updateCardsPlayed(cardPlayed: CardType): TrickType {
+    const player = this.getPlayer();
     const play = {
       cardPlayed,
-      playedBy: this.activePlayer,
+      playedBy: player.playerId!,
+      playerIndex: player.playerIndex,
     };
     const updatedTrick = [...this.trick];
     updatedTrick.push(play);
@@ -304,40 +330,29 @@ export class Round implements RoundType {
 
   endPlayerTurn(): void {
     this.resetPlayableCards();
-
-    if (this.trick.length > this.numPlayers) throw new Error('Too many cards were played');
-    if (this.trick.length < this.numPlayers) this.updateActivePlayer();
-    if (this.trick.length === this.numPlayers) this.endTrick();
+    this.trick.length === this.numPlayers ? this.endTrick() : this.updateActivePlayer();
   }
 
-  private resetPlayableCards(): void {
+  resetPlayableCards(): void {
     this.playableCards = [];
   }
 
   endTrick(): EvaluatedTrick {
-    const pointValue = this.getTrickValue();
+    const trickPointValue = this.getTrickValue();
     const trickWinner = this.getTrickWinner();
-    const trickEvaluation = {
-      pointValue: pointValue,
-      cardsPlayed: this.trick,
-      trickWonBy: trickWinner,
-    };
+    const evaluatedTrick = this.evaluateTrick(trickPointValue, trickWinner);
 
-    const wonByPlayer = this.playersRoundData.find((player) => player.seat === trickWinner)!;
-    if (wonByPlayer.teamId === 'team0') this.tricksTeam0.push(trickEvaluation);
-    if (wonByPlayer.teamId === 'team1') this.tricksTeam1.push(trickEvaluation);
-
-    this.updateRoundPoints(trickEvaluation, wonByPlayer);
+    this.updateTeamPoints(evaluatedTrick.takenBy.teamId, evaluatedTrick.pointValue);
+    this.updateTeamTricks(evaluatedTrick.takenBy.teamId, evaluatedTrick);
     this.resetTrick();
 
-    this.tricksTeam0.length + this.tricksTeam1.length === HAND_SIZE
-      ? this.evaluateRound()
-      : this.updateActivePlayer(trickWinner);
+    this.trickIndex === HAND_SIZE ? this.evaluateRound() : this.updateActivePlayer(trickWinner.playerIndex);
+    this.trickIndex < HAND_SIZE && this.incrementTrickIndex();
 
-    return trickEvaluation;
+    return evaluatedTrick;
   }
 
-  private getTrickValue(): number {
+  getTrickValue(): number {
     let value = 1;
 
     const cardsPlayed = this.trick.map((play) => play.cardPlayed);
@@ -349,11 +364,11 @@ export class Round implements RoundType {
     return value;
   }
 
-  private getTrickWinner(): Seat {
+  getTrickWinner(): PlayerType {
     const ledSuit = this.trick[0].cardPlayed.suit;
 
     const winner = this.trick.reduce(
-      (winningCard, play): { playedBy: Seat; playValue: number } => {
+      (winningCard, play): { playedBy: PlayerId; playerIndex: PlayerIndex; playValue: number } => {
         if (play.cardPlayed.suit !== ledSuit && play.cardPlayed.suit !== this.trump) {
           play.cardPlayed.playValue = 0;
         }
@@ -364,112 +379,174 @@ export class Round implements RoundType {
           play.cardPlayed.playValue = play.cardPlayed.playValue;
         }
         return play.cardPlayed.playValue > winningCard.playValue
-          ? { playedBy: play.playedBy, playValue: play.cardPlayed.playValue }
+          ? { playedBy: play.playedBy, playerIndex: play.playerIndex, playValue: play.cardPlayed.playValue }
           : winningCard;
       },
       {
-        playedBy: -1,
+        playedBy: '',
+        playerIndex: -1,
         playValue: -1,
       }
     );
 
-    if (!this.validateSeat(winner.playedBy))
-      throw new Error(`Could not determine who won the trick ${winner.playedBy}`);
-    const trickWinner = winner.playedBy;
+    const trickWinner = findPlayerById(this.players, winner.playedBy);
     return trickWinner;
   }
 
-  private updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void {
-    const addPointsToTeam = this.roundPoints.findIndex((team) => team.teamId === takenBy.teamId);
-    this.roundPoints[addPointsToTeam].points = this.roundPoints[addPointsToTeam].points + takenTrick.pointValue;
+  evaluateTrick(trickPointValue: number, trickWinner: PlayerType): EvaluatedTrick {
+    return {
+      trickIndex: this.trickIndex,
+      trick: this.trick,
+      pointValue: trickPointValue,
+      takenBy: trickWinner,
+    };
   }
 
-  private resetTrick(): void {
+  getTeamTotals(teamId: TeamId): TeamTotals {
+    return this.teamTotals.find((team) => team.teamId === teamId)!;
+  }
+
+  updateTeamPoints(teamId: TeamId, trickValue: number): void {
+    const teamTotals = this.getTeamTotals(teamId);
+    teamTotals.points = teamTotals.points + trickValue;
+  }
+
+  updateTeamTricks(teamId: TeamId, takenTrick: EvaluatedTrick): void {
+    const teamTotals = this.getTeamTotals(teamId);
+    teamTotals.tricks.push(takenTrick);
+  }
+
+  resetTrick(): void {
     this.trick = [];
   }
 
-  evaluateRound(): RoundTotals {
-    const bid = this.isBidMade();
-    const playerPoints = this.playerTrickTotals();
-    const totals = { bid, roundPoints: this.roundPoints, playerPoints };
+  incrementTrickIndex(): void {
+    this.trickIndex++;
+  }
+
+  evaluateRound(): RoundSummary {
+    const { isBidMade } = this.evaluateBid();
+    const playerStats = this.getPlayerStats();
+    const teamPoints = this.teamTotals.map((team) => ({ teamId: team.teamId, points: team.points }));
+    const totals = {
+      roundIndex: this.roundIndex,
+      winningBid: this.winningBid,
+      trump: this.trump!,
+      isBidMade,
+      teamPoints,
+      playerStats,
+    };
 
     this.endRound(totals);
     return totals;
   }
 
-  private isBidMade(): EvaluatedBid {
-    const bidTeam = this.players.find((player) => player.seat === this.winningBid.bidder)!.teamId;
-    let pointsMade = this.roundPoints.find((points) => points.teamId === bidTeam)!.points;
+  evaluateBid(): { isBidMade: boolean; evaluatedBidPoints: number } {
+    const bidTeamId = this.getBidTeamId();
+    const bidTeamPoints = this.teamTotals.find((points) => points.teamId === bidTeamId)!.points;
+    const isBidMade = this.isBidMade();
+    const evaluatedBidPoints = this.getRoundEndPoints(isBidMade, bidTeamPoints);
 
-    const noBidMultiplier = this.winningBid.isTrump ? 1 : 2;
-    const bidTeamPoints =
-      pointsMade - this.winningBid.amount >= 0
-        ? pointsMade * noBidMultiplier
-        : this.winningBid.amount * noBidMultiplier * -1;
-
-    pointsMade = bidTeamPoints;
-
-    const totals = {
-      ...this.winningBid,
-      bidMade: bidTeamPoints > 0,
-    };
-
-    return totals;
+    const bidTeam = this.teamTotals.find((team) => team.teamId === bidTeamId)!;
+    bidTeam.points = evaluatedBidPoints;
+    return { isBidMade, evaluatedBidPoints };
   }
 
-  private playerTrickTotals(): PlayerPointTotals {
-    const tricks = this.tricksTeam0.concat(this.tricksTeam1);
-    const initialPoints = [];
+  getBidTeamId(): TeamId {
+    const bidTeamId = findPlayerById(this.players, this.winningBid.bidder.playerId)!.teamId;
+    return bidTeamId;
+  }
+
+  getRoundEndPoints(isBidMade: boolean, tricksValue: number): number {
+    const isTroika = this.winningBid.bidAmount === 13;
+    const isKaiser = this.winningBid.bidAmount === 14;
+    const noBidMultiplier = this.winningBid.isTrump ? 1 : 2;
+    const missedBidMultiplier = -1;
+
+    if (isTroika) return isBidMade ? 52 : 52 * missedBidMultiplier;
+    if (isKaiser) return isBidMade ? 1000 : 1000 * missedBidMultiplier;
+    return isBidMade
+      ? tricksValue * noBidMultiplier
+      : this.winningBid.bidAmount * noBidMultiplier * missedBidMultiplier;
+  }
+
+  isBidMade(): boolean {
+    const bidTeamId = this.getBidTeamId();
+    const bidTeamPoints = this.teamTotals.find((team) => team.teamId === bidTeamId)!.points;
+    const isBidMade = bidTeamPoints - this.winningBid.bidAmount >= 0;
+    return isBidMade;
+  }
+
+  getPlayerStats(): PlayerStats {
+    const playerStats = this.initializePlayerStats();
+
+    return playerStats;
+  }
+
+  initializePlayerStats(): PlayerStats {
+    const initialStats: PlayerStats = [];
+    const trickStats = this.getPlayerTrickStats();
 
     for (let i = 0; i < this.numPlayers; i++) {
-      initialPoints.push({ playerSeat: i, points: 0 });
+      const player = findPlayerByIndex(this.players, i);
+      const bidStats = this.getPlayerBidStats(player);
+
+      initialStats.push({
+        playerId: player.playerId!,
+        bidStats,
+        trickStats: trickStats[i],
+      });
     }
 
-    const totals = tricks.reduce((playerTricks, trick) => {
-      const trickWonBy = this.playersRoundData.find((player) => player.seat === trick.trickWonBy)!;
-      playerTricks[trickWonBy.seat] = {
-        playerSeat: trickWonBy.seat,
-        points: playerTricks[trickWonBy.seat].points + trick.pointValue,
+    return initialStats;
+  }
+
+  getPlayerBidStats(player: PlayerType): BidStats {
+    const { bidAmount, isTrump } = this.bids.find((bid) => bid.bidder.playerIndex === player.playerIndex)!;
+    const winningBidder = this.winningBid.bidder.playerId === player.playerId;
+    const biddingTeam = findPlayerById(this.players, this.winningBid.bidder.playerId).teamId === player.teamId;
+    const wonRound = biddingTeam ? this.isBidMade() : !this.isBidMade();
+
+    const bidStats = {
+      bidAmount,
+      isTrump,
+      winningBidder,
+      biddingTeam,
+      wonRound,
+    };
+
+    return bidStats;
+  }
+
+  getRoundTricks(): EvaluatedTrick[] {
+    const roundTricks = this.teamTotals.flatMap((team) => team.tricks);
+    return roundTricks;
+  }
+
+  getPlayerTrickStats(): TrickStats[] {
+    const roundTricks = this.getRoundTricks();
+    const initialStats = [];
+
+    for (let i = 0; i < this.numPlayers; i++) {
+      initialStats.push({ points: 0, tricksTaken: 0, fiveTaken: false, threeTaken: false });
+    }
+
+    const trickStats = roundTricks.reduce((playerTricks, trick): TrickStats[] => {
+      const takenByIndex = findPlayerById(this.players, trick.takenBy.playerId).playerIndex;
+      playerTricks[takenByIndex] = {
+        ...playerTricks[takenByIndex],
+        points: playerTricks[takenByIndex].points + trick.pointValue,
+        tricksTaken: playerTricks[takenByIndex].tricksTaken++,
+        fiveTaken: trick.trick.some(
+          (play) => play.cardPlayed.suit === Suit.Hearts && play.cardPlayed.name === CardName.Five
+        ),
+        threeTaken: trick.trick.some(
+          (play) => play.cardPlayed.suit === Suit.Spades && play.cardPlayed.name === CardName.Three
+        ),
       };
       return playerTricks;
-    }, initialPoints);
+    }, initialStats);
 
-    return totals;
-  }
-
-  // todo test this
-  canBid(playerId: string): boolean {
-    if (!this.biddingOpen()) return false;
-
-    if (!this.isActivePlayer(playerId)) return false;
-
-    if (this.findBidForPlayer(this.activePlayer)) return false;
-
-    return true;
-  }
-
-  // todo test this
-  canSetTrump(playerId: string): boolean {
-    if (this.biddingOpen()) return false;
-
-    if (!this.isActivePlayer(playerId)) return false;
-
-    if (this.getTrump()) return false;
-
-    if (this.winningBid.bidder !== this.activePlayer) return false;
-
-    return true;
-  }
-
-  isActivePlayer(playerId: string): boolean {
-    const activePlayer = this.getActivePlayer();
-
-    return Boolean(activePlayer && activePlayer.playerId === playerId);
-  }
-
-  getActivePlayer(): PlayerType | null {
-    if (!this?.activePlayer) return null;
-
-    return this.players[this.activePlayer];
+    return trickStats;
   }
 }

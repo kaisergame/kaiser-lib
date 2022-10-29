@@ -1,127 +1,126 @@
 import { CardType, Suit } from './Cards';
-import { PlayerType, Seat } from './Game';
+import { PlayerId, PlayerType, PlayerIndex, TeamId } from './Game';
 
-export interface RoundType {
-  playersRoundData: PlayerRoundData[];
+export type BaseRoundType = {
+  roundIndex: number;
+  players: PlayerType[];
+  hands: PlayerHand[];
+  bids: PlayerBid[];
   numPlayers: number;
-  dealer: Seat;
-  hands: Hand[];
+  dealerIndex: PlayerIndex;
   minBid: BidAmount;
-  bids: BidType[];
-  winningBid: BidType;
-  trump: Suit | null;
-  activePlayer: Seat;
+  winningBid: PlayerBid;
+  trump: Trump | null;
+  activePlayerIndex: PlayerIndex;
   playableCards: CardType[];
+  trickIndex: number;
   trick: TrickType;
-  tricksTeam0: EvaluatedTrick[];
-  tricksTeam1: EvaluatedTrick[];
-  roundPoints: RoundPointTotals;
-  toJSON(): RoundState;
-  updateStateFromJSON(state: RoundState): void;
-  // dealHands(): Hand[]; // private
-  sortHands(lowToHigh?: 'lowToHigh'): void;
-  validBids(): BidAmount[];
-  setPlayerBid(bid: BidAmount): void;
-  setWinningBid(): BidType; // private
-  setTrump(trump: Suit): void; // private
-  getTrump(): Suit | null; // public
-  updateActivePlayer(makeActivePlayer?: number): Seat; // private
-  setPlayableCards(hand: Hand): CardType[]; // private
-  playCard(cardPlayed: CardType): void;
-  removeCardFromHand(cardPlayed: CardType): Hand; // private
-  updateCardsPlayed(cardPlayed: CardType): TrickType; // private
-  endPlayerTurn(): void; // private
-  biddingOpen(): boolean;
-  findBidForPlayer(player: number): BidType | null;
-  // resetPlayableCards(): void; // private
-  endTrick(): EvaluatedTrick; // private
-  // getTrickValue(): number; // private
-  // getTrickWinner(): Seat; // private
-  // updateRoundPoints(takenTrick: EvaluatedTrick, takenBy: PlayerType): void; // private
-  // resetTrick(): void; // private
-  evaluateRound(): RoundTotals; // private
-  // isBidMade(): EvaluatedBid; // private
-  // playerTrickTotals(): PlayerPointTotals; // private
-  endRound: (roundTotals: RoundTotals) => void;
-  canBid(playerId: string): boolean;
-  getActivePlayer(): PlayerType | null;
-  isActivePlayer(playerId: string): boolean;
-  canSetTrump(playerId: string): boolean;
-}
-
-export type RoundState = {
-  playersRoundData: PlayerRoundData[];
-  hands: Hand[];
-  bids: BidType[];
-  numPlayers: number;
-  dealer: Seat;
-  minBid: BidAmount;
-  winningBid: BidType;
-  trump: Suit | null;
-  activePlayer: Seat;
-  playableCards: CardType[];
-  trick: TrickType;
-  tricksTeam0: EvaluatedTrick[];
-  tricksTeam1: EvaluatedTrick[];
-  roundPoints: RoundPointTotals;
+  teamTotals: TeamTotals[];
 };
+
+export interface RoundType extends BaseRoundType {
+  toJSON(): BaseRoundType;
+  updateStateFromJSON(state: BaseRoundType): void;
+  dealHands(): void;
+  sortHands(lowToHigh?: 'lowToHigh'): void;
+  getValidBids(): Bid[];
+  canBid(playerId: string): boolean;
+  setPlayerBid(id: PlayerId, bidValue: BidAmount, isTrump: boolean | null): void;
+  setWinningBid(): PlayerBid;
+  canSetTrump(playerId: string): boolean;
+  setTrump(playerId: PlayerId, trump: Suit): void;
+  getTrump(): Trump | null;
+  updateActivePlayer(makeActivePlayer?: number): void;
+  getPlayer(playerIndex: PlayerIndex): PlayerType;
+  isActivePlayer(playerId: string): boolean;
+  setPlayableCards(): CardType[];
+  playCard(playerId: PlayerId, cardPlayed: CardType): void;
+  removeCardFromHand(cardPlayed: CardType): boolean;
+  updateCardsPlayed(cardPlayed: CardType): TrickType;
+  endPlayerTurn(): void;
+  resetPlayableCards(): void;
+  endTrick(): EvaluatedTrick;
+  getTrickWinner(): PlayerType;
+  evaluateTrick(trickPointValue: number, trickWinner: PlayerType): EvaluatedTrick;
+  getTeamTotals(teamId: TeamId): TeamTotals;
+  updateTeamPoints(teamId: TeamId, trickValue: number): void;
+  resetTrick(): void;
+  evaluateRound(): RoundSummary;
+  isBidMade(bidTeamPoints: number): boolean;
+  endRound: (roundSummary: RoundSummary) => void;
+}
 
 export type Hand = CardType[];
 
-export type PlayerRoundData = PlayerType & {
-  // roundTeam?: number; // needed for 5 player?
-  bid: BidAmount | null;
-  // wonBid: boolean;
-  // madeBid: boolean;
-  isDealer: boolean;
+export type PlayerHand = {
+  playerId: PlayerId;
+  hand: Hand;
 };
 
-export type BidType = {
-  amount: BidAmount;
-  bidder: Seat;
-  isTrump: boolean;
+export type Bid = {
+  bidAmount: BidAmount;
+  isTrump: boolean | null;
 };
 
-export type EvaluatedBid = BidType & {
-  bidMade: boolean;
-};
+export interface PlayerBid extends Bid {
+  bidder: { playerId: PlayerId; playerIndex: PlayerIndex };
+}
 
 export enum BidAmount {
   Pass = 0,
   Five = 5,
-  FiveNo = 5.5,
   Six = 6,
-  SixNo = 6.5,
   Seven = 7,
-  SevenNo = 7.5,
   Eight = 8,
-  EightNo = 8.5,
   Nine = 9,
-  NineNo = 9.5,
   Ten = 10,
-  TenNo = 10.5,
   Eleven = 11,
-  ElevenNo = 11.5,
   Twelve = 12,
-  TwelveNo = 12.5,
-  Troika = 12.7,
-  Kaiser = 12.9,
+  Troika = 13,
+  Kaiser = 14,
 }
 
+export type Trump = Suit | 'NO_TRUMP';
+
+export type TrickType = { cardPlayed: CardType; playedBy: PlayerId; playerIndex: PlayerIndex }[];
+
 export type EvaluatedTrick = {
-  cardsPlayed: TrickType;
+  trickIndex: number;
+  trick: TrickType;
   pointValue: number;
-  trickWonBy: Seat;
+  takenBy: PlayerType;
 };
 
-export type TrickType = { cardPlayed: CardType; playedBy: Seat }[];
+export type TeamTotals = { teamId: string; points: number; tricks: EvaluatedTrick[] };
 
-export type RoundTotals = {
-  bid: EvaluatedBid;
-  roundPoints: RoundPointTotals;
-  playerPoints: PlayerPointTotals;
+export type TeamPoints = { teamId: string; points: number }[];
+
+export type BidStats = {
+  bidAmount: BidAmount;
+  isTrump: boolean | null;
+  winningBidder: boolean;
+  biddingTeam: boolean;
+  wonRound: boolean; // made bid or defended other team bid
 };
 
-export type RoundPointTotals = { teamId: string; points: number }[];
+export type TrickStats = {
+  points: number;
+  tricksTaken: number;
+  fiveTaken: boolean;
+  threeTaken: boolean;
+};
 
-export type PlayerPointTotals = { playerSeat: Seat; points: number }[];
+export type PlayerStats = {
+  playerId: PlayerId;
+  bidStats: BidStats;
+  trickStats: TrickStats;
+}[];
+
+export type RoundSummary = {
+  roundIndex: number;
+  winningBid: PlayerBid;
+  isBidMade: boolean;
+  trump: Trump;
+  teamPoints: TeamPoints;
+  playerStats: PlayerStats;
+};

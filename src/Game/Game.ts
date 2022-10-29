@@ -1,93 +1,86 @@
 import {
   GameConfig,
-  GameStateType,
   GameType,
+  BaseGameType,
   GameVersion,
   PlayerId,
   PlayerType,
-  RoundPointTotals,
+  TeamPoints,
   RoundSummary,
-  RoundTotals,
   RoundType,
-  ScoreType,
-  Seat,
+  PlayerIndex,
   TeamType,
+  TeamId,
 } from '../@types/index';
+import { findPlayerById, findPlayerByIndex, findTeamById, validatePlayerIndex } from 'src/utils/helpers';
 import { Round } from '../Round/Round';
 
 export class Game implements GameType {
-  players: PlayerType[];
-  teams: TeamType[];
-  scores: ScoreType[];
-  dealer: Seat | null = null;
-  // eventually round should be private
+  players: PlayerType[] = [];
+  teams: TeamType[] = [];
+  dealerIndex: PlayerIndex | null = null;
   round: RoundType | null = null;
   roundSummaries: RoundSummary[] = [];
+  version: GameVersion = GameVersion.One;
 
   constructor(public owner: { id: string; name: string }, readonly gameId: string, readonly config: GameConfig) {
     this.gameId = gameId;
-    this.teams = this.initializeTeams();
-    this.players = this.initializePlayers();
-    this.owner = this.initializeOwner(owner);
+    this.owner = owner;
     this.config = config;
-    this.scores = [
-      { teamId: 'team0', teamScore: 0 },
-      { teamId: 'team1', teamScore: 0 },
-    ];
+
+    this.initializeTeams();
+    this.initializePlayers();
+    this.addPlayer(owner.id, owner.name);
   }
 
-  toJSON(): GameStateType {
+  toJSON(): BaseGameType {
     return {
       gameId: this.gameId,
       config: this.config,
       owner: this.owner,
       players: this.players,
       teams: this.teams,
-      scores: this.scores,
-      dealer: this.dealer,
+      dealerIndex: this.dealerIndex,
       round: this.round?.toJSON() || null,
       roundSummaries: this.roundSummaries,
       version: GameVersion.One,
     };
   }
 
-  static fromJSON(state: GameStateType): Game {
+  static fromJSON(state: BaseGameType): Game {
     const game = new Game(state.owner, state.gameId, state.config);
     game.updateStateFromJSON(state);
 
     return game;
   }
 
-  updateStateFromJSON(state: GameStateType): void {
+  updateStateFromJSON(state: BaseGameType): void {
     this.owner = state.owner;
     this.players = state.players;
     this.teams = state.teams;
-    this.scores = state.scores;
-    this.dealer = state.dealer;
-    if (state.round) {
-      this.round = Round.fromJSON(state.round, this.endRound.bind(this));
-    }
+    this.dealerIndex = state.dealerIndex;
+    if (state.round) this.round = Round.fromJSON(state.round, this.endRound.bind(this));
     this.roundSummaries = state.roundSummaries;
   }
 
   // PLAYERS
-  initializeTeams(): TeamType[] {
+  initializeTeams(): void {
     const numTeams = this.config.numPlayers / 2;
     const teams = [];
 
     for (let i = 0; i < numTeams; i++) {
       const team: TeamType = {
         teamId: `team${i}`,
-        teamSeats: this.getTeamSeats(i),
         teamMembers: [],
+        teamScore: 0,
       };
       teams.push(team);
     }
 
-    return teams;
+    this.teams = teams;
   }
 
-  initializePlayers(): PlayerType[] {
+  initializePlayers(): void {
     const players: PlayerType[] = [];
 
     for (let i = 0; i < this.config.numPlayers; i++) {
@@ -95,151 +88,169 @@ export class Game implements GameType {
         playerId: null,
         name: null,
         teamId: `team${i % 2}`,
-        seat: i,
+        playerIndex: i,
       };
       players.push(player);
     }
 
-    return players;
+    this.players = players;
   }
 
-  initializeOwner(owner: { id: string; name: string }): { id: string; name: string } {
-    this.addPlayer(owner.id, owner.name);
-    return owner;
+  canAddPlayer(id: string): boolean {
+    const openPlayer = this.players.find((player) => player.playerId === null);
+
+    if (!openPlayer) return false;
+    if (this.players.find((player) => player.playerId === id)) return false;
+    if (this.players.length > this.config.numPlayers) return false;
+
+    return true;
   }
 
-  addPlayer(id: string, name: string): PlayerType {
-    const curPlayers = this.players.filter((player) => player.playerId !== null);
-    // console.log(curPlayers);
+  addPlayer(id: string, name: string): void {
+    if (!this.canAddPlayer(id)) throw new Error('Player cannot be added');
 
-    if (curPlayers.length === this.config.numPlayers)
-      throw new Error(`Already ${this.config.numPlayers} players in game`);
-    if (curPlayers.find((player) => player.playerId === id))
-      throw new Error(`Player ${name} has alread joined the game`);
+    const openPlayer = findPlayerById(this.players, null);
+    const player = { ...openPlayer, playerId: id, name: name };
+    this.addPlayerToTeam(player.playerId, player.teamId);
+    this.players[player.playerIndex] = player;
 
-    const openPlayer = this.players.findIndex((player) => player.playerId === null)!;
-    const player = { ...this.players[openPlayer], playerId: id, name: name };
-    const playerTeam = this.teams.find((team) => team.teamId === player.teamId);
-    // console.log(this.players, player, playerTeam);
-
-    if (!playerTeam) throw new Error('Player not added could not asign player to team');
-
-    this.players[openPlayer] = player;
-    playerTeam.teamMembers.push(player.playerId!);
     if (this.round) {
-      const playerData = this.round.playersRoundData.find((player) => player.playerId === null);
+      const playerData = this.round.players.find((player) => player.playerId === null);
       playerData!.playerId = id;
       playerData!.name = name;
     }
-
-    return player;
   }
 
-  removePlayer(id: string): void {
-    const player = this.players.find((player) => player.playerId === id);
-    player!.playerId = null;
+  addPlayerToTeam(playerId: PlayerId, teamId: TeamId): void {
+    const playerTeam = findTeamById(this.teams, teamId);
+    playerTeam.teamMembers.push(playerId);
+  }
 
-    this.teams.map((team) => team.teamMembers.filter((playerId) => playerId !== id));
+  removePlayer(playerId: PlayerId): void {
+    const player = findPlayerById(this.players, playerId);
+    this.removePlayerFromTeam(player.playerId!, player.teamId);
+    player.playerId = null;
+    player.name = null;
 
     if (this.round) {
-      const playerData = this.round.playersRoundData.find((player) => player.playerId === id);
-      playerData!.playerId = null;
-      playerData!.name = null;
+      const player = findPlayerById(this.round.players, playerId);
+      player.playerId = null;
+      player.name = null;
     }
   }
 
-  getTeamSeats(teamIndex: number): number[] {
-    const seats = [];
+  removePlayerFromTeam(playerId: PlayerId, teamId: TeamId): void {
+    const playerTeam = findTeamById(this.teams, teamId);
+    playerTeam.teamMembers.filter((teamMemberId) => teamMemberId !== playerId);
+  }
+
+  getTeamPlayerIndex(teamIndex: number): number[] {
+    const playerIndexs = [];
     const { numPlayers } = this.config;
 
     for (let i = teamIndex; i < numPlayers; i += numPlayers / 2) {
-      seats.push(i);
+      playerIndexs.push(i);
     }
 
-    return seats;
+    return playerIndexs;
   }
 
-  switchPlayerSeat(playerToMove: PlayerId, moveToSeat?: Seat): void {
-    if (this.round) throw new Error('Cannot change seats while game is in progress');
-    if (moveToSeat && (typeof moveToSeat !== 'number' || moveToSeat >= this.config.numPlayers || moveToSeat < 0))
-      throw new Error(`There is no seat ${moveToSeat}`);
+  switchPlayerIndex(playerIdToMove: PlayerId, moveToIndex: PlayerIndex): void {
+    if (this.round) return;
+    if (!validatePlayerIndex(moveToIndex)) throw new Error('Cannot move there');
 
-    const movePlayer = this.players.find((player) => player.playerId === playerToMove);
-    if (movePlayer === undefined) throw new Error('Could not find player to move');
-
-    const seatLeft = movePlayer.seat < this.config.numPlayers - 1 ? movePlayer.seat + 1 : 0;
-    const switchSeat = moveToSeat || seatLeft;
-    const switchPlayer = this.players.find((player) => player.seat === switchSeat);
-    if (switchPlayer === undefined) throw new Error('Could not find player to switch');
-
+    const movePlayer = findPlayerById(this.players, playerIdToMove)!;
     const copyMovePlayer: PlayerType = JSON.parse(JSON.stringify(movePlayer));
-    const copySwitchPlayer: PlayerType = JSON.parse(JSON.stringify(switchPlayer));
-    const moveTeam = this.teams.find((team) => team.teamId === movePlayer.teamId)!;
-    const switchTeam = this.teams.find((team) => team.teamSeats.includes(switchSeat))!;
+    const moveTeam = findTeamById(this.teams, movePlayer.teamId)!;
 
-    moveTeam.teamMembers.splice(moveTeam.teamMembers.indexOf(playerToMove), 1);
-    switchTeam.teamMembers.push(playerToMove);
+    const switchPlayer = findPlayerByIndex(this.players, moveToIndex);
+    const copySwitchPlayer: PlayerType = JSON.parse(JSON.stringify(switchPlayer));
+    const switchTeam = findTeamById(this.teams, switchPlayer.teamId)!;
+
+    moveTeam.teamMembers.filter((playerId) => playerId !== movePlayer.playerId);
+    switchPlayer.playerId && moveTeam.teamMembers.push(switchPlayer.playerId);
+    switchTeam.teamMembers.filter((playerId) => playerId !== switchPlayer.playerId);
+    switchTeam.teamMembers.push(playerIdToMove);
 
     if (switchPlayer.playerId) {
       switchTeam.teamMembers.splice(switchTeam.teamMembers.indexOf(switchPlayer.playerId), 1);
       moveTeam.teamMembers.push(switchPlayer.playerId);
     }
 
-    movePlayer.playerId = copyMovePlayer.playerId;
-    movePlayer.name = copyMovePlayer.name;
     movePlayer.teamId = copySwitchPlayer.teamId;
-    movePlayer.seat = copySwitchPlayer.seat;
+    movePlayer.playerIndex = copySwitchPlayer.playerIndex;
 
-    switchPlayer.playerId = copySwitchPlayer.playerId;
-    switchPlayer.name = copySwitchPlayer.name;
     switchPlayer.teamId = copyMovePlayer.teamId;
-    switchPlayer.seat = copyMovePlayer.seat;
+    switchPlayer.playerIndex = copyMovePlayer.playerIndex;
+
+    this.sortPlayers();
+  }
+
+  sortPlayers(): void {
+    this.players.sort((playerA: PlayerType, playerB: PlayerType) => playerA.playerIndex - playerB.playerIndex);
+  }
+
+  canStartGame(): boolean {
+    if (this.teams.find((team) => team.teamScore !== 0)) return false;
+    if (this.players.find((player) => player.playerId === null)) return false;
+    if (this.players.length !== this.config.numPlayers) return false;
+
+    return true;
   }
 
   // GAMEPLAY
   startGame(): void {
-    if (this.scores.find((score) => score.teamScore !== 0)) throw new Error('Cannot start game during play');
-    if (this.players.find((player) => player.playerId === null))
-      throw new Error(`Game requires ${this.config.numPlayers} to start`);
-
-    this.createRound();
+    this.canStartGame() && this.createRound();
   }
 
   createRound(): void {
     const dealer = this.setDealer();
-    const round = new Round(this.config.numPlayers, this.config.minBid, this.players, dealer, this.endRound.bind(this));
+    const round = new Round(
+      this.roundSummaries.length + 1,
+      this.config.numPlayers,
+      this.config.minBid,
+      this.players,
+      dealer,
+      this.endRound.bind(this)
+    );
 
     this.round = round;
   }
 
-  setDealer(): Seat {
-    let dealer = this.dealer;
+  setDealer(): PlayerIndex {
+    let dealer = this.dealerIndex;
+
     if (dealer === null) dealer = 0;
     else dealer !== this.players.length - 1 ? dealer++ : (dealer = 0);
 
-    this.dealer = dealer;
+    this.dealerIndex = dealer;
     return dealer;
   }
 
-  endRound(roundTotals: RoundTotals): void {
-    this.updateScores(roundTotals.roundPoints);
+  endRound(roundSummary: RoundSummary): void {
+    this.updateRoundSummaries(roundSummary);
+    this.updateScores(roundSummary.teamPoints);
+    // TODO: add Kaiser check
     const winner = this.checkIsWinner();
 
     if (winner) this.endGame(winner);
     if (!winner) this.createRound();
   }
 
-  updateScores(roundPoints: RoundPointTotals): void {
-    for (const pointData of roundPoints) {
-      for (const score of this.scores) {
-        if (pointData.teamId === score.teamId) score.teamScore += pointData.points;
-      }
-    }
+  updateRoundSummaries(roundSummary: RoundSummary): void {
+    this.roundSummaries.push(roundSummary);
+  }
+
+  updateScores(teamPoints: TeamPoints): void {
+    teamPoints.forEach((pointData) => {
+      const team = findTeamById(this.teams, pointData.teamId);
+      team.teamScore = team.teamScore + pointData.points;
+    });
   }
 
   checkIsWinner(): string | null {
     const winScore = this.config.scoreToWin;
-    const isWinner = this.scores.reduce<{ teamId: string | null; teamScore: number }>(
+    const isWinner = this.teams.reduce<{ teamId: string | null; teamScore: number }>(
       (highScore, team) => {
         const { teamId, teamScore } = team;
         return teamScore >= winScore && teamScore > highScore.teamScore ? { teamId, teamScore } : highScore;
@@ -248,22 +259,6 @@ export class Game implements GameType {
     );
 
     return isWinner.teamId;
-  }
-
-  canBid(playerId: string): boolean {
-    return Boolean(this.round?.canBid(playerId));
-  }
-
-  canSetTrump(playerId: string): boolean {
-    return Boolean(this.round?.canSetTrump(playerId));
-  }
-
-  isActivePlayer(playerId: string): boolean {
-    return Boolean(this.round && this.round.isActivePlayer(playerId));
-  }
-
-  getActivePlayer(): PlayerType | null {
-    return this.round?.getActivePlayer() || null;
   }
 
   endGame(teamId: string): void {
