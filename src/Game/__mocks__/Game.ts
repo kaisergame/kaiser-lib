@@ -642,7 +642,7 @@ export const MOCK_TRICK_1_JSON = {
     teamTotals: [
       {
         teamId: 'team0',
-        points: 1,
+        points: 6,
         tricks: [
           {
             trickIndex: 1,

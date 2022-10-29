@@ -23,11 +23,12 @@ describe('managing game state with toJSON and fromJSON', () => {
     expect(fromJSONGame).toStrictEqual(game);
   });
   test('fromJSON instantiates Game and Round from JSON state', () => {
+    jest.mock('./Game.ts');
     game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
     game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
     game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
     game.startGame();
-    game.round!.hands = mock.MOCK_HANDS_SORTED;
+    game.round!.hands = JSON.parse(JSON.stringify(mock.MOCK_HANDS_SORTED));
     expect(game.round?.activePlayerIndex).toBe(1);
     game.round?.setPlayerBid('mockUser1', BidAmount.Seven, true);
     game.round?.setPlayerBid('mockUser2', BidAmount.Seven, false);
@@ -35,10 +36,10 @@ describe('managing game state with toJSON and fromJSON', () => {
     game.round?.setPlayerBid('mockUser0', BidAmount.Eight, true);
     game.round?.setTrump('mockUser0', Suit.Hearts);
     expect(game.round?.activePlayerIndex).toBe(0);
-    game.round?.playCard('mockUser0', { suit: Suit.Hearts, name: CardName.Ace, faceValue: 1, playValue: 14 });
-    game.round?.playCard('mockUser0', { suit: Suit.Hearts, name: CardName.Queen, faceValue: 12, playValue: 12 });
-    game.round?.playCard('mockUser0', { suit: Suit.Hearts, name: CardName.Five, faceValue: 5, playValue: 5 });
-    game.round?.playCard('mockUser0', { suit: Suit.Hearts, name: CardName.Nine, faceValue: 9, playValue: 9 });
+    game.round?.playCard('mockUser0', game.round!.hands[0].hand[0]);
+    game.round?.playCard('mockUser1', game.round!.hands[1].hand[0]);
+    game.round?.playCard('mockUser2', game.round!.hands[2].hand[0]);
+    game.round?.playCard('mockUser3', game.round!.hands[3].hand[0]);
     expect(game.toJSON()).toStrictEqual(mock.MOCK_TRICK_1_JSON);
     // const fromJSONGame = Game.fromJSON(mock.MOCK_TRICK_1_JSON);
     // expect(fromJSONGame).toStrictEqual(game);
