@@ -369,17 +369,13 @@ export class Round implements RoundType {
 
     const winner = this.trick.reduce(
       (winningCard, play): { playedBy: PlayerId; playerIndex: PlayerIndex; playValue: number } => {
-        if (play.cardPlayed.suit !== ledSuit && play.cardPlayed.suit !== this.trump) {
-          play.cardPlayed.playValue = 0;
-        }
-        if (play.cardPlayed.suit === this.trump) {
-          play.cardPlayed.playValue = play.cardPlayed.playValue + TRUMP_VALUE;
-        }
-        if (play.cardPlayed.suit === ledSuit && play.cardPlayed.suit !== this.trump) {
-          play.cardPlayed.playValue = play.cardPlayed.playValue;
-        }
-        return play.cardPlayed.playValue > winningCard.playValue
-          ? { playedBy: play.playedBy, playerIndex: play.playerIndex, playValue: play.cardPlayed.playValue }
+        let value = play.cardPlayed.playValue;
+        if (play.cardPlayed.suit !== ledSuit && play.cardPlayed.suit !== this.trump) value = 0;
+
+        if (play.cardPlayed.suit === this.trump) value = value + TRUMP_VALUE;
+
+        return value > winningCard.playValue
+          ? { playedBy: play.playedBy, playerIndex: play.playerIndex, playValue: value }
           : winningCard;
       },
       {
