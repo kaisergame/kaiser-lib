@@ -1,18 +1,19 @@
+import { findPlayerById, findPlayerByIndex, findTeamById, validatePlayerIndex } from 'src/utils/helpers';
+
 import {
+  BaseGameType,
   GameConfig,
   GameType,
-  BaseGameType,
   GameVersion,
   PlayerId,
+  PlayerIndex,
   PlayerType,
-  TeamPoints,
   RoundSummary,
   RoundType,
-  PlayerIndex,
-  TeamType,
   TeamId,
+  TeamPoints,
+  TeamType,
 } from '../@types/index';
-import { findPlayerById, findPlayerByIndex, findTeamById, validatePlayerIndex } from 'src/utils/helpers';
 import { Round } from '../Round/Round';
 
 export class Game implements GameType {
@@ -144,42 +145,25 @@ export class Game implements GameType {
     playerTeam.teamMembers.filter((teamMemberId) => teamMemberId !== playerId);
   }
 
-  getTeamPlayerIndex(teamIndex: number): number[] {
-    const playerIndexs = [];
-    const { numPlayers } = this.config;
-
-    for (let i = teamIndex; i < numPlayers; i += numPlayers / 2) {
-      playerIndexs.push(i);
-    }
-
-    return playerIndexs;
-  }
-
   switchPlayerIndex(playerIdToMove: PlayerId, moveToIndex: PlayerIndex): void {
     if (this.round) return;
     if (!validatePlayerIndex(moveToIndex)) throw new Error('Cannot move there');
 
     const movePlayer = findPlayerById(this.players, playerIdToMove)!;
     const copyMovePlayer: PlayerType = JSON.parse(JSON.stringify(movePlayer));
-    const moveTeam = findTeamById(this.teams, movePlayer.teamId)!;
+    let { teamMembers: moveTeamMembers } = findTeamById(this.teams, movePlayer.teamId)!;
 
     const switchPlayer = findPlayerByIndex(this.players, moveToIndex);
     const copySwitchPlayer: PlayerType = JSON.parse(JSON.stringify(switchPlayer));
-    const switchTeam = findTeamById(this.teams, switchPlayer.teamId)!;
+    let { teamMembers: switchTeamMembers } = findTeamById(this.teams, switchPlayer.teamId)!;
 
-    moveTeam.teamMembers.filter((playerId) => playerId !== movePlayer.playerId);
-    switchPlayer.playerId && moveTeam.teamMembers.push(switchPlayer.playerId);
-    switchTeam.teamMembers.filter((playerId) => playerId !== switchPlayer.playerId);
-    switchTeam.teamMembers.push(playerIdToMove);
-
-    if (switchPlayer.playerId) {
-      switchTeam.teamMembers.splice(switchTeam.teamMembers.indexOf(switchPlayer.playerId), 1);
-      moveTeam.teamMembers.push(switchPlayer.playerId);
-    }
+    moveTeamMembers = moveTeamMembers.filter((playerId) => playerId !== copyMovePlayer.playerId);
+    copySwitchPlayer.playerId && moveTeamMembers.push(copySwitchPlayer.playerId);
+    switchTeamMembers = switchTeamMembers.filter((playerId) => playerId !== copySwitchPlayer.playerId);
+    copyMovePlayer.playerId && switchTeamMembers.push(copyMovePlayer.playerId);
 
     movePlayer.teamId = copySwitchPlayer.teamId;
     movePlayer.playerIndex = copySwitchPlayer.playerIndex;
-
     switchPlayer.teamId = copyMovePlayer.teamId;
     switchPlayer.playerIndex = copyMovePlayer.playerIndex;
 

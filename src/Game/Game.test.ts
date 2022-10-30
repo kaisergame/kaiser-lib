@@ -5,7 +5,74 @@ import * as mock from './__mocks__/Game';
 import { Game } from './Game';
 
 // GAME START AND ROUND PLAYTHROUGH
-describe('4 Player Game playthrough', () => {
+describe('managing game state with toJSON and fromJSON', () => {
+  let game: Game;
+  beforeEach(() => {
+    // config { numPlayers: 4, minBid: 7, scoreToWin: 52 }
+    game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('toJSON creates a JSON object of game', () => {
+    expect(game.toJSON()).toStrictEqual(mock.MOCK_INIT_GAME_STATE_JSON);
+  });
+
+  test('fromJSON instantiates Game from JSON state', () => {
+    const fromJSONGame = Game.fromJSON(mock.MOCK_INIT_GAME_STATE_JSON);
+    expect(fromJSONGame).toStrictEqual(game);
+  });
+
+  test('toJSON creates JSON object with Round active', () => {
+    ``;
+    game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
+    game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
+    game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
+    game.startGame();
+    game.round!.hands = JSON.parse(JSON.stringify(mock.MOCK_HANDS_SORTED));
+    expect(game.round?.activePlayerIndex).toBe(1);
+    game.round?.setPlayerBid('mockUser1', BidAmount.Seven, true);
+    game.round?.setPlayerBid('mockUser2', BidAmount.Seven, false);
+    game.round?.setPlayerBid('mockUser3', BidAmount.Eight, true);
+    game.round?.setPlayerBid('mockUser0', BidAmount.Eight, true);
+    game.round?.setTrump('mockUser0', Suit.Hearts);
+    expect(game.round?.activePlayerIndex).toBe(0);
+    game.round?.playCard('mockUser0', game.round!.hands[0].hand[0]);
+    game.round?.playCard('mockUser1', game.round!.hands[1].hand[0]);
+    game.round?.playCard('mockUser2', game.round!.hands[2].hand[0]);
+    game.round?.playCard('mockUser3', game.round!.hands[3].hand[0]);
+    const jsonGameState = game.toJSON();
+    expect(jsonGameState).toStrictEqual(mock.MOCK_ROUND_GAME_STATE_JSON);
+  });
+
+  test('fromJSON recreates Game with Round active', () => {
+    jest.mock('./Game.ts');
+    game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
+    game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
+    game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
+    game.startGame();
+    game.round!.hands = JSON.parse(JSON.stringify(mock.MOCK_HANDS_SORTED));
+    expect(game.round?.activePlayerIndex).toBe(1);
+    game.round?.setPlayerBid('mockUser1', BidAmount.Seven, true);
+    game.round?.setPlayerBid('mockUser2', BidAmount.Seven, false);
+    game.round?.setPlayerBid('mockUser3', BidAmount.Eight, true);
+    game.round?.setPlayerBid('mockUser0', BidAmount.Eight, true);
+    game.round?.setTrump('mockUser0', Suit.Hearts);
+    expect(game.round?.activePlayerIndex).toBe(0);
+    game.round?.playCard('mockUser0', game.round!.hands[0].hand[0]);
+    game.round?.playCard('mockUser1', game.round!.hands[1].hand[0]);
+    game.round?.playCard('mockUser2', game.round!.hands[2].hand[0]);
+    game.round?.playCard('mockUser3', game.round!.hands[3].hand[0]);
+    const roundState = game.round!;
+    const jsonGameState = game.toJSON();
+    expect(jsonGameState).toStrictEqual(mock.MOCK_ROUND_GAME_STATE_JSON);
+    const fromJSONGame = Game.fromJSON(jsonGameState);
+    expect(game.round).toMatchObject(roundState);
+  });
+});
+
+describe('4 player Game playthrough', () => {
   let game: Game;
   beforeAll(() => {
     // config { numPlayers: 4, minBid: 7, scoreToWin: 52 }
@@ -40,10 +107,14 @@ describe('4 Player Game playthrough', () => {
       expect(game.players.filter((player) => player.playerId !== null).length).toBe(4);
       expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
     });
-  });
 
-  describe('gameStateToJson', () => {
-    test.todo('test gameStateToJson()');
+    test('switchPlayerIndex exchanges playerIndex / teamId for 2 players then re-sorts players', () => {
+      game.switchPlayerIndex('mockUser0', 3);
+      expect(game.players).toStrictEqual(mock.MOCK_SWITCH_PLAYERS);
+      game.switchPlayerIndex('mockUser3', 3);
+      expect(game.players).toStrictEqual(mock.MOCK_PLAYERS);
+      expect(() => game.switchPlayerIndex('mockUser0', 4)).toThrow();
+    });
   });
 
   describe('create Round', () => {
