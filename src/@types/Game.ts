@@ -1,4 +1,4 @@
-import { BidAmount, BaseRoundType, RoundSummary } from './Round';
+import { BaseRoundType, BidAmount, RoundSummary } from './Round';
 
 export type BaseGameType = {
   gameId: GameId;

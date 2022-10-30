@@ -1,18 +1,19 @@
+import { findPlayerById, findPlayerByIndex, findTeamById, validatePlayerIndex } from 'src/utils/helpers';
+
 import {
+  BaseGameType,
   GameConfig,
   GameType,
-  BaseGameType,
   GameVersion,
   PlayerId,
+  PlayerIndex,
   PlayerType,
-  TeamPoints,
   RoundSummary,
   RoundType,
-  PlayerIndex,
-  TeamType,
   TeamId,
+  TeamPoints,
+  TeamType,
 } from '../@types/index';
-import { findPlayerById, findPlayerByIndex, findTeamById, validatePlayerIndex } from 'src/utils/helpers';
 import { Round } from '../Round/Round';
 
 export class Game implements GameType {

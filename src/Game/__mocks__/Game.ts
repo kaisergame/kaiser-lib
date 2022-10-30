@@ -1,18 +1,17 @@
 import {
   BidAmount,
-  PlayerBid,
   CardName,
   Deck,
-  EvaluatedTrick,
   GameConfig,
+  GameVersion,
   Hand,
+  PlayerBid,
   PlayerHand,
   PlayerType,
   RoundSummary,
   Suit,
   TeamType,
   TrickType,
-  GameVersion,
 } from 'src/@types/index';
 
 // CONFIG

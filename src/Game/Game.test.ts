@@ -24,6 +24,7 @@ describe('managing game state with toJSON and fromJSON', () => {
   });
 
   test('toJSON creates JSON object with Round active', () => {
+    ``;
     game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
     game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
     game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);

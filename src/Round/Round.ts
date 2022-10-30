@@ -1,29 +1,29 @@
-import { findPlayerById, findPlayerByIndex } from 'src/utils/helpers';
 import {
+  BaseRoundType,
   Bid,
   BidAmount,
-  PlayerBid,
+  BidStats,
+  CardName,
   CardType,
   EvaluatedTrick,
+  PlayerBid,
   PlayerHand,
   PlayerId,
+  PlayerIndex,
   PlayerStats,
   PlayerType,
-  BaseRoundType,
   RoundSummary,
   RoundType,
-  PlayerIndex,
   Suit,
-  TrickType,
-  Trump,
   TeamId,
   TeamTotals,
-  CardName,
-  BidStats,
   TrickStats,
+  TrickType,
+  Trump,
 } from 'src/@types/index';
 import { Cards } from 'src/Cards/Cards';
-import { TRUMP_VALUE, HAND_SIZE } from 'src/constants/game';
+import { HAND_SIZE, TRUMP_VALUE } from 'src/constants/game';
+import { findPlayerById, findPlayerByIndex } from 'src/utils/helpers';
 import { validatePlayerIndex } from 'src/utils/helpers';
 
 export class Round implements RoundType {
@@ -33,7 +33,7 @@ export class Round implements RoundType {
   trump: Trump | null = null;
   activePlayerIndex: PlayerIndex = -1;
   playableCards: CardType[] = [];
-  trickIndex: number = 1;
+  trickIndex = 1;
   trick: TrickType = [];
   teamTotals: TeamTotals[] = [
     { teamId: 'team0', points: 0, tricks: [] },

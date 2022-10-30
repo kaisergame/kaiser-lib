@@ -1,5 +1,5 @@
 import { CardType, Suit } from './Cards';
-import { PlayerId, PlayerType, PlayerIndex, TeamId } from './Game';
+import { PlayerId, PlayerIndex, PlayerType, TeamId } from './Game';
 
 export type BaseRoundType = {
   roundIndex: number;

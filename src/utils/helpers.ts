@@ -1,4 +1,4 @@
-import { PlayerType, PlayerId, PlayerIndex, TeamId, TeamType } from 'src/@types';
+import { PlayerId, PlayerIndex, PlayerType, TeamId, TeamType } from 'src/@types';
 
 export const isPlayersSorted = (players: PlayerType[]): boolean => {
   let inOrder = true;
@@ -9,6 +9,10 @@ export const isPlayersSorted = (players: PlayerType[]): boolean => {
     }
   }
   return inOrder;
+};
+
+export const validatePlayerIndex = (playerIndex: PlayerIndex | undefined, numPlayers: number = 4): boolean => {
+  return typeof playerIndex === 'number' && playerIndex < numPlayers && playerIndex >= 0;
 };
 
 export const findPlayerByIndex = (players: PlayerType[], playerIndex: PlayerIndex): PlayerType => {
@@ -31,8 +35,4 @@ export const findTeamById = (teams: TeamType[], id: TeamId): TeamType => {
   if (!team) throw new Error('No team found');
 
   return team;
-};
-
-export const validatePlayerIndex = (playerIndex: PlayerIndex | undefined, numPlayers: number = 4): boolean => {
-  return typeof playerIndex === 'number' && playerIndex < numPlayers && playerIndex >= 0;
 };
