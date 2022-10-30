@@ -25,7 +25,6 @@ describe('managing game state with toJSON and fromJSON', () => {
   });
 
   test('toJSON creates JSON object with Round active', () => {
-    ``;
     game.addPlayer(mock.MOCK_USER_1.id, mock.MOCK_USER_1.name);
     game.addPlayer(mock.MOCK_USER_2.id, mock.MOCK_USER_2.name);
     game.addPlayer(mock.MOCK_USER_3.id, mock.MOCK_USER_3.name);
@@ -67,7 +66,7 @@ describe('managing game state with toJSON and fromJSON', () => {
     const roundState = game.round!;
     const jsonGameState = game.toJSON();
     expect(jsonGameState).toStrictEqual(mock.MOCK_ROUND_GAME_STATE_JSON);
-    const fromJSONGame = Game.fromJSON(jsonGameState);
+    Game.fromJSON(jsonGameState);
     expect(game.round).toMatchObject(roundState);
   });
 });
