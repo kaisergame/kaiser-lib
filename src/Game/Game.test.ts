@@ -8,6 +8,7 @@ import { Game } from './Game';
 describe('managing game state with toJSON and fromJSON', () => {
   let game: Game;
   beforeEach(() => {
+    // config { numPlayers: 4, minBid: 7, scoreToWin: 52 }
     game = new Game(mock.MOCK_USER_0, 'gameId12345', mock.MOCK_GAME_CONFIG);
   });
   afterEach(() => {
@@ -63,11 +64,11 @@ describe('managing game state with toJSON and fromJSON', () => {
     game.round?.playCard('mockUser1', game.round!.hands[1].hand[0]);
     game.round?.playCard('mockUser2', game.round!.hands[2].hand[0]);
     game.round?.playCard('mockUser3', game.round!.hands[3].hand[0]);
+    const roundState = game.round!;
     const jsonGameState = game.toJSON();
     expect(jsonGameState).toStrictEqual(mock.MOCK_ROUND_GAME_STATE_JSON);
     const fromJSONGame = Game.fromJSON(jsonGameState);
-    fromJSONGame.round!.trickIndex = 2; // has not yet been updated when toJSON is called above
-    expect(fromJSONGame).toMatchObject(game);
+    expect(game.round).toMatchObject(roundState);
   });
 });
 
